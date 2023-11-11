@@ -18,6 +18,7 @@ TEST_CASE("Test the derivation of the FWave speeds.", "[FWaveSpeeds]")
    * Test case:
    *  h: 10 | 9
    *  u: -3 | 3
+   *  b:  0 | 0
    *
    * FWave height: 9.5
    * FWave velocity: (sqrt(10) * -3 + 3 * 3) / ( sqrt(10) + sqrt(9) )
@@ -45,6 +46,7 @@ TEST_CASE("Test the derivation of the FWave wave strength.", "[FWaveStrengths]")
    *  h:   10 | 9
    *  u:   -3 | 3
    *  hu: -30 | 27
+   *  b:    0 | 0
    *
    * The derivation of the FWave speeds (s1, s2) is given above.
    *
@@ -78,6 +80,8 @@ TEST_CASE("Test the derivation of the FWave wave strength.", "[FWaveStrengths]")
                                              9,
                                              -30,
                                              27,
+                                             0,
+                                             0,
                                              -9.7311093998375095,
                                              9.5731051658991654,
                                              l_strengthL,
@@ -96,6 +100,7 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
    *  h:    10 | 9
    *  u:    -3 | 3
    *  hu:  -30 | 27
+   *  b:     0 | 0
    *
    * The derivation of the FWave speeds (s1, s2) and wave strengths (a1, a1) is given above.
    *
@@ -116,6 +121,8 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
                                           9,
                                           -30,
                                           27,
+                                          0,
+                                          0,
                                           l_netUpdatesL,
                                           l_netUpdatesR);
 
@@ -131,6 +138,7 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
    *     left | right
    *   h:  10 | 8
    *   hu:  0 | 0
+   *   b:   0 | 0
    *
    * FWave speeds are given as:
    *
@@ -143,7 +151,7 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
    *
    *          | 0.5 -0.0532217 |
    *   Rinv = |                |
-   *          | 0.5 -0.0532217 |
+   *          | 0.5 0.0532217 |
    *
    * Multiplicaton with the jump in fluxes gives the wave strengths:
    *
@@ -165,6 +173,8 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
                                           8,
                                           0,
                                           0,
+                                          0,
+                                          0,
                                           l_netUpdatesL,
                                           l_netUpdatesR);
 
@@ -175,6 +185,58 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
   REQUIRE(l_netUpdatesR[1] == Approx(-88.2599));
 
   /*
+   * Test case (dam break with bathymetry):
+   *
+   *     left | right
+   *   h:  10 | 8
+   *   hu:  0 | 0
+   *   b: -15 | -8
+   *
+   * FWave speeds are given as:
+   *
+   *   s1 = -sqrt(9.80665 * 9)
+   *   s2 =  sqrt(9.80665 * 9)
+   *
+   * Inversion of the matrix of right Eigenvectors:
+   *
+   *   wolframalpha.com query: invert {{1, 1}, {-sqrt(9.80665 * 9), sqrt(9.80665 * 9)}}
+   *
+   *          | 0.5 -0.0532217 |
+   *   Rinv = |                |
+   *          | 0.5 0.0532217  |
+   *
+   * Multiplicaton with the jump in fluxes gives the wave strengths:
+   *
+   *        |  0 - 0                                                     |   | -23.4867 |   | a1 |
+   * Rinv * |                                                            | = |          | = |    |
+   *        | 1/2*9.80665*8^2-1/2*9.80665*10^2 +9.80665*(-8+15)*(10+8)/2 |   |  23.4867 |   | a2 |
+   *
+   * The net-updates are given through the scaled eigenvectors.
+   *
+   *                      |  1 |   | -23.4867      |
+   * update #1:      a1 * |    | = |               |
+   *                      | s1 |   | 220.650       |
+   *
+   *                      |  1 |   |  23.4867      |
+   * update #2:      a2 * |    | = |               |
+   *                      | s2 |   | 220.650       |
+   */
+  tsunami_lab::solvers::FWave::netUpdates(10,
+                                          8,
+                                          0,
+                                          0,
+                                          -15,
+                                          -8,
+                                          l_netUpdatesL,
+                                          l_netUpdatesR);
+
+  REQUIRE(l_netUpdatesL[0] == Approx(-23.4867));
+  REQUIRE(l_netUpdatesL[1] == Approx(220.650));
+
+  REQUIRE(l_netUpdatesR[0] == Approx(23.4867));
+  REQUIRE(l_netUpdatesR[1] == Approx(220.650));
+
+  /*
    * Test case (trivial steady state):
    *
    *     left | right
@@ -183,6 +245,8 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
    */
   tsunami_lab::solvers::FWave::netUpdates(10,
                                           10,
+                                          0,
+                                          0,
                                           0,
                                           0,
                                           l_netUpdatesL,
@@ -201,6 +265,7 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
    *  h:   1   | 1
    *  u:   100 | 10
    *  hu:  100 | 10
+   *  b:   0   | 0
    *
    *  FWave speeds are given as:
    *
@@ -234,6 +299,8 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
                                           1,
                                           100,
                                           10,
+                                          0,
+                                          0,
                                           l_netUpdatesL,
                                           l_netUpdatesR);
 
@@ -242,4 +309,74 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
 
   REQUIRE(l_netUpdatesR[0] == Approx(-90));
   REQUIRE(l_netUpdatesR[1] == Approx(-9900.002044988));
+}
+
+TEST_CASE("Test the derivation of the FWave net-updates with dry Cells.", "[FWaveUpdatesDryCells]")
+{
+  /*
+   * Test case (dry dry interface):
+   *
+   *     left | right
+   *   h:   0 | 0
+   *  hu:   0 | 0
+   *   b:  14 | 3
+   *
+   *  expecting no change
+   */
+  float l_netUpdatesL[2] = {-5, 3};
+  float l_netUpdatesR[2] = {4, 7};
+
+  tsunami_lab::solvers::FWave::netUpdates(0,
+                                          0,
+                                          0,
+                                          0,
+                                          14,
+                                          3,
+                                          l_netUpdatesL,
+                                          l_netUpdatesR);
+
+  REQUIRE(l_netUpdatesL[0] == 0);
+  REQUIRE(l_netUpdatesL[1] == 0);
+
+  REQUIRE(l_netUpdatesR[0] == 0);
+  REQUIRE(l_netUpdatesR[1] == 0);
+
+  /*
+   * Test case (dry wet interface):
+   *
+   *     left | right
+   *   h:   0 |  10
+   *  hu:   0 | -10
+   *   b:  10 |  -10
+   *
+   *  expecting reflecting condition:
+   *
+   *  left:  h = 10, hu = 10, b = -10
+   */
+  float l_netUpdatesL2[2] = {-5, 3};
+  float l_netUpdatesR2[2] = {4, 7};
+
+  tsunami_lab::solvers::FWave::netUpdates(0,
+                                          10,
+                                          0,
+                                          -10,
+                                          10,
+                                          -10,
+                                          l_netUpdatesL,
+                                          l_netUpdatesR);
+
+  tsunami_lab::solvers::FWave::netUpdates(10,
+                                          10,
+                                          10,
+                                          -10,
+                                          -10,
+                                          -10,
+                                          l_netUpdatesL2,
+                                          l_netUpdatesR2);
+
+  REQUIRE(l_netUpdatesL[0] == 0);
+  REQUIRE(l_netUpdatesL[1] == 0);
+
+  REQUIRE(l_netUpdatesR[0] == Approx(l_netUpdatesR2[0]));
+  REQUIRE(l_netUpdatesR[1] == Approx(l_netUpdatesR2[1]));
 }

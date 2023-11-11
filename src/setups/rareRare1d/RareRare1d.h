@@ -1,5 +1,7 @@
 /**
- * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * One-dimensional rarefaction rarefaction wave problem.
@@ -69,6 +71,14 @@ public:
    **/
   t_real getMomentumY(t_real,
                       t_real) const;
+
+  /**
+   * @brief Gets the bathymetry
+   *
+   * @return bathymetry
+   */
+  t_real getBathymetry(t_real,
+                       t_real) const;
 };
 
 #endif

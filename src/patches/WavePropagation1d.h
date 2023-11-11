@@ -29,11 +29,20 @@ private:
   //! bool if FWave solver is used
   bool m_useFWave = true;
 
+  //! left boundary
+  t_boundary m_boundaryLeft = t_boundary::OPEN;
+
+  //! right boundary
+  t_boundary m_boundaryRight = t_boundary::OPEN;
+
   //! water heights for the current and next time step for all cells
   t_real *m_h[2] = {nullptr, nullptr};
 
   //! momenta for the current and next time step for all cells
   t_real *m_hu[2] = {nullptr, nullptr};
+
+  //! bathymetry for the current and next time step for all cells
+  t_real *m_b = nullptr;
 
 public:
   /**
@@ -41,8 +50,10 @@ public:
    *
    * @param i_nCells number of cells.
    * @param i_useFWave bool: true if FWave solver should be used, false if Roe solver should be used.
+   * @param i_boundaryLeft left boundary condition.
+   * @param i_boundaryRight right boundary condition.
    **/
-  WavePropagation1d(t_idx i_nCells, bool i_useFWave);
+  WavePropagation1d(t_idx i_nCells, bool i_useFWave, t_boundary i_boundaryLeft, t_boundary i_boundaryRight);
 
   /**
    * Destructor which frees all allocated memory.
@@ -100,6 +111,16 @@ public:
   }
 
   /**
+   * @brief Gets the cells bathymetry.
+   *
+   * @return bathymetry.
+   */
+  t_real const *getBathymetry()
+  {
+    return m_b + 1;
+  }
+
+  /**
    * Sets the height of the cell to the given value.
    *
    * @param i_ix id of the cell in x-direction.
@@ -131,6 +152,19 @@ public:
   void setMomentumY(t_idx,
                     t_idx,
                     t_real){};
+
+  /**
+   * @brief Sets the bathymetry of the cell to the given value.
+   *
+   * @param i_ix id of the cell in x-direction.
+   * @param i_b bathymetry.
+   */
+  void setBathymetry(t_idx i_ix,
+                     t_idx,
+                     t_real i_b)
+  {
+    m_b[i_ix + 1] = i_b;
+  }
 };
 
 #endif

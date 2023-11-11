@@ -1,5 +1,7 @@
 /**
- * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * One-dimensional rare rare problem.
@@ -38,6 +40,12 @@ tsunami_lab::t_real tsunami_lab::setups::RareRare1d::getMomentumX(t_real i_x,
 
 tsunami_lab::t_real tsunami_lab::setups::RareRare1d::getMomentumY(t_real,
                                                                   t_real) const
+{
+  return 0;
+}
+
+tsunami_lab::t_real tsunami_lab::setups::RareRare1d::getBathymetry(t_real,
+                                                                   t_real) const
 {
   return 0;
 }
