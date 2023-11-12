@@ -418,7 +418,7 @@ A :math:`\delta` (minimum offset from 0m height) of 20m is used so we don't run 
   :nocontrols:
   :muted:
 
-The Tsunami Setup simulated over an hour of time.
+The Tsunami Setup simulated over an hour of time. We observe a runup of roughly 1.8 to 2 meters.
 
 3.4.5 Impact of different initial displacements
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
