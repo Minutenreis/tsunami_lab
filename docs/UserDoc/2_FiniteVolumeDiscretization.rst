@@ -255,7 +255,7 @@ The higher the initial heights are, the higher the middlestate is and the faster
 
 Shock-Shock problem with h=10 and u=5
 
-.. video:: _static/2_ShockShock1d_10_100.mp4
+.. video:: _static/3_2_ShockShock1d_10_100.mp4
   :width: 700
   :autoplay:
   :loop:

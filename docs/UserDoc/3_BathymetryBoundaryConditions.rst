@@ -205,7 +205,7 @@ Added new setup to easier simulate tasks (with user controlled h_l h_r hu_l hu_r
 
 reflecting right boundary condition with open left boundary condition, h=10 and u=10
 
-.. video:: _static/3_ShockShock1d_10_100.mp4
+.. video:: _static/3_2_ShockShock1d_10_100.mp4
   :width: 700
   :autoplay:
   :loop:
