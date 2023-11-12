@@ -232,9 +232,9 @@ In :math:`x \in [0,25]` the maximum Froude number is given by
         2 \quad &\text{else}
       \end{cases}\\
   u_{sub}(x) &= \frac{4.42}{h_{sub}(x)} \\
-  F_{sub}(x) &= \frac{u_{sub}(x)}{\sqrt{g h_{sub}(x)}} = \frac{4.42}{\sqrt{g}\cdot h_{sub}(x)^{3/2}} \\
+  F_{sub}(x) &= \frac{u_{sub}(x)}{\sqrt{g h_{sub}(x)}} = \frac{4.42}{\sqrt{g}\cdot h_{sub}(x)^{\frac{3}{2}}} \\
   x_{max(F_{sub}(x))} &= x_{min(h_{sub}(x))} = 10 \\
-  F_{sub}(10) &= \frac{4.42}{\sqrt{g}\cdot h_{sub}(10)^{3/2}} = \frac{4.42}{\sqrt{g}\cdot 1.8^{3/2}} = 0.58446 \\
+  F_{sub}(10) &= \frac{4.42}{\sqrt{g}\cdot h_{sub}(10)^{\frac{3}{2}}} = \frac{4.42}{\sqrt{g}\cdot 1.8^{\frac{3}{2}}} = 0.58446 \\
   \\
   h_{super}(x) &= -b_{super}(x) = 
       \begin{cases}
@@ -243,7 +243,7 @@ In :math:`x \in [0,25]` the maximum Froude number is given by
       \end{cases}\\
   u_{super}(x) &= \frac{0.18}{h_{super}(x)} \\
   x_{max(F_{super}(x))} &= x_{min(h_{super}(x))} = 10 \\
-  F_{super}(x) &= \frac{0.18}{\sqrt{g}\cdot h_{sub}(10)^{3/2}} = \frac{0.18}{\sqrt{g}\cdot 0.18^{3/2}} = 30.1125 \\
+  F_{super}(x) &= \frac{0.18}{\sqrt{g}\cdot h_{super}(10)^{\frac{3}{2}}} = \frac{0.18}{\sqrt{g}\cdot 0.13^{\frac{3}{2}}} = 1.22630 \\
 
 3.3.2 Implement both cases through the base class setup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
