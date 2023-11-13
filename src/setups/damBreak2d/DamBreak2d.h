@@ -54,7 +54,7 @@ public:
    * @return height at the given point.
    **/
   t_real getHeight(t_real i_x,
-                   t_real) const;
+                   t_real i_y) const;
 
   /**
    * Gets the momentum in x-direction.
