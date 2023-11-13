@@ -5,8 +5,8 @@
  * One-dimensional wave propagation patch.
  **/
 #include "WavePropagation1d.h"
-#include "../solvers/roe/Roe.h"
-#include "../solvers/fWave/FWave.h"
+#include "../../solvers/roe/Roe.h"
+#include "../../solvers/fWave/FWave.h"
 
 tsunami_lab::patches::WavePropagation1d::WavePropagation1d(t_idx i_nCells,
                                                            bool i_useFWave,
@@ -50,6 +50,7 @@ tsunami_lab::patches::WavePropagation1d::~WavePropagation1d()
 
 void tsunami_lab::patches::WavePropagation1d::timeStep(t_real i_scaling)
 {
+  setGhostOutflow();
   // pointers to old and new data
   t_real *l_hOld = m_h[m_step];
   t_real *l_huOld = m_hu[m_step];

@@ -6,7 +6,7 @@
  **/
 #include <catch2/catch.hpp>
 #include "WavePropagation1d.h"
-#include "../constants.h"
+#include "../../constants.h"
 
 TEST_CASE("Test the 1d wave propagation roe solver.", "[WaveProp1dRoe]")
 {
@@ -54,9 +54,6 @@ TEST_CASE("Test the 1d wave propagation roe solver.", "[WaveProp1dRoe]")
                              0,
                              0);
   }
-
-  // set outflow boundary condition
-  m_waveProp.setGhostOutflow();
 
   // perform a time step
   m_waveProp.timeStep(0.1);
@@ -129,9 +126,6 @@ TEST_CASE("Test the 1d wave propagation FWave solver.", "[WaveProp1dFWave]")
                              0,
                              0);
   }
-
-  // set outflow boundary condition
-  m_waveProp.setGhostOutflow();
 
   // perform a time step
   m_waveProp.timeStep(0.1);
@@ -209,15 +203,9 @@ TEST_CASE("Test the 1d wave propagation FWave solver middleStates.csv .", "[Wave
                                0);
     }
 
-    // set outflow boundary condition
-    m_waveProp.setGhostOutflow();
-
     // perform a time step
     for (int i = 0; i < 100; i++)
     {
-      // set outflow boundary condition
-      m_waveProp.setGhostOutflow();
-
       m_waveProp.timeStep(0.001);
     }
 

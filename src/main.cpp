@@ -4,7 +4,7 @@
  * @section DESCRIPTION
  * Entry-point for simulations.
  **/
-#include "patches/WavePropagation1d.h"
+#include "patches/wavePropagation1d/WavePropagation1d.h"
 #include "setups/damBreak1d/DamBreak1d.h"
 #include "setups/rareRare1d/RareRare1d.h"
 #include "setups/shockShock1d/ShockShock1d.h"
@@ -311,11 +311,11 @@ int main(int i_argc,
     }
   }
 
-  // derive maximum wave speed in setup; the momentum is ignored
+  // derive maximum wave speed in setup; the momentum is ignored TODO: add y values to max speed
   tsunami_lab::t_real l_speedMax = std::sqrt(9.81 * l_hMax);
 
   // derive constant time step; changes at simulation time are ignored
-  tsunami_lab::t_real l_dt = 0.5 * l_dxy / l_speedMax;
+  tsunami_lab::t_real l_dt = 0.45 * l_dxy / l_speedMax;
 
   // derive scaling for a time step
   tsunami_lab::t_real l_scaling = l_dt / l_dxy;
@@ -362,7 +362,6 @@ int main(int i_argc,
       l_nOut++;
     }
 
-    l_waveProp->setGhostOutflow();
     l_waveProp->timeStep(l_scaling);
 
     l_timeStep++;
