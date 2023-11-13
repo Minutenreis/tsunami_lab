@@ -451,5 +451,5 @@ Maybe a linear relationship between the initial displacement and the momentum is
 
 A version with a static 20 meter displacement in between 175km and 225km and a left reflective boundary.
 It seems to travel as a single big wave towards japan mainland hitting it with roughly 15m height and getting reflected to roughly half the height.
-This is basically our dambreak problem in 2 directions without an infinite water source
+This is basically our dambreak problem in 2 directions without an infinite water source.
 The lower video is just the height of the water without the momentum and bathymetry.
