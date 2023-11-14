@@ -125,14 +125,23 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
     }
 
   // pointers to old and new data
-  t_real *l_hOld = m_h[m_step];
-  t_real *l_huOld = m_hu[m_step];
-  t_real *l_hvOld = m_hv[m_step];
+  l_hOld = m_h[m_step];
+  l_huOld = m_hu[m_step];
+  l_hvOld = m_hv[m_step];
 
   m_step = (m_step + 1) % 2;
-  t_real *l_hNew = m_h[m_step];
-  t_real *l_huNew = m_hu[m_step];
-  t_real *l_hvNew = m_hv[m_step];
+  l_hNew = m_h[m_step];
+  l_huNew = m_hu[m_step];
+  l_hvNew = m_hv[m_step];
+
+  // init new cell quantities
+  for (t_idx l_cx = 1; l_cx < m_nCells + 1; l_cx++)
+    for (t_idx l_cy = 1; l_cy < m_nCells + 1; l_cy++)
+    {
+      l_hNew[getCoord(l_cx, l_cy)] = l_hOld[getCoord(l_cx, l_cy)];
+      l_huNew[getCoord(l_cx, l_cy)] = l_huOld[getCoord(l_cx, l_cy)];
+      l_hvNew[getCoord(l_cx, l_cy)] = l_hvOld[getCoord(l_cx, l_cy)];
+    }
 
   // iterate over edges and update with Riemann solutions in y direction
   for (t_idx l_ex = 0; l_ex < m_nCells + 1; l_ex++)
@@ -187,20 +196,22 @@ void tsunami_lab::patches::WavePropagation2d::setGhostOutflow()
   {
   case t_boundary::OPEN:
   {
-    for (int l_y = 1; l_y < m_nCells + 1; l_y++)
+    for (t_idx l_y = 1; l_y < m_nCells + 1; l_y++)
     {
       l_h[getCoord(0, l_y)] = l_h[getCoord(1, l_y)];
       l_hu[getCoord(0, l_y)] = l_hu[getCoord(1, l_y)];
+      l_hv[getCoord(0, l_y)] = l_hv[getCoord(1, l_y)];
       l_b[getCoord(0, l_y)] = l_b[getCoord(1, l_y)];
     }
     break;
   }
   case t_boundary::WALL:
   {
-    for (int l_y = 1; l_y < m_nCells + 1; l_y++)
+    for (t_idx l_y = 1; l_y < m_nCells + 1; l_y++)
     {
       l_h[getCoord(0, l_y)] = 0;
       l_hu[getCoord(0, l_y)] = 0;
+      l_hv[getCoord(0, l_y)] = 0;
       l_b[getCoord(0, l_y)] = 20;
     }
     break;
@@ -212,20 +223,22 @@ void tsunami_lab::patches::WavePropagation2d::setGhostOutflow()
   {
   case t_boundary::OPEN:
   {
-    for (int l_y = 1; l_y < m_nCells + 1; l_y++)
+    for (t_idx l_y = 1; l_y < m_nCells + 1; l_y++)
     {
       l_h[getCoord(m_nCells + 1, l_y)] = l_h[getCoord(m_nCells, l_y)];
       l_hu[getCoord(m_nCells + 1, l_y)] = l_hu[getCoord(m_nCells, l_y)];
+      l_hv[getCoord(m_nCells + 1, l_y)] = l_hv[getCoord(m_nCells, l_y)];
       l_b[getCoord(m_nCells + 1, l_y)] = l_b[getCoord(m_nCells, l_y)];
     }
     break;
   }
   case t_boundary::WALL:
   {
-    for (int l_y = 1; l_y < m_nCells + 1; l_y++)
+    for (t_idx l_y = 1; l_y < m_nCells + 1; l_y++)
     {
       l_h[getCoord(m_nCells + 1, l_y)] = 0;
       l_hu[getCoord(m_nCells + 1, l_y)] = 0;
+      l_hv[getCoord(m_nCells + 1, l_y)] = 0;
       l_b[getCoord(m_nCells + 1, l_y)] = 20;
     }
     break;
@@ -237,20 +250,22 @@ void tsunami_lab::patches::WavePropagation2d::setGhostOutflow()
   {
   case t_boundary::OPEN:
   {
-    for (int l_x = 1; l_x < m_nCells + 1; l_x++)
+    for (t_idx l_x = 1; l_x < m_nCells + 1; l_x++)
     {
       l_h[getCoord(l_x, 0)] = l_h[getCoord(l_x, 1)];
       l_hu[getCoord(l_x, 0)] = l_hu[getCoord(l_x, 1)];
+      l_hv[getCoord(l_x, 0)] = l_hv[getCoord(l_x, 1)];
       l_b[getCoord(l_x, 0)] = l_b[getCoord(l_x, 1)];
     }
     break;
   }
   case t_boundary::WALL:
   {
-    for (int l_x = 1; l_x < m_nCells + 1; l_x++)
+    for (t_idx l_x = 1; l_x < m_nCells + 1; l_x++)
     {
       l_h[getCoord(l_x, 0)] = 0;
       l_hu[getCoord(l_x, 0)] = 0;
+      l_hv[getCoord(l_x, 0)] = 0;
       l_b[getCoord(l_x, 0)] = 20;
     }
     break;
@@ -262,20 +277,22 @@ void tsunami_lab::patches::WavePropagation2d::setGhostOutflow()
   {
   case t_boundary::OPEN:
   {
-    for (int l_x = 1; l_x < m_nCells + 1; l_x++)
+    for (t_idx l_x = 1; l_x < m_nCells + 1; l_x++)
     {
       l_h[getCoord(l_x, m_nCells + 1)] = l_h[getCoord(l_x, m_nCells)];
       l_hu[getCoord(l_x, m_nCells + 1)] = l_hu[getCoord(l_x, m_nCells)];
+      l_hv[getCoord(l_x, m_nCells + 1)] = l_hv[getCoord(l_x, m_nCells)];
       l_b[getCoord(l_x, m_nCells + 1)] = l_b[getCoord(l_x, m_nCells)];
     }
     break;
   }
   case t_boundary::WALL:
   {
-    for (int l_x = 1; l_x < m_nCells + 1; l_x++)
+    for (t_idx l_x = 1; l_x < m_nCells + 1; l_x++)
     {
       l_h[getCoord(l_x, m_nCells + 1)] = 0;
       l_hu[getCoord(l_x, m_nCells + 1)] = 0;
+      l_hv[getCoord(l_x, m_nCells + 1)] = 0;
       l_b[getCoord(l_x, m_nCells + 1)] = 20;
     }
     break;

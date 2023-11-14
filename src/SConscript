@@ -10,6 +10,7 @@ Import('env')
 l_sources = [ 'solvers/roe/Roe.cpp',
               'solvers/fWave/FWave.cpp',
               'patches/wavePropagation1d/WavePropagation1d.cpp',
+              'patches/wavePropagation2d/WavePropagation2d.cpp',
               'setups/shockShock1d/ShockShock1d.cpp',
               'setups/damBreak1d/DamBreak1d.cpp',
               'setups/rareRare1d/RareRare1d.cpp',
@@ -17,6 +18,7 @@ l_sources = [ 'solvers/roe/Roe.cpp',
               'setups/subcritical1d/Subcritical1d.cpp',
               'setups/supercritical1d/Supercritical1d.cpp',
               'setups/tsunamiEvent1d/TsunamiEvent1d.cpp',
+              'setups/damBreak2d/DamBreak2d.cpp',
               'io/Csv.cpp' ]
 
 for l_so in l_sources:
@@ -29,6 +31,7 @@ l_tests = [ 'tests.cpp',
             'solvers/roe/Roe.test.cpp',
             'solvers/fWave/FWave.test.cpp',
             'patches/wavePropagation1d/WavePropagation1d.test.cpp',
+            'patches/wavePropagation2d/WavePropagation2d.test.cpp',
             'setups/shockShock1d/ShockShock1d.test.cpp',
             'setups/damBreak1d/DamBreak1d.test.cpp',
             'setups/rareRare1d/RareRare1d.test.cpp',
@@ -36,6 +39,7 @@ l_tests = [ 'tests.cpp',
             'setups/subcritical1d/Subcritical1d.test.cpp',
             'setups/supercritical1d/Supercritical1d.test.cpp',
             'setups/tsunamiEvent1d/TsunamiEvent1d.test.cpp',
+            'setups/damBreak2d/DamBreak2d.test.cpp',
             'io/Csv.test.cpp' ]
 
 for l_te in l_tests:

@@ -22,8 +22,10 @@ TEST_CASE("Test the CSV-writer for 1D settings.", "[CsvWrite1d]")
                               5,
                               1,
                               7,
-                              l_h + 1,
-                              l_hu + 1,
+                              1,
+                              0,
+                              l_h,
+                              l_hu,
                               nullptr,
                               nullptr,
                               l_stream0);
@@ -61,9 +63,11 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
                               2,
                               2,
                               4,
-                              l_h + 4 + 1,
-                              l_hu + 4 + 1,
-                              l_hv + 4 + 1,
+                              1,
+                              1,
+                              l_h,
+                              l_hu,
+                              l_hv,
                               nullptr,
                               l_stream1);
 
@@ -74,7 +78,7 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
 15,15,10,5,10
 )V0G0N";
 
-  REQUIRE(l_stream1.str().size() == l_ref1.size());
+  // REQUIRE(l_stream1.str().size() == l_ref1.size());
   REQUIRE(l_stream1.str() == l_ref1);
 }
 

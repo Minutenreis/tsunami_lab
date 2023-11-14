@@ -89,7 +89,7 @@ public:
    */
   t_real const *getHeight()
   {
-    return m_h[m_step] + 1;
+    return m_h[m_step];
   }
 
   /**
@@ -99,7 +99,7 @@ public:
    **/
   t_real const *getMomentumX()
   {
-    return m_hu[m_step] + 1;
+    return m_hu[m_step];
   }
 
   /**
@@ -117,7 +117,27 @@ public:
    */
   t_real const *getBathymetry()
   {
-    return m_b + 1;
+    return m_b;
+  }
+
+  /**
+   * @brief Gets number of ghost cells in x-direction.
+   *
+   * @return number of ghost cells in x-direction.
+   */
+  t_idx getGhostCellsX()
+  {
+    return 1;
+  }
+
+  /**
+   * @brief Gets number of ghost cells in y-direction.
+   *
+   * @return number of ghost cells in y-direction.
+   */
+  t_idx getGhostCellsY()
+  {
+    return 0;
   }
 
   /**

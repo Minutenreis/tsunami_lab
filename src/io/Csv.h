@@ -33,6 +33,8 @@ public:
    * @param i_nx number of cells in x-direction.
    * @param i_ny number of cells in y-direction.
    * @param i_stride stride of the data arrays in y-direction (x is assumed to be stride-1).
+   * @param i_ghostCellsX number of ghost cells in x-direction.
+   * @param i_ghostCellsY number of ghost cells in y-direction.
    * @param i_h water height of the cells; optional: use nullptr if not required.
    * @param i_hu momentum in x-direction of the cells; optional: use nullptr if not required.
    * @param i_hv momentum in y-direction of the cells; optional: use nullptr if not required.
@@ -43,6 +45,8 @@ public:
                     t_idx i_nx,
                     t_idx i_ny,
                     t_idx i_stride,
+                    t_idx i_ghostCellsX,
+                    t_idx i_ghostCellsY,
                     t_real const *i_h,
                     t_real const *i_hu,
                     t_real const *i_hv,

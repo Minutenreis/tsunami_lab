@@ -45,6 +45,20 @@ public:
   virtual t_idx getStride() = 0;
 
   /**
+   * @brief Gets number of ghost cells in x-direction.
+   *
+   * @return number of ghost cells in x-direction.
+   */
+  virtual t_idx getGhostCellsX() = 0;
+
+  /**
+   * @brief Gets number of ghost cells in y-direction.
+   *
+   * @return number of ghost cells in y-direction.
+   */
+  virtual t_idx getGhostCellsY() = 0;
+
+  /**
    * Gets cells' water heights.
    *
    * @return water heights.

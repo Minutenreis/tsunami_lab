@@ -10,6 +10,8 @@ void tsunami_lab::io::Csv::write(t_real i_dxy,
                                  t_idx i_nx,
                                  t_idx i_ny,
                                  t_idx i_stride,
+                                 t_idx i_ghostCellsX,
+                                 t_idx i_ghostCellsY,
                                  t_real const *i_h,
                                  t_real const *i_hu,
                                  t_real const *i_hv,
@@ -29,15 +31,15 @@ void tsunami_lab::io::Csv::write(t_real i_dxy,
   io_stream << "\n";
 
   // iterate over all cells
-  for (t_idx l_iy = 0; l_iy < i_ny; l_iy++)
+  for (t_idx l_iy = i_ghostCellsY; l_iy < i_ny + i_ghostCellsY; l_iy++)
   {
-    for (t_idx l_ix = 0; l_ix < i_nx; l_ix++)
+    for (t_idx l_ix = i_ghostCellsX; l_ix < i_nx + i_ghostCellsX; l_ix++)
     {
       // derive coordinates of cell center
-      t_real l_posX = (l_ix + 0.5) * i_dxy;
-      t_real l_posY = (l_iy + 0.5) * i_dxy;
+      t_real l_posX = (l_ix - i_ghostCellsX + 0.5) * i_dxy; // ghost cells don't count for distance
+      t_real l_posY = (l_iy - i_ghostCellsY + 0.5) * i_dxy; // ghost cells don't count for distance
 
-      t_idx l_id = l_iy * i_stride + l_ix;
+      t_idx l_id = l_ix + l_iy * i_stride;
 
       // write data
       io_stream << l_posX << "," << l_posY;

@@ -39,5 +39,9 @@ Command Line Parameters
 | :code:`[-s solver]` = choose between :code:`roe` and :code:`fWave` solver, default is :code:`fWave`
 | :code:`[-u setup]` = choose between :code:`'DamBreak1d h_l h_r'`, :code:`'ShockShock1d h hu'`,
  :code:`'RareRare1d h hu'`, :code:`'Custom1d h_l h_r hu_l hu_r middle'`, :code:`Subcrit1d`,
- :code:`Supercrit1d`, :code:`'Tsunami1d path_to_csv time_simulated'` , default is :code:`'DamBreak1d 10 5'`
-| :code:`[-b 'boundary_left boundary_right']` = choose each boundary between :code:`wall` and :code:`open`, default is :code:`'open open'`
+ :code:`Supercrit1d`, :code:`'Tsunami1d path_to_csv time_simulated'`, :code:`DamBreak2d` , default is :code:`'DamBreak1d 10 5'`
+| :code:`[-b 'boundary_left boundary_right boundary_bottom boundary_top']` = 
+choose each boundary between :code:`wall` and :code:`open`, 
+default is :code:`open` for each; any boundary left out is set to :code:`open`
+| :code:`[-d n_cells_y]` = number of cells in y direction for 2d simulations, default is :code:`1`
+

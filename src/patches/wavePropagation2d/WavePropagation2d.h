@@ -76,6 +76,8 @@ public:
    * @param i_useFWave bool: true if FWave solver should be used, false if Roe solver should be used.
    * @param i_boundaryLeft left boundary condition.
    * @param i_boundaryRight right boundary condition.
+   * @param i_boundaryBottom bottom boundary condition.
+   * @param i_boundaryTop top boundary condition.
    **/
   WavePropagation2d(t_idx i_nCells, bool i_useFWave, t_boundary i_boundaryLeft, t_boundary i_boundaryRight, t_boundary i_boundaryBottom, t_boundary i_boundaryTop);
 
@@ -104,6 +106,26 @@ public:
   t_idx getStride()
   {
     return m_nCells + 2;
+  }
+
+  /**
+   * @brief Gets number of ghost cells in x-direction.
+   *
+   * @return number of ghost cells in x-direction.
+   */
+  t_idx getGhostCellsX()
+  {
+    return 1;
+  }
+
+  /**
+   * @brief Gets number of ghost cells in y-direction.
+   *
+   * @return number of ghost cells in y-direction.
+   */
+  t_idx getGhostCellsY()
+  {
+    return 1;
   }
 
   /**

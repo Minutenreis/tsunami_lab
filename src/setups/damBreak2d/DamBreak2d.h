@@ -37,17 +37,6 @@ private:
 
 public:
   /**
-   * Constructor.
-   *
-   * @param i_heightLeft water height on the left side of the dam.
-   * @param i_heightRight water height on the right side of the dam.
-   * @param i_locationDam location (x-coordinate) of the dam.
-   **/
-  DamBreak2d(t_real i_heightLeft,
-             t_real i_heightRight,
-             t_real i_locationDam);
-
-  /**
    * Gets the water height at a given point.
    *
    * @param i_x x-coordinate of the queried point.
@@ -75,10 +64,12 @@ public:
   /**
    * @brief Gets the bathymetry
    *
+   * @param i_x x-coordinate of the queried point.
+   * @param i_y y-coordinate of the queried point.
    * @return bathymetry
    */
-  t_real getBathymetry(t_real,
-                       t_real) const;
+  t_real getBathymetry(t_real i_x,
+                       t_real i_y) const;
 };
 
 #endif

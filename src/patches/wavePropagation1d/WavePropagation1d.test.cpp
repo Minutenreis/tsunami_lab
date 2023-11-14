@@ -61,22 +61,22 @@ TEST_CASE("Test the 1d wave propagation roe solver.", "[WaveProp1dRoe]")
   // steady state
   for (std::size_t l_ce = 0; l_ce < 49; l_ce++)
   {
-    REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(10));
-    REQUIRE(m_waveProp.getMomentumX()[l_ce] == Approx(0));
+    REQUIRE(m_waveProp.getHeight()[l_ce + 1] == Approx(10));
+    REQUIRE(m_waveProp.getMomentumX()[l_ce + 1] == Approx(0));
   }
 
   // dam-break
-  REQUIRE(m_waveProp.getHeight()[49] == Approx(10 - 0.1 * 9.394671362));
-  REQUIRE(m_waveProp.getMomentumX()[49] == Approx(0 + 0.1 * 88.25985));
+  REQUIRE(m_waveProp.getHeight()[49 + 1] == Approx(10 - 0.1 * 9.394671362));
+  REQUIRE(m_waveProp.getMomentumX()[49 + 1] == Approx(0 + 0.1 * 88.25985));
 
-  REQUIRE(m_waveProp.getHeight()[50] == Approx(8 + 0.1 * 9.394671362));
-  REQUIRE(m_waveProp.getMomentumX()[50] == Approx(0 + 0.1 * 88.25985));
+  REQUIRE(m_waveProp.getHeight()[50 + 1] == Approx(8 + 0.1 * 9.394671362));
+  REQUIRE(m_waveProp.getMomentumX()[50 + 1] == Approx(0 + 0.1 * 88.25985));
 
   // steady state
   for (std::size_t l_ce = 51; l_ce < 100; l_ce++)
   {
-    REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(8));
-    REQUIRE(m_waveProp.getMomentumX()[l_ce] == Approx(0));
+    REQUIRE(m_waveProp.getHeight()[l_ce + 1] == Approx(8));
+    REQUIRE(m_waveProp.getMomentumX()[l_ce + 1] == Approx(0));
   }
 }
 
@@ -133,22 +133,22 @@ TEST_CASE("Test the 1d wave propagation FWave solver.", "[WaveProp1dFWave]")
   // steady state
   for (std::size_t l_ce = 0; l_ce < 49; l_ce++)
   {
-    REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(10));
-    REQUIRE(m_waveProp.getMomentumX()[l_ce] == Approx(0));
+    REQUIRE(m_waveProp.getHeight()[l_ce + 1] == Approx(10));
+    REQUIRE(m_waveProp.getMomentumX()[l_ce + 1] == Approx(0));
   }
 
   // dam-break
-  REQUIRE(m_waveProp.getHeight()[49] == Approx(10 - 0.1 * 9.39468));
-  REQUIRE(m_waveProp.getMomentumX()[49] == Approx(0 + 0.1 * 88.2599));
+  REQUIRE(m_waveProp.getHeight()[49 + 1] == Approx(10 - 0.1 * 9.39468));
+  REQUIRE(m_waveProp.getMomentumX()[49 + 1] == Approx(0 + 0.1 * 88.2599));
 
-  REQUIRE(m_waveProp.getHeight()[50] == Approx(8 + 0.1 * 9.39468));
-  REQUIRE(m_waveProp.getMomentumX()[50] == Approx(0 + 0.1 * 88.2599));
+  REQUIRE(m_waveProp.getHeight()[50 + 1] == Approx(8 + 0.1 * 9.39468));
+  REQUIRE(m_waveProp.getMomentumX()[50 + 1] == Approx(0 + 0.1 * 88.2599));
 
   // steady state
   for (std::size_t l_ce = 51; l_ce < 100; l_ce++)
   {
-    REQUIRE(m_waveProp.getHeight()[l_ce] == Approx(8));
-    REQUIRE(m_waveProp.getMomentumX()[l_ce] == Approx(0));
+    REQUIRE(m_waveProp.getHeight()[l_ce + 1] == Approx(8));
+    REQUIRE(m_waveProp.getMomentumX()[l_ce + 1] == Approx(0));
   }
 }
 
@@ -210,7 +210,7 @@ TEST_CASE("Test the 1d wave propagation FWave solver middleStates.csv .", "[Wave
     }
 
     // test for h*
-    REQUIRE(m_waveProp.getHeight()[49] == Approx(testCases[i][4]));
-    REQUIRE(m_waveProp.getHeight()[50] == Approx(testCases[i][4]));
+    REQUIRE(m_waveProp.getHeight()[49 + 1] == Approx(testCases[i][4]));
+    REQUIRE(m_waveProp.getHeight()[50 + 1] == Approx(testCases[i][4]));
   }
 }
