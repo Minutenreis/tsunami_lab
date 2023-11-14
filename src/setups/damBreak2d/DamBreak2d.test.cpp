@@ -31,5 +31,5 @@ TEST_CASE("Test the two-dimensional dam break setup.", "[DamBreak2d]")
 
   REQUIRE(l_damBreak.getBathymetry(10, 10) == -10);
 
-  REQUIRE(l_damBreak.getBathymetry(3, 3) == 10);
+  REQUIRE(l_damBreak.getBathymetry(31, 0) == 10);
 }

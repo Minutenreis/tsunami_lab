@@ -34,7 +34,7 @@ tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getMomentumY(t_real,
 tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getBathymetry(t_real i_x,
                                                                    t_real i_y) const
 {
-  if (i_x >= 2 && i_x <= 4 && i_y >= 2 && i_y <= 4)
+  if (i_x >= 30 && i_x <= 32 && i_y >= -40 && i_y <= 40)
   {
     return 10;
   }

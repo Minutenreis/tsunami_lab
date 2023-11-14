@@ -295,9 +295,11 @@ int main(int i_argc,
 
   // calculate cell size
   tsunami_lab::t_real l_dxy = l_width / l_nx;
-  std::cout << "  cell size:       " << l_dxy << " m" << std::endl;
-  std::cout << "  width simulated: " << l_width << " m" << std::endl;
-  std::cout << "  time simulated:  " << l_endTime << " s" << std::endl;
+  std::cout << "  cell size:                      " << l_dxy << " m" << std::endl;
+  std::cout << "  width simulated:                " << l_width << " m" << std::endl;
+  std::cout << "  coordinates simulated:          x e [" << l_xOffset << ", " << l_width + l_xOffset << "]" << std::endl;
+  std::cout << "                                  y e [" << l_yOffset << ", " << l_width * float(l_ny) / float(l_nx) + l_yOffset << "]" << std::endl;
+  std::cout << "  time simulated:                 " << l_endTime << " s" << std::endl;
   std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
   std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
 
@@ -390,6 +392,8 @@ int main(int i_argc,
                                   l_waveProp->getStride(),
                                   l_waveProp->getGhostCellsX(),
                                   l_waveProp->getGhostCellsY(),
+                                  l_xOffset,
+                                  l_yOffset,
                                   l_waveProp->getHeight(),
                                   l_waveProp->getMomentumX(),
                                   l_waveProp->getMomentumY(),
