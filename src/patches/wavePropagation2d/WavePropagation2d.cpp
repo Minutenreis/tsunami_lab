@@ -124,6 +124,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
       l_huNew[l_ceR] -= i_scaling * l_netUpdates[1][1];
     }
 
+  setGhostOutflow();
   // pointers to old and new data
   l_hOld = m_h[m_step];
   l_huOld = m_hu[m_step];
