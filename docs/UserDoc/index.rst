@@ -43,5 +43,4 @@ Command Line Parameters
 | :code:`[-b 'boundary_left boundary_right boundary_bottom boundary_top']` = 
 choose each boundary between :code:`wall` and :code:`open`, 
 default is :code:`open` for each; any boundary left out is set to :code:`open`
-| :code:`[-d n_cells_y]` = number of cells in y direction for 2d simulations, default is :code:`1`
 

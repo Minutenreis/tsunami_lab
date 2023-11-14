@@ -11,6 +11,8 @@
 tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getHeight(t_real i_x,
                                                                t_real i_y) const
 {
+  if (getBathymetry(i_x, i_y) > 0) // obstacle
+    return 0;
   if (std::sqrt(i_x * i_x + i_y * i_y) < 10)
     return 10;
   else
@@ -29,13 +31,12 @@ tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getMomentumY(t_real,
   return 0;
 }
 
-tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getBathymetry(t_real,
-                                                                   t_real) const
+tsunami_lab::t_real tsunami_lab::setups::DamBreak2d::getBathymetry(t_real i_x,
+                                                                   t_real i_y) const
 {
-  // if (i_x >= 2 && i_x <= 4 && i_y >= 2 && i_y <= 4)
-  // {
-  //   return -2;
-  // }
-  // return -5;
-  return 0;
+  if (i_x >= 2 && i_x <= 4 && i_y >= 2 && i_y <= 4)
+  {
+    return 10;
+  }
+  return -10;
 }

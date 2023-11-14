@@ -25,8 +25,11 @@ private:
   //! current step which indicates the active values in the arrays below
   unsigned short m_step = 0;
 
-  //! number of cells discretizing the computational domain
-  t_idx m_nCells = 0;
+  //! number of cells discretizing the computational domain in x direction
+  t_idx m_nCellsx = 0;
+
+  //! number of cells discretizing the computational domain in y direction
+  t_idx m_nCellsy = 0;
 
   //! bool if FWave solver is used
   bool m_useFWave = true;
@@ -72,14 +75,21 @@ public:
   /**
    * Constructs the 1d wave propagation solver.
    *
-   * @param i_nCells number of cells.
+   * @param i_nCellsx number of cells in x direction.
+   * @param i_nCellsy number of cells in y direction.
    * @param i_useFWave bool: true if FWave solver should be used, false if Roe solver should be used.
    * @param i_boundaryLeft left boundary condition.
    * @param i_boundaryRight right boundary condition.
    * @param i_boundaryBottom bottom boundary condition.
    * @param i_boundaryTop top boundary condition.
    **/
-  WavePropagation2d(t_idx i_nCells, bool i_useFWave, t_boundary i_boundaryLeft, t_boundary i_boundaryRight, t_boundary i_boundaryBottom, t_boundary i_boundaryTop);
+  WavePropagation2d(t_idx i_nCellsx,
+                    t_idx i_nCellsy,
+                    bool i_useFWave,
+                    t_boundary i_boundaryLeft,
+                    t_boundary i_boundaryRight,
+                    t_boundary i_boundaryBottom,
+                    t_boundary i_boundaryTop);
 
   /**
    * Destructor which frees all allocated memory.
@@ -105,7 +115,7 @@ public:
    **/
   t_idx getStride()
   {
-    return m_nCells + 2;
+    return m_nCellsx + 2;
   }
 
   /**

@@ -93,13 +93,13 @@ int main(int i_argc,
   tsunami_lab::t_boundary l_boundaryB = tsunami_lab::t_boundary::OPEN;
   tsunami_lab::t_boundary l_boundaryT = tsunami_lab::t_boundary::OPEN;
   tsunami_lab::t_real l_endTime = 1.25;
-  tsunami_lab::t_real l_width = 10.0;
+  tsunami_lab::t_real l_width = 10.0; // width in x direction, y is scaled by l_ny / l_nx
   tsunami_lab::t_real l_xOffset = 0;
   tsunami_lab::t_real l_yOffset = 0;
 
   std::cout << "runtime configuration" << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:d:")) != -1)
+  while ((opt = getopt(i_argc, i_argv, "u:s:b:")) != -1)
   {
     switch (opt)
     {
@@ -151,6 +151,7 @@ int main(int i_argc,
         std::cout << "  using DamBreak2d() setup" << std::endl;
         l_setup = new tsunami_lab::setups::DamBreak2d();
         l_width = 100;
+        l_ny = l_nx; // square domain
         l_xOffset = -50;
         l_yOffset = -50;
         l_endTime = 20;
@@ -249,16 +250,6 @@ int main(int i_argc,
       getBoundary(l_boundaryTName, &l_boundaryT);
       break;
     }
-    case 'd':
-    {
-      l_ny = atoi(optarg);
-      if (l_ny < 1)
-      {
-        std::cerr << "invalid number of cells" << std::endl;
-        return EXIT_FAILURE;
-      }
-      break;
-    }
     // unknown option
     case '?':
     {
@@ -277,6 +268,8 @@ int main(int i_argc,
                                                   5,
                                                   5);
   }
+
+  // FWave or Roe Solver
   if (l_useFwave == false)
   {
     std::cout << "  using Roe solver" << std::endl;
@@ -287,6 +280,8 @@ int main(int i_argc,
   }
   // construct solver
   tsunami_lab::patches::WavePropagation *l_waveProp;
+
+  // 1d or 2d solver
   if (l_ny == 1)
   {
     l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
@@ -294,7 +289,7 @@ int main(int i_argc,
   }
   else
   {
-    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
     std::cout << "  using 2d solver" << std::endl;
   }
 
