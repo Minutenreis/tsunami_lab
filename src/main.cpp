@@ -363,7 +363,7 @@ int main(int i_argc,
     }
   }
 
-  // derive maximum wave speed in setup; the momentum is ignored TODO: do we have to change anything for y? h_max is the same
+  // derive maximum wave speed in setup; the momentum is ignored
   tsunami_lab::t_real l_speedMax = std::sqrt(9.81 * l_hMax);
 
   // derive constant time step; changes at simulation time are ignored
