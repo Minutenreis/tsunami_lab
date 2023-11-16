@@ -1,5 +1,8 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * IO-routines for writing a snapshot as Comma Separated Values (CSV).
@@ -7,13 +10,12 @@
 #ifndef TSUNAMI_LAB_IO_CSV
 #define TSUNAMI_LAB_IO_CSV
 
-#include "../constants.h"
+#include "../../constants.h"
 #include <cstring>
 #include <string>
 #include <iostream>
 #include <vector>
 #include "rapidcsv.h"
-#include "../constants.h"
 
 namespace tsunami_lab
 {

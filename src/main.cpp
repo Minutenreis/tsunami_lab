@@ -14,7 +14,8 @@
 #include "setups/subcritical1d/Subcritical1d.h"
 #include "setups/tsunamiEvent1d/TsunamiEvent1d.h"
 #include "setups/damBreak2d/DamBreak2d.h"
-#include "io/Csv.h"
+#include "io/csv/Csv.h"
+#include "io/stations/Stations.h"
 #include "constants.h"
 #include <cstdlib>
 #include <iostream>
@@ -96,10 +97,11 @@ int main(int i_argc,
   tsunami_lab::t_real l_width = 10.0; // width in x direction, y is scaled by l_ny / l_nx
   tsunami_lab::t_real l_xOffset = 0;
   tsunami_lab::t_real l_yOffset = 0;
+  tsunami_lab::io::Stations *l_stations = nullptr;
 
   std::cout << "runtime configuration" << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:")) != -1)
+  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:")) != -1)
   {
     switch (opt)
     {
@@ -211,11 +213,11 @@ int main(int i_argc,
       else if (l_setupName == "TSUNAMI1D")
       {
         // assumptions: headerless csv, 4 columns, 3rd being length along path and 4th being height
-        std::string i_filePath = l_arg1Str;
+        std::string l_filePath = l_arg1Str;
         rapidcsv::Document l_doc;
         size_t l_rowCount;
 
-        tsunami_lab::io::Csv::openCSV(i_filePath, l_doc, l_rowCount);
+        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, l_rowCount);
 
         l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc, l_rowCount);
         l_width = 250 * l_rowCount;
@@ -250,6 +252,12 @@ int main(int i_argc,
       getBoundary(l_boundaryTName, &l_boundaryT);
       break;
     }
+    case 'r':
+    {
+      std::string i_filePath(optarg);
+      l_stations = new tsunami_lab::io::Stations(i_filePath);
+      break;
+    }
     // unknown option
     case '?':
     {
@@ -257,6 +265,12 @@ int main(int i_argc,
       break;
     }
     }
+  }
+
+  if (l_stations != nullptr)
+  {
+    std::cout << "  using stations file at src/data/stations.json" << std::endl;
+    l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
   }
 
   // command line prints
@@ -415,6 +429,7 @@ int main(int i_argc,
   std::cout << "freeing memory" << std::endl;
   delete l_setup;
   delete l_waveProp;
+  delete l_stations;
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

@@ -11,6 +11,7 @@
    1_RiemannSolver
    2_FiniteVolumeDiscretization
    3_BathymetryBoundaryConditions
+   4_TwoDimensionalSolver
    doxygen
 
   
@@ -41,6 +42,23 @@ Command Line Parameters
  :code:`'RareRare1d h hu'`, :code:`'Custom1d h_l h_r hu_l hu_r middle'`, :code:`Subcrit1d`,
  :code:`Supercrit1d`, :code:`'Tsunami1d path_to_csv time_simulated'`, :code:`DamBreak2d` , default is :code:`'DamBreak1d 10 5'`
 | :code:`[-b 'boundary_left boundary_right boundary_bottom boundary_top']` = 
-choose each boundary between :code:`wall` and :code:`open`, 
-default is :code:`open` for each; any boundary left out is set to :code:`open`
+ choose each boundary between :code:`wall` and :code:`open`, 
+ default is :code:`open` for each; any boundary left out is set to :code:`open`
+| :code:`[-r stationsJson]` = path of the stations json file, default is :code:`src/data/stations.json`
+
+stationsJson Format:
+
+.. code:: javascript
+
+   {
+      "frequency": float,
+      "stations": [
+         {
+            "name": string,
+            "x": float,
+            "y": float
+         },
+         ...
+      ]
+   }
 

@@ -1,0 +1,15 @@
+{
+    "frequency": 2,
+    "stations": [
+        {
+            "name": "Radio 1",
+            "x": 0,
+            "y": 0
+        },
+        {
+            "name": "Radio 2",
+            "x": 10,
+            "y": -10
+        }
+    ]
+}

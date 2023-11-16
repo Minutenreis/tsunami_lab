@@ -1,11 +1,14 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * Unit tests for the CSV-interface.
  **/
 #include <catch2/catch.hpp>
-#include "../constants.h"
+#include "../../constants.h"
 #include <sstream>
 #define private public
 #include "Csv.h"
