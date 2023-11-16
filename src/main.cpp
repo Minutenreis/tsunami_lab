@@ -98,6 +98,7 @@ int main(int i_argc,
   tsunami_lab::t_real l_xOffset = 0;
   tsunami_lab::t_real l_yOffset = 0;
   tsunami_lab::io::Stations *l_stations = nullptr;
+  bool l_useStations = false;
 
   std::cout << "runtime configuration" << std::endl;
 
@@ -157,6 +158,7 @@ int main(int i_argc,
         l_xOffset = -50;
         l_yOffset = -50;
         l_endTime = 20;
+        l_useStations = true;
       }
       // 'RareRare1d h hu' setup
       else if (l_setupName == "RARERARE1D")
@@ -267,7 +269,7 @@ int main(int i_argc,
     }
   }
 
-  if (l_stations != nullptr)
+  if (l_stations == nullptr)
   {
     std::cout << "  using stations file at src/data/stations.json" << std::endl;
     l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
@@ -387,6 +389,19 @@ int main(int i_argc,
   }
   std::filesystem::create_directory("solutions");
 
+  // delete old stations
+  if (l_useStations)
+  {
+    if (std::filesystem::exists("stations"))
+    {
+      std::filesystem::remove_all("stations");
+    }
+    std::filesystem::create_directory("stations");
+    l_stations->init();
+  }
+
+  int l_nFreqStation = 0;
+
   while (l_simTime < l_endTime)
   {
     if (l_timeStep % 25 == 0)
@@ -415,6 +430,24 @@ int main(int i_argc,
                                   l_file);
       l_file.close();
       l_nOut++;
+    }
+
+    if (l_useStations && l_simTime > l_nFreqStation * l_stations->getT())
+    {
+      l_stations->write(l_dxy,
+                        l_nx,
+                        l_ny,
+                        l_waveProp->getStride(),
+                        l_waveProp->getGhostCellsX(),
+                        l_waveProp->getGhostCellsY(),
+                        l_simTime,
+                        l_xOffset,
+                        l_yOffset,
+                        l_waveProp->getHeight(),
+                        l_waveProp->getMomentumX(),
+                        l_waveProp->getMomentumY(),
+                        l_waveProp->getBathymetry());
+      ++l_nFreqStation;
     }
 
     l_waveProp->timeStep(l_scaling);

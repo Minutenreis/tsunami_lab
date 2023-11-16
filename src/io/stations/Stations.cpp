@@ -9,6 +9,7 @@
 #include "Stations.h"
 #include "json.hpp"
 #include <fstream>
+#include <string>
 
 using json = nlohmann::json;
 
@@ -23,6 +24,53 @@ tsunami_lab::io::Stations::Stations(const std::string path)
     m_stations = data["stations"];
 }
 
-tsunami_lab::io::Stations::~Stations()
+tsunami_lab::t_real tsunami_lab::io::Stations::getT() const
 {
+    return m_T;
+}
+
+std::vector<tsunami_lab::t_station> tsunami_lab::io::Stations::getStations() const
+{
+    return m_stations;
+}
+
+void tsunami_lab::io::Stations::init()
+{
+    for (t_station l_station : m_stations)
+    {
+        std::string l_path = "stations/station_" + l_station.name + ".csv";
+        std::ofstream l_file;
+        l_file.open(l_path);
+        l_file << "time,height,momentum_x,momentum_y,bathymetry" << std::endl;
+    }
+}
+
+void tsunami_lab::io::Stations::write(t_real i_dxy,
+                                      t_idx i_nx,
+                                      t_idx i_ny,
+                                      t_idx i_stride,
+                                      t_idx i_ghostCellsX,
+                                      t_idx i_ghostCellsY,
+                                      t_real i_simTime,
+                                      t_real i_offsetX,
+                                      t_real i_offsetY,
+                                      t_real const *i_h,
+                                      t_real const *i_hu,
+                                      t_real const *i_hv,
+                                      t_real const *i_b)
+{
+    for (t_station l_station : m_stations)
+    {
+        if (l_station.x - i_offsetX < 0 || l_station.x - i_offsetX > i_nx * i_dxy || l_station.y - i_offsetY < 0 || l_station.y - i_offsetY > i_ny * i_dxy)
+            continue; // station is outside of the domain
+
+        t_idx l_ix = (l_station.x - i_offsetX) / i_dxy + i_ghostCellsX;
+        t_idx l_iy = (l_station.y - i_offsetY) / i_dxy + i_ghostCellsY;
+        t_idx l_id = l_ix + l_iy * i_stride;
+
+        std::string l_path = "stations/station_" + l_station.name + ".csv";
+        std::ofstream l_file;
+        l_file.open(l_path, std::ios_base::app);
+        l_file << i_simTime << "," << i_h[l_id] << "," << i_hu[l_id] << "," << i_hv[l_id] << "," << i_b[l_id] << std::endl;
+    }
 }

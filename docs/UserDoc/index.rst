@@ -28,10 +28,11 @@ Installing and Running
 * clone the project with :code:`git clone https://github.com/Minutenreis/tsunami_lab.git` 
 * add the submodules with :code:`git submodule init` and :code:`git submodule update`
 * build with :code:`scons`
-* execute the Dam Break Problem with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] number_of_cells` 
+* execute the Dam Break Problem with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] number_of_cells` 
 * execute the tests with :code:`./build/tests`
 
-The output of the Dam Break Problem is in :code:`/solutions`
+The output of the Setup is in :code:`/solutions`
+The output of the Stations is in :code:`/stations`
 
 Command Line Parameters
 -----------------------
