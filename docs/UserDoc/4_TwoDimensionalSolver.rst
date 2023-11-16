@@ -171,7 +171,7 @@ It reads the station config from a :code:`json` file on initialization with the 
 .. code:: javascript
 
    {
-      "frequency": float,
+      "period": float,
       "stations": [
          {
             "name": string,
@@ -194,7 +194,7 @@ Its again a header only library like the `rapidcsv <https://github.com/d99kris/r
         std::ifstream f(path);
         json data = json::parse(f);
 
-        t_real l_frequency = data["frequency"];
+        t_real l_frequency = data["period"];
 
         m_T = 1.0 / l_frequency;
         m_stations = data["stations"];

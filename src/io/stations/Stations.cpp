@@ -18,9 +18,8 @@ tsunami_lab::io::Stations::Stations(const std::string path)
     std::ifstream f(path);
     json data = json::parse(f);
 
-    t_real l_frequency = data["frequency"];
+    m_T = data["period"];
 
-    m_T = 1.0 / l_frequency;
     m_stations = data["stations"];
 }
 
@@ -71,6 +70,25 @@ void tsunami_lab::io::Stations::write(t_real i_dxy,
         std::string l_path = "stations/station_" + l_station.name + ".csv";
         std::ofstream l_file;
         l_file.open(l_path, std::ios_base::app);
-        l_file << i_simTime << "," << i_h[l_id] << "," << i_hu[l_id] << "," << i_hv[l_id] << "," << i_b[l_id] << std::endl;
+        l_file << i_simTime;
+
+        if (i_h != nullptr)
+            l_file << "," << i_h[l_id];
+        else
+            l_file << ",0";
+        if (i_hu != nullptr)
+            l_file << "," << i_hu[l_id];
+        else
+            l_file << ",0";
+        if (i_hv != nullptr)
+            l_file << "," << i_hv[l_id];
+        else
+            l_file << ",0";
+        if (i_b != nullptr)
+            l_file << "," << i_b[l_id];
+        else
+            l_file << ",0";
+        l_file << std::endl
+               << std::flush;
     }
 }

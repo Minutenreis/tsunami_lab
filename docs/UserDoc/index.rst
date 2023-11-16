@@ -52,7 +52,7 @@ stationsJson Format:
 .. code:: javascript
 
    {
-      "frequency": float,
+      "period": float,
       "stations": [
          {
             "name": string,

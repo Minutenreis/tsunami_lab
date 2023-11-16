@@ -98,7 +98,6 @@ int main(int i_argc,
   tsunami_lab::t_real l_xOffset = 0;
   tsunami_lab::t_real l_yOffset = 0;
   tsunami_lab::io::Stations *l_stations = nullptr;
-  bool l_useStations = false;
 
   std::cout << "runtime configuration" << std::endl;
 
@@ -158,7 +157,6 @@ int main(int i_argc,
         l_xOffset = -50;
         l_yOffset = -50;
         l_endTime = 20;
-        l_useStations = true;
       }
       // 'RareRare1d h hu' setup
       else if (l_setupName == "RARERARE1D")
@@ -283,6 +281,7 @@ int main(int i_argc,
     l_setup = new tsunami_lab::setups::DamBreak1d(10,
                                                   5,
                                                   5);
+    l_endTime = 20;
   }
 
   // FWave or Roe Solver
@@ -390,15 +389,12 @@ int main(int i_argc,
   std::filesystem::create_directory("solutions");
 
   // delete old stations
-  if (l_useStations)
+  if (std::filesystem::exists("stations"))
   {
-    if (std::filesystem::exists("stations"))
-    {
-      std::filesystem::remove_all("stations");
-    }
-    std::filesystem::create_directory("stations");
-    l_stations->init();
+    std::filesystem::remove_all("stations");
   }
+  std::filesystem::create_directory("stations");
+  l_stations->init();
 
   int l_nFreqStation = 0;
 
@@ -432,7 +428,7 @@ int main(int i_argc,
       l_nOut++;
     }
 
-    if (l_useStations && l_simTime > l_nFreqStation * l_stations->getT())
+    if (l_simTime > l_nFreqStation * l_stations->getT())
     {
       l_stations->write(l_dxy,
                         l_nx,
