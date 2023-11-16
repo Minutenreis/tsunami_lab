@@ -270,5 +270,16 @@ and then appends the data of the current simulationtime to each station file, sh
 4.2.3 Use a symmetric problem setup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. image:: _static/4_Station_1d_2d.png
+  :width: 700
+
+A comparison between our :code:`WavePropagation1d` (top in legend) vs our :code:`WavePropagation2d` (bottom in legend).
+Both runs use our :code:`DamBreak2d` setup with constant bathymetry with an open boundary on all sides and a station at (15,0).
+The wavespeeds seem unaffected by modelling the second dimension.
+The peaks are higher and troughs lower for the 1d case though.
+The explanation probably lies in the balancing of the heights in the 2d case.
+Instead of just front and back the cells also flow out to the sides (and getting flown back from them) which makes peaks lower and troughs higher.
+We see that in the end both end with the same solution though, which probably is mainly caused by the open outflow condition on all sides and it regressing to the initial 5m height.
+
 4.2.4 (optional) Run a “convergence study”
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
