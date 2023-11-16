@@ -161,11 +161,111 @@ Which leads to the following simulation (open boundary on all sides and simulati
 4.2. Stations
 -------------
 
-4.2.1 Add a new class tsunami_lab::io::Stations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.2.1 & 4.2.2 Add a new class tsunami_lab::io::Stations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-4.2.2 Provide the names and locations of each stations to your solver
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+We added a new class :code:`tsunami-lab::io::Stations` that is responsible for reading and writing the station data.
+
+It reads the station config from a :code:`json` file on initialization with the following format:
+
+.. code:: javascript
+
+   {
+      "frequency": float,
+      "stations": [
+         {
+            "name": string,
+            "x": float,
+            "y": float
+         },
+         ...
+      ]
+   }
+
+and uses the `nlohmann::json <https://github.com/nlohmann/json>`_ library to parse it. 
+Its again a header only library like the `rapidcsv <https://github.com/d99kris/rapidcsv>`_ library in our :code:`csv` class.
+
+.. code:: cpp
+
+    using json = nlohmann::json;
+
+    tsunami_lab::io::Stations::Stations(const std::string path)
+    {
+        std::ifstream f(path);
+        json data = json::parse(f);
+
+        t_real l_frequency = data["frequency"];
+
+        m_T = 1.0 / l_frequency;
+        m_stations = data["stations"];
+    }
+
+with :code:`m_stations` being a :code:`std::vector` of :code:`t_station` objects.
+
+.. code:: cpp
+
+    struct t_station
+    {
+        std::string name;
+        t_real x;
+        t_real y;
+    };
+
+The writing of the data is done by iterating over the stations and writing the data to a file with the name of the :code:`station_<stationName>`.
+To achieve this we first initiate the new csv files for all stations with :code:`init()`:
+
+.. code:: cpp
+    
+    void tsunami_lab::io::Stations::init()
+    {
+        for (t_station l_station : m_stations)
+        {
+            std::string l_path = "stations/station_" + l_station.name + ".csv";
+            std::ofstream l_file;
+            l_file.open(l_path);
+            l_file << "time,height,momentum_x,momentum_y,bathymetry" << std::endl;
+        }
+    }
+
+Afterwards we write the data each time the a new multiple of :code:`frequency`, defined in the json config file, is reached.
+
+.. code:: cpp
+
+    if (l_useStations && l_simTime > l_nFreqStation * l_stations->getT())
+
+and then appends the data of the current simulationtime to each station file, should the station be inside the domain.
+
+.. code:: cpp
+
+    void tsunami_lab::io::Stations::write(t_real i_dxy,
+                                          t_idx i_nx,
+                                          t_idx i_ny,
+                                          t_idx i_stride,
+                                          t_idx i_ghostCellsX,
+                                          t_idx i_ghostCellsY,
+                                          t_real i_simTime,
+                                          t_real i_offsetX,
+                                          t_real i_offsetY,
+                                          t_real const *i_h,
+                                          t_real const *i_hu,
+                                          t_real const *i_hv,
+                                          t_real const *i_b)
+    {
+        for (t_station l_station : m_stations)
+        {
+            if (l_station.x - i_offsetX < 0 || l_station.x - i_offsetX > i_nx * i_dxy || l_station.y - i_offsetY < 0 || l_station.y - i_offsetY > i_ny * i_dxy)
+                continue; // station is outside of the domain
+
+            t_idx l_ix = (l_station.x - i_offsetX) / i_dxy + i_ghostCellsX;
+            t_idx l_iy = (l_station.y - i_offsetY) / i_dxy + i_ghostCellsY;
+            t_idx l_id = l_ix + l_iy * i_stride;
+
+            std::string l_path = "stations/station_" + l_station.name + ".csv";
+            std::ofstream l_file;
+            l_file.open(l_path, std::ios_base::app);
+            l_file << i_simTime << "," << i_h[l_id] << "," << i_hu[l_id] << "," << i_hv[l_id] << "," << i_b[l_id] << std::endl;
+        }
+    }
 
 4.2.3 Use a symmetric problem setup
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
