@@ -524,4 +524,9 @@ TEST_CASE("Test the 2d wave propagation FWave solver x direction.", "[WaveProp2d
             REQUIRE(m_waveProp.getMomentumY()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
             REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
         }
+    //since diagonal cells are not updated, they should still be zero
+    REQUIRE(m_waveProp.getHeight()[50 + 50 * 102] == Approx(8));
+    REQUIRE(m_waveProp.getMomentumX()[(50 + 1) + (50 + 1) * 102] == Approx(0));
+    REQUIRE(m_waveProp.getMomentumY()[(50 + 1) + (50 + 1) * 102] == Approx(0));
+    REQUIRE(m_waveProp.getBathymetry()[(50 + 1) + (50 + 1) * 102] == Approx(0));
 }
