@@ -10,57 +10,190 @@
 #include "WavePropagation2d.h"
 #include "../../constants.h"
 
-
-TEST_CASE("Test the 2d wave propagation FWave solver.", "[WaveProp2dFWave]")
+TEST_CASE("Test the 2d wave propagation FWave solver x direction.", "[WaveProp2dFWaveX]")
 {
-  tsunami_lab::patches::WavePropagation2d m_waveProp(100, 100, true,  tsunami_lab::t_boundary::OPEN,  tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN);
+    /*
+     * Test case:
+     *
+     *   Single dam break problem between x-cell 49 and 50.
+     *     left | right
+     *       10 | 8
+     *        0 | 0
+     *
+     *   Elsewhere steady state.
+     *
+     * The net-updates at the respective edge are given as
+     * (see derivation in Roe solver):
+     *    left          | right
+     *      9.394671362 | -9.394671362
+     *    -88.25985     | -88.25985
+     *
+     * Analogue to test of WavePropagation1d.test.cpp
+     */
 
-  for (std::size_t l_ce = 0; l_ce < 50; l_ce++)
-  {
-    m_waveProp.setHeight(l_ce,
-                         0,
-                         10);
-    m_waveProp.setMomentumX(l_ce,
-                            0,
-                            0);
-    m_waveProp.setBathymetry(l_ce,
-                             0,
-                             0);
-  }
-  for (std::size_t l_ce = 50; l_ce < 100; l_ce++)
-  {
-    m_waveProp.setHeight(l_ce,
-                         0,
-                         8);
-    m_waveProp.setMomentumX(l_ce,
-                            0,
-                            0);
-    m_waveProp.setBathymetry(l_ce,
-                             0,
-                             0);
-  }
+    tsunami_lab::patches::WavePropagation2d m_waveProp(100, 100, true, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN);
 
-  // perform a time step
-  m_waveProp.timeStep(0.1);
+    for (std::size_t l_cx = 0; l_cx < 50; l_cx++)
+        for (std::size_t l_cy = 0; l_cy < 100; l_cy++)
+        {
+            m_waveProp.setHeight(l_cx,
+                                 l_cy,
+                                 10);
+            m_waveProp.setMomentumX(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setMomentumY(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setBathymetry(l_cx,
+                                     l_cy,
+                                     0);
+        }
+    for (std::size_t l_cx = 50; l_cx < 100; l_cx++)
+        for (std::size_t l_cy = 0; l_cy < 100; l_cy++)
+        {
+            m_waveProp.setHeight(l_cx,
+                                 l_cy,
+                                 8);
+            m_waveProp.setMomentumX(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setMomentumY(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setBathymetry(l_cx,
+                                     l_cy,
+                                     0);
+        }
 
-  // steady state
-  for (std::size_t l_ce = 0; l_ce < 49; l_ce++)
-  {
-    REQUIRE(m_waveProp.getHeight()[l_ce + 1] == Approx(10));
-    REQUIRE(m_waveProp.getMomentumX()[l_ce + 1] == Approx(0));
-  }
+    // perform a time step
+    m_waveProp.timeStep(0.1);
 
-  // dam-break
-  REQUIRE(m_waveProp.getHeight()[49 + 1] == Approx(10.0f));
-  REQUIRE(m_waveProp.getMomentumX()[49 + 1] == Approx(0.0f));
+    // steady state
+    for (std::size_t l_cx = 0; l_cx < 49; l_cx++)
+        for (std::size_t l_cy = 0; l_cy < 100; l_cy++)
+        {
+            REQUIRE(m_waveProp.getHeight()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(10));
+            REQUIRE(m_waveProp.getMomentumX()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getMomentumY()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+        }
 
-  REQUIRE(m_waveProp.getHeight()[50 + 1] == Approx(8.0f));
-  REQUIRE(m_waveProp.getMomentumX()[50 + 1] == Approx(0.0f));
+    // dam-break
+    for (std::size_t l_cy = 0; l_cy < 100; l_cy++)
+    {
+        REQUIRE(m_waveProp.getHeight()[(49 + 1) + (l_cy + 1) * 102] == Approx(10 - 0.1 * 9.394671362));
+        REQUIRE(m_waveProp.getMomentumX()[(49 + 1) + (l_cy + 1) * 102] == Approx(0 + 0.1 * 88.25985));
+        REQUIRE(m_waveProp.getMomentumY()[(49 + 1) + (l_cy + 1) * 102] == Approx(0));
+        REQUIRE(m_waveProp.getBathymetry()[(49 + 1) + (l_cy + 1) * 102] == Approx(0));
 
-  // steady state
-  for (std::size_t l_ce = 51; l_ce < 100; l_ce++)
-  {
-    REQUIRE(m_waveProp.getHeight()[l_ce + 1] == Approx(8));
-    REQUIRE(m_waveProp.getMomentumX()[l_ce + 1] == Approx(0));
-  }
+        REQUIRE(m_waveProp.getHeight()[(50 + 1) + (l_cy + 1) * 102] == Approx(8 + 0.1 * 9.394671362));
+        REQUIRE(m_waveProp.getMomentumX()[(50 + 1) + (l_cy + 1) * 102] == Approx(0 + 0.1 * 88.25985));
+        REQUIRE(m_waveProp.getMomentumY()[(50 + 1) + (l_cy + 1) * 102] == Approx(0));
+        REQUIRE(m_waveProp.getBathymetry()[(50 + 1) + (l_cy + 1) * 102] == Approx(0));
+    }
+
+    // steady state
+    for (std::size_t l_cx = 51; l_cx < 100; l_cx++)
+        for (std::size_t l_cy = 0; l_cy < 100; l_cy++)
+        {
+            REQUIRE(m_waveProp.getHeight()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(8));
+            REQUIRE(m_waveProp.getMomentumX()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getMomentumY()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+        }
+}
+
+TEST_CASE("Test the 2d wave propagation FWave solver y direction.", "[WaveProp2dFWaveY]")
+{
+    /*
+     * Test case:
+     *
+     *   Single dam break problem between y-cell 49 and 50.
+     *     left | right
+     *       10 | 8
+     *        0 | 0
+     *
+     *   Elsewhere steady state.
+     *
+     * The net-updates at the respective edge are given as
+     * (see derivation in Roe solver):
+     *    left          | right
+     *      9.394671362 | -9.394671362
+     *    -88.25985     | -88.25985
+     *
+     * Analogue to test of WavePropagation1d.test.cpp
+     */
+
+    tsunami_lab::patches::WavePropagation2d m_waveProp(100, 100, true, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN);
+
+    for (std::size_t l_cy = 0; l_cy < 50; l_cy++)
+        for (std::size_t l_cx = 0; l_cx < 100; l_cx++)
+        {
+            m_waveProp.setHeight(l_cx,
+                                 l_cy,
+                                 10);
+            m_waveProp.setMomentumX(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setMomentumY(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setBathymetry(l_cx,
+                                     l_cy,
+                                     0);
+        }
+    for (std::size_t l_cy = 50; l_cy < 100; l_cy++)
+        for (std::size_t l_cx = 0; l_cx < 100; l_cx++)
+        {
+            m_waveProp.setHeight(l_cx,
+                                 l_cy,
+                                 8);
+            m_waveProp.setMomentumX(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setMomentumY(l_cx,
+                                    l_cy,
+                                    0);
+            m_waveProp.setBathymetry(l_cx,
+                                     l_cy,
+                                     0);
+        }
+
+    // perform a time step
+    m_waveProp.timeStep(0.1);
+
+    // steady state
+    for (std::size_t l_cy = 0; l_cy < 49; l_cy++)
+        for (std::size_t l_cx = 0; l_cx < 100; l_cx++)
+        {
+            REQUIRE(m_waveProp.getHeight()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(10));
+            REQUIRE(m_waveProp.getMomentumX()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getMomentumY()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+        }
+
+    // dam-break
+    for (std::size_t l_cx = 0; l_cx < 100; l_cx++)
+    {
+        REQUIRE(m_waveProp.getHeight()[(l_cx + 1) + (49 + 1) * 102] == Approx(10 - 0.1 * 9.394671362));
+        REQUIRE(m_waveProp.getMomentumX()[(l_cx + 1) + (49 + 1) * 102] == Approx(0));
+        REQUIRE(m_waveProp.getMomentumY()[(l_cx + 1) + (49 + 1) * 102] == Approx(0 + 0.1 * 88.25985));
+        REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (49 + 1) * 102] == Approx(0));
+
+        REQUIRE(m_waveProp.getHeight()[(l_cx + 1) + (50 + 1) * 102] == Approx(8 + 0.1 * 9.394671362));
+        REQUIRE(m_waveProp.getMomentumX()[(l_cx + 1) + (50 + 1) * 102] == Approx(0));
+        REQUIRE(m_waveProp.getMomentumY()[(l_cx + 1) + (50 + 1) * 102] == Approx(0 + 0.1 * 88.25985));
+        REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (50 + 1) * 102] == Approx(0));
+    }
+
+    // steady state
+    for (std::size_t l_cy = 51; l_cy < 100; l_cy++)
+        for (std::size_t l_cx = 0; l_cx < 100; l_cx++)
+        {
+            REQUIRE(m_waveProp.getHeight()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(8));
+            REQUIRE(m_waveProp.getMomentumX()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getMomentumY()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+            REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
+        }
 }
