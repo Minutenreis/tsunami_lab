@@ -385,7 +385,7 @@ TEST_CASE("Test the 2d wave propagation Roe solver y direction.", "[WaveProp2dRo
             REQUIRE(m_waveProp.getBathymetry()[(l_cx + 1) + (l_cy + 1) * 102] == Approx(0));
         }
 }
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 TEST_CASE("Test the 2d wave propagation FWave solver x direction.", "[WaveProp2dFWaveX]")
 {
     /*
@@ -407,6 +407,7 @@ TEST_CASE("Test the 2d wave propagation FWave solver x direction.", "[WaveProp2d
      * Analogue to test of WavePropagation1d.test.cpp
      */
 
+    
     tsunami_lab::patches::WavePropagation2d m_waveProp(100, 100, true, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN);
 
     //allocate 50 x 50 cells with 10m height in a 100*100 grid
