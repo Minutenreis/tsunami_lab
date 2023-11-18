@@ -14,7 +14,7 @@ TEST_CASE("Test the one-dimensional tsunamievent setup.", "[TsunamiEvent1d]")
 {
   rapidcsv::Document l_doc;
   size_t l_rowCount;
-  tsunami_lab::io::Csv::openCSV("src/data/test.csv", l_doc, l_rowCount);
+  tsunami_lab::io::Csv::openCSV("src/data/test.csv", l_doc, l_rowCount, false);
 
   // delta = 20
   // row = b_in < 0 and -b_in > delta and usage of getDisplacement

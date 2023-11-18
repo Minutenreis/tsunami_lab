@@ -217,7 +217,7 @@ int main(int i_argc,
         rapidcsv::Document l_doc;
         size_t l_rowCount;
 
-        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, l_rowCount);
+        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, l_rowCount, false);
 
         l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc, l_rowCount);
         l_width = 250 * l_rowCount;

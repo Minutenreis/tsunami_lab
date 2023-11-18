@@ -25,16 +25,6 @@ namespace tsunami_lab
  **/
 class tsunami_lab::setups::DamBreak2d : public Setup
 {
-private:
-  //! height on the left side
-  t_real m_heightLeft = 0;
-
-  //! height on the right side
-  t_real m_heightRight = 0;
-
-  //! location of the dam
-  t_real m_locationDam = 0;
-
 public:
   /**
    * Gets the water height at a given point.

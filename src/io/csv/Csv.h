@@ -66,16 +66,7 @@ public:
    * @param o_doc csv file as rapidcsv::Document
    * @param o_rowCount row count of csv file
    */
-  static void openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, size_t &o_rowCount);
-
-  /**
-   * @brief reads a line from a rapidcsv::Document
-   *
-   * @param i_doc rapidcsv::Document
-   * @param i_row row to read
-   * @return t_real value of the line
-   */
-  static tsunami_lab::t_real readLine(const rapidcsv::Document &i_doc, size_t i_row);
+  static void openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, size_t &o_rowCount, bool header);
 };
 
 #endif

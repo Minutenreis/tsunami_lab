@@ -93,8 +93,8 @@ TEST_CASE("Test the CSV-reader with a 4 column file.", "[CsvRead4Columns]")
 {
   rapidcsv::Document doc;
   size_t rowCount;
-  tsunami_lab::io::Csv::openCSV("src/data/test.csv", doc, rowCount);
+  tsunami_lab::io::Csv::openCSV("src/data/test.csv", doc, rowCount, false);
   tsunami_lab::t_real i_row = 2;
-  tsunami_lab::t_real bathometry = tsunami_lab::io::Csv::readLine(doc, i_row);
+  tsunami_lab::t_real bathometry = doc.GetCell<tsunami_lab::t_real>(3, i_row);
   REQUIRE(bathometry == -5.84086714415f);
 }

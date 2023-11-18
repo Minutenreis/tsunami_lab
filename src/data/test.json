@@ -2,13 +2,13 @@
     "period": 2,
     "stations": [
         {
-            "name": "Radio 1",
-            "x": 9,
-            "y": 0
+            "name": "Test_1",
+            "x": 0,
+            "y": 2
         },
         {
-            "name": "Radio 2",
-            "x": 14,
+            "name": "Test_2",
+            "x": 5,
             "y": 0
         }
     ]

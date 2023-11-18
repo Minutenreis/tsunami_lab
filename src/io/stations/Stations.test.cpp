@@ -8,18 +8,64 @@
  */
 #include <catch2/catch.hpp>
 #include "Stations.h"
+#include "../csv/Csv.h"
 
-TEST_CASE("Test Reading the Json", "[StationsRead]")
+TEST_CASE("Test Reading the test.json", "[StationsRead]")
 {
     std::string l_path = "src/data/test.json";
     tsunami_lab::io::Stations l_stations(l_path);
 
     REQUIRE(l_stations.getT() == 2);
     REQUIRE(l_stations.getStations().size() == 2);
-    REQUIRE(l_stations.getStations()[0].name == "Radio 1");
-    REQUIRE(l_stations.getStations()[0].x == 9);
-    REQUIRE(l_stations.getStations()[0].y == 0);
-    REQUIRE(l_stations.getStations()[1].name == "Radio 2");
-    REQUIRE(l_stations.getStations()[1].x == 14);
+    REQUIRE(l_stations.getStations()[0].name == "Test_1");
+    REQUIRE(l_stations.getStations()[0].x == 0);
+    REQUIRE(l_stations.getStations()[0].y == 2);
+    REQUIRE(l_stations.getStations()[1].name == "Test_2");
+    REQUIRE(l_stations.getStations()[1].x == 5);
     REQUIRE(l_stations.getStations()[1].y == 0);
+}
+
+TEST_CASE("Test Writing JSons for all Stations", "[StationsWrite]")
+{
+    std::string l_path = "src/data/test.json";
+    tsunami_lab::io::Stations l_stations(l_path);
+
+    // delete old stations
+    if (std::filesystem::exists("stations"))
+    {
+        std::filesystem::remove_all("stations");
+    }
+    std::filesystem::create_directory("stations");
+    l_stations.init();
+    tsunami_lab::t_real l_h[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    tsunami_lab::t_real l_hu[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    tsunami_lab::t_real l_hv[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    tsunami_lab::t_real l_b[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    l_stations.write(1, 3, 3, 3, 0, 0, 1, 0, 0, l_h, l_hu, l_hv, l_b);
+    l_stations.write(1, 3, 3, 3, 0, 0, 2, 0, 0, l_h, l_hu, l_hv, l_b);
+    l_stations.write(1, 3, 3, 3, 0, 0, 3, 0, 0, l_h, l_hu, l_hv, l_b);
+
+    REQUIRE(std::filesystem::exists("stations/station_Test_1.csv"));
+    REQUIRE(std::filesystem::exists("stations/station_Test_2.csv"));
+
+    rapidcsv::Document test1Doc, test2Doc;
+    size_t test1RowCount, test2RowCount;
+
+    tsunami_lab::io::Csv::openCSV("stations/station_Test_1.csv", test1Doc, test1RowCount, true);
+    tsunami_lab::io::Csv::openCSV("stations/station_Test_2.csv", test2Doc, test2RowCount, true);
+
+    REQUIRE(test1Doc.GetRowCount() == 3);
+    REQUIRE(test2Doc.GetRowCount() == 0);
+    tsunami_lab::t_real l_height, l_momentum_x, l_momentum_y, l_bathymetry, l_time;
+    l_time = test1Doc.GetCell<tsunami_lab::t_real>(0, 0);
+    l_height = test1Doc.GetCell<tsunami_lab::t_real>(1, 0);
+    l_momentum_x = test1Doc.GetCell<tsunami_lab::t_real>(2, 0);
+    l_momentum_y = test1Doc.GetCell<tsunami_lab::t_real>(3, 0);
+    l_bathymetry = test1Doc.GetCell<tsunami_lab::t_real>(4, 0);
+    REQUIRE(l_time == 1);
+    REQUIRE(l_height == 7);
+    REQUIRE(l_momentum_x == 7);
+    REQUIRE(l_momentum_y == 7);
+    REQUIRE(l_bathymetry == 7);
 }
