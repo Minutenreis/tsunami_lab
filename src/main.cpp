@@ -64,13 +64,13 @@ int main(int i_argc,
   {
     // removed invalid number of arguments message for -h option
     std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-d n_cells_y] n_cells_x" << std::endl;
+    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] n_cells_x" << std::endl;
     // std::cerr << "  ./build/tsunami_lab [-s SOLVER] [-u SETUP] [-b BOUNDARY] N_CELLS_X" << std::endl;
     // std::cerr << "  N_CELLS_X = the number of cells in x-direction." << std::endl;
     // std::cerr << "  -s SOLVER = 'Roe','FWave', default is 'FWave'" << std::endl;
     // std::cerr << "  -u SETUP  = 'DamBreak1d h_l h_r','RareRare1d h hu','ShockShock1d h hu', default is 'DamBreak1d 10 5'" << std::endl;
     // std::cerr << "  example: ./build/tsunami_lab -s roe -u 'ShockShock1d 10 100' 100" << std::endl;
-    std::cerr << "more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
+    std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -252,6 +252,7 @@ int main(int i_argc,
       getBoundary(l_boundaryTName, &l_boundaryT);
       break;
     }
+    // stations
     case 'r':
     {
       std::string i_filePath(optarg);
@@ -281,7 +282,6 @@ int main(int i_argc,
     l_setup = new tsunami_lab::setups::DamBreak1d(10,
                                                   5,
                                                   5);
-    l_endTime = 20;
   }
 
   // FWave or Roe Solver

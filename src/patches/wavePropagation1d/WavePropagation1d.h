@@ -47,6 +47,11 @@ private:
   //! bathymetry for the current and next time step for all cells
   t_real *m_b = nullptr;
 
+  /**
+   * Sets the values of the ghost cells according to t_boundary set in the class.
+   **/
+  void setGhostCells();
+
 public:
   /**
    * Constructs the 1d wave propagation solver.
@@ -69,11 +74,6 @@ public:
    * @param i_scaling scaling of the time step (dt / dx).
    **/
   void timeStep(t_real i_scaling);
-
-  /**
-   * Sets the values of the ghost cells according to outflow boundary conditions.
-   **/
-  void setGhostOutflow();
 
   /**
    * Gets the stride in y-direction. x-direction is stride-1.
