@@ -253,7 +253,7 @@ and then appends the data of the current simulationtime to each station file, sh
     {
         for (t_station l_station : m_stations)
         {
-            if (l_station.x - i_offsetX < 0 || l_station.x - i_offsetX > i_nx * i_dxy || l_station.y - i_offsetY < 0 || l_station.y - i_offsetY > i_ny * i_dxy)
+            if (l_station.x - i_offsetX < 0 || l_station.x - i_offsetX >= i_nx * i_dxy || l_station.y - i_offsetY < 0 || l_station.y - i_offsetY >= i_ny * i_dxy)
                 continue; // station is outside of the domain
 
             t_idx l_ix = (l_station.x - i_offsetX) / i_dxy + i_ghostCellsX;

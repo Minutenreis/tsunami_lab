@@ -60,11 +60,12 @@ void tsunami_lab::io::Stations::write(t_real i_dxy,
 {
     for (t_station l_station : m_stations)
     {
-        if (l_station.x - i_offsetX < 0 || l_station.x - i_offsetX > i_nx * i_dxy || l_station.y - i_offsetY < 0 || l_station.y - i_offsetY > i_ny * i_dxy)
+        if (l_station.x - i_offsetX < 0 || l_station.x - i_offsetX >= i_nx * i_dxy || l_station.y - i_offsetY < 0 || l_station.y - i_offsetY >= i_ny * i_dxy)
             continue; // station is outside of the domain
 
         t_idx l_ix = (l_station.x - i_offsetX) / i_dxy + i_ghostCellsX;
         t_idx l_iy = (l_station.y - i_offsetY) / i_dxy + i_ghostCellsY;
+
         t_idx l_id = l_ix + l_iy * i_stride;
 
         std::string l_path = "stations/station_" + l_station.name + ".csv";
