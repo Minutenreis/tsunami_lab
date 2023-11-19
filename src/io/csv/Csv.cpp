@@ -1,5 +1,8 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * IO-routines for writing a snapshot as Comma Separated Values (CSV).
@@ -10,6 +13,10 @@ void tsunami_lab::io::Csv::write(t_real i_dxy,
                                  t_idx i_nx,
                                  t_idx i_ny,
                                  t_idx i_stride,
+                                 t_idx i_ghostCellsX,
+                                 t_idx i_ghostCellsY,
+                                 t_real i_offsetX,
+                                 t_real i_offsetY,
                                  t_real const *i_h,
                                  t_real const *i_hu,
                                  t_real const *i_hv,
@@ -29,15 +36,15 @@ void tsunami_lab::io::Csv::write(t_real i_dxy,
   io_stream << "\n";
 
   // iterate over all cells
-  for (t_idx l_iy = 0; l_iy < i_ny; l_iy++)
+  for (t_idx l_iy = i_ghostCellsY; l_iy < i_ny + i_ghostCellsY; l_iy++)
   {
-    for (t_idx l_ix = 0; l_ix < i_nx; l_ix++)
+    for (t_idx l_ix = i_ghostCellsX; l_ix < i_nx + i_ghostCellsX; l_ix++)
     {
       // derive coordinates of cell center
-      t_real l_posX = (l_ix + 0.5) * i_dxy;
-      t_real l_posY = (l_iy + 0.5) * i_dxy;
+      t_real l_posX = (l_ix - i_ghostCellsX + 0.5) * i_dxy + i_offsetX; // ghost cells don't count for distance
+      t_real l_posY = (l_iy - i_ghostCellsY + 0.5) * i_dxy + i_offsetY; // ghost cells don't count for distance
 
-      t_idx l_id = l_iy * i_stride + l_ix;
+      t_idx l_id = l_ix + l_iy * i_stride;
 
       // write data
       io_stream << l_posX << "," << l_posY;
@@ -55,15 +62,15 @@ void tsunami_lab::io::Csv::write(t_real i_dxy,
   io_stream << std::flush;
 }
 
-void tsunami_lab::io::Csv::openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, size_t &o_rowCount)
+void tsunami_lab::io::Csv::openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, size_t &o_rowCount, bool header)
 {
-  // assume headless csv
-  o_doc = rapidcsv::Document(i_filePath, rapidcsv::LabelParams(-1, -1));
+  if (header)
+  {
+    o_doc = rapidcsv::Document(i_filePath, rapidcsv::LabelParams(0, -1));
+  }
+  else
+  {
+    o_doc = rapidcsv::Document(i_filePath, rapidcsv::LabelParams(-1, -1));
+  }
   o_rowCount = o_doc.GetRowCount();
-}
-
-tsunami_lab::t_real tsunami_lab::io::Csv::readLine(const rapidcsv::Document &i_doc, size_t i_row)
-{
-  float o_row = i_doc.GetRow<float>(i_row)[3];
-  return o_row;
 }

@@ -1,12 +1,15 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * One-dimensional wave propagation patch.
  **/
 #include "WavePropagation1d.h"
-#include "../solvers/roe/Roe.h"
-#include "../solvers/fWave/FWave.h"
+#include "../../solvers/roe/Roe.h"
+#include "../../solvers/fWave/FWave.h"
 
 tsunami_lab::patches::WavePropagation1d::WavePropagation1d(t_idx i_nCells,
                                                            bool i_useFWave,
@@ -29,7 +32,7 @@ tsunami_lab::patches::WavePropagation1d::WavePropagation1d(t_idx i_nCells,
   // init to zero
   for (unsigned short l_st = 0; l_st < 2; l_st++)
   {
-    for (t_idx l_ce = 0; l_ce < m_nCells; l_ce++)
+    for (t_idx l_ce = 0; l_ce < m_nCells + 2; l_ce++)
     {
       m_h[l_st][l_ce] = 0;
       m_hu[l_st][l_ce] = 0;
@@ -50,6 +53,7 @@ tsunami_lab::patches::WavePropagation1d::~WavePropagation1d()
 
 void tsunami_lab::patches::WavePropagation1d::timeStep(t_real i_scaling)
 {
+  setGhostCells();
   // pointers to old and new data
   t_real *l_hOld = m_h[m_step];
   t_real *l_huOld = m_hu[m_step];
@@ -105,7 +109,7 @@ void tsunami_lab::patches::WavePropagation1d::timeStep(t_real i_scaling)
   }
 }
 
-void tsunami_lab::patches::WavePropagation1d::setGhostOutflow()
+void tsunami_lab::patches::WavePropagation1d::setGhostCells()
 {
   t_real *l_h = m_h[m_step];
   t_real *l_hu = m_hu[m_step];

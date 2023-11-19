@@ -12,8 +12,8 @@
 #include "../Setup.h"
 #include <cmath>
 #include <algorithm>
-#include "../../io/Csv.h"
-#include "../../io/rapidcsv.h"
+#include "../../io/csv/Csv.h"
+#include "../../io/csv/rapidcsv.h"
 
 namespace tsunami_lab
 {

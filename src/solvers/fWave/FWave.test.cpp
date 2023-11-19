@@ -151,7 +151,7 @@ TEST_CASE("Test the derivation of the FWave net-updates.", "[FWaveUpdates]")
    *
    *          | 0.5 -0.0532217 |
    *   Rinv = |                |
-   *          | 0.5 0.0532217 |
+   *          | 0.5 0.0532217  |
    *
    * Multiplicaton with the jump in fluxes gives the wave strengths:
    *
