@@ -9,7 +9,8 @@ Import('env')
 # gather sources
 l_sources = [ 'solvers/roe/Roe.cpp',
               'solvers/fWave/FWave.cpp',
-              'patches/WavePropagation1d.cpp',
+              'patches/wavePropagation1d/WavePropagation1d.cpp',
+              'patches/wavePropagation2d/WavePropagation2d.cpp',
               'setups/shockShock1d/ShockShock1d.cpp',
               'setups/damBreak1d/DamBreak1d.cpp',
               'setups/rareRare1d/RareRare1d.cpp',
@@ -17,7 +18,9 @@ l_sources = [ 'solvers/roe/Roe.cpp',
               'setups/subcritical1d/Subcritical1d.cpp',
               'setups/supercritical1d/Supercritical1d.cpp',
               'setups/tsunamiEvent1d/TsunamiEvent1d.cpp',
-              'io/Csv.cpp' ]
+              'setups/damBreak2d/DamBreak2d.cpp',
+              'io/csv/Csv.cpp',
+              'io/stations/Stations.cpp',]
 
 for l_so in l_sources:
   env.sources.append( env.Object( l_so ) )
@@ -28,7 +31,8 @@ env.standalone = env.Object( "main.cpp" )
 l_tests = [ 'tests.cpp',
             'solvers/roe/Roe.test.cpp',
             'solvers/fWave/FWave.test.cpp',
-            'patches/WavePropagation1d.test.cpp',
+            'patches/wavePropagation1d/WavePropagation1d.test.cpp',
+            'patches/wavePropagation2d/WavePropagation2d.test.cpp',
             'setups/shockShock1d/ShockShock1d.test.cpp',
             'setups/damBreak1d/DamBreak1d.test.cpp',
             'setups/rareRare1d/RareRare1d.test.cpp',
@@ -36,7 +40,9 @@ l_tests = [ 'tests.cpp',
             'setups/subcritical1d/Subcritical1d.test.cpp',
             'setups/supercritical1d/Supercritical1d.test.cpp',
             'setups/tsunamiEvent1d/TsunamiEvent1d.test.cpp',
-            'io/Csv.test.cpp' ]
+            'setups/damBreak2d/DamBreak2d.test.cpp',
+            'io/csv/Csv.test.cpp',
+            'io/stations/Stations.test.cpp',]
 
 for l_te in l_tests:
   env.tests.append( env.Object( l_te ) )

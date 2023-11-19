@@ -1,5 +1,8 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * IO-routines for writing a snapshot as Comma Separated Values (CSV).
@@ -7,13 +10,12 @@
 #ifndef TSUNAMI_LAB_IO_CSV
 #define TSUNAMI_LAB_IO_CSV
 
-#include "../constants.h"
+#include "../../constants.h"
 #include <cstring>
 #include <string>
 #include <iostream>
 #include <vector>
 #include "rapidcsv.h"
-#include "../constants.h"
 
 namespace tsunami_lab
 {
@@ -33,6 +35,10 @@ public:
    * @param i_nx number of cells in x-direction.
    * @param i_ny number of cells in y-direction.
    * @param i_stride stride of the data arrays in y-direction (x is assumed to be stride-1).
+   * @param i_ghostCellsX number of ghost cells in x-direction.
+   * @param i_ghostCellsY number of ghost cells in y-direction.
+   * @param i_offsetX offset in x-direction.
+   * @param i_offsetY offset in y-direction.
    * @param i_h water height of the cells; optional: use nullptr if not required.
    * @param i_hu momentum in x-direction of the cells; optional: use nullptr if not required.
    * @param i_hv momentum in y-direction of the cells; optional: use nullptr if not required.
@@ -43,6 +49,10 @@ public:
                     t_idx i_nx,
                     t_idx i_ny,
                     t_idx i_stride,
+                    t_idx i_ghostCellsX,
+                    t_idx i_ghostCellsY,
+                    t_real i_offsetX,
+                    t_real i_offsetY,
                     t_real const *i_h,
                     t_real const *i_hu,
                     t_real const *i_hv,
@@ -56,16 +66,7 @@ public:
    * @param o_doc csv file as rapidcsv::Document
    * @param o_rowCount row count of csv file
    */
-  static void openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, size_t &o_rowCount);
-
-  /**
-   * @brief reads a line from a rapidcsv::Document
-   *
-   * @param i_doc rapidcsv::Document
-   * @param i_row row to read
-   * @return t_real value of the line
-   */
-  static tsunami_lab::t_real readLine(const rapidcsv::Document &i_doc, size_t i_row);
+  static void openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, size_t &o_rowCount, bool header);
 };
 
 #endif

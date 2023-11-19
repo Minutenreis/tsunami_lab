@@ -76,5 +76,5 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent1d::getBathymetryBin(t_real
 {
   // convert i_x to cell index (assuming 250m cells)
   int l_row = i_x / 250;
-  return io::Csv::readLine(m_doc, l_row);
+  return m_doc.GetCell<t_real>(3, l_row);
 }

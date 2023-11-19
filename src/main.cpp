@@ -4,7 +4,8 @@
  * @section DESCRIPTION
  * Entry-point for simulations.
  **/
-#include "patches/WavePropagation1d.h"
+#include "patches/wavePropagation1d/WavePropagation1d.h"
+#include "patches/wavePropagation2d/WavePropagation2d.h"
 #include "setups/damBreak1d/DamBreak1d.h"
 #include "setups/rareRare1d/RareRare1d.h"
 #include "setups/shockShock1d/ShockShock1d.h"
@@ -12,7 +13,9 @@
 #include "setups/supercritical1d/Supercritical1d.h"
 #include "setups/subcritical1d/Subcritical1d.h"
 #include "setups/tsunamiEvent1d/TsunamiEvent1d.h"
-#include "io/Csv.h"
+#include "setups/damBreak2d/DamBreak2d.h"
+#include "io/csv/Csv.h"
+#include "io/stations/Stations.h"
 #include "constants.h"
 #include <cstdlib>
 #include <iostream>
@@ -38,8 +41,8 @@ void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
   }
   else
   {
-    std::cerr << "unknown boundary condition " << i_name << std::endl;
-    exit(EXIT_FAILURE);
+    // default is OPEN
+    *o_boundary = tsunami_lab::t_boundary::OPEN;
   }
 }
 
@@ -61,11 +64,13 @@ int main(int i_argc,
   {
     // removed invalid number of arguments message for -h option
     std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s SOLVER] [-u SETUP] N_CELLS_X" << std::endl;
-    std::cerr << "  N_CELLS_X = the number of cells in x-direction." << std::endl;
-    std::cerr << "  -s SOLVER = 'Roe','FWave', default is 'FWave'" << std::endl;
-    std::cerr << "  -u SETUP  = 'DamBreak1d h_l h_r','RareRare1d h hu','ShockShock1d h hu', default is 'DamBreak1d 10 5'" << std::endl;
-    std::cerr << "  example: ./build/tsunami_lab -s roe -u 'ShockShock1d 10 100' 100" << std::endl;
+    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] n_cells_x" << std::endl;
+    // std::cerr << "  ./build/tsunami_lab [-s SOLVER] [-u SETUP] [-b BOUNDARY] N_CELLS_X" << std::endl;
+    // std::cerr << "  N_CELLS_X = the number of cells in x-direction." << std::endl;
+    // std::cerr << "  -s SOLVER = 'Roe','FWave', default is 'FWave'" << std::endl;
+    // std::cerr << "  -u SETUP  = 'DamBreak1d h_l h_r','RareRare1d h hu','ShockShock1d h hu', default is 'DamBreak1d 10 5'" << std::endl;
+    // std::cerr << "  example: ./build/tsunami_lab -s roe -u 'ShockShock1d 10 100' 100" << std::endl;
+    std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
     return EXIT_FAILURE;
   }
 
@@ -86,14 +91,17 @@ int main(int i_argc,
   tsunami_lab::setups::Setup *l_setup = nullptr;
   tsunami_lab::t_boundary l_boundaryL = tsunami_lab::t_boundary::OPEN;
   tsunami_lab::t_boundary l_boundaryR = tsunami_lab::t_boundary::OPEN;
+  tsunami_lab::t_boundary l_boundaryB = tsunami_lab::t_boundary::OPEN;
+  tsunami_lab::t_boundary l_boundaryT = tsunami_lab::t_boundary::OPEN;
   tsunami_lab::t_real l_endTime = 1.25;
-  tsunami_lab::t_real l_width = 10.0;
+  tsunami_lab::t_real l_width = 10.0; // width in x direction, y is scaled by l_ny / l_nx
+  tsunami_lab::t_real l_xOffset = 0;
+  tsunami_lab::t_real l_yOffset = 0;
+  tsunami_lab::io::Stations *l_stations = nullptr;
 
   std::cout << "runtime configuration" << std::endl;
-  std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
-  std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:")) != -1)
+  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:")) != -1)
   {
     switch (opt)
     {
@@ -139,6 +147,16 @@ int main(int i_argc,
         l_setup = new tsunami_lab::setups::DamBreak1d(l_arg1,
                                                       l_arg2,
                                                       5);
+      }
+      else if (l_setupName == "DAMBREAK2D")
+      {
+        std::cout << "  using DamBreak2d() setup" << std::endl;
+        l_setup = new tsunami_lab::setups::DamBreak2d();
+        l_width = 100;
+        l_ny = l_nx; // square domain
+        l_xOffset = -50;
+        l_yOffset = -50;
+        l_endTime = 20;
       }
       // 'RareRare1d h hu' setup
       else if (l_setupName == "RARERARE1D")
@@ -195,11 +213,11 @@ int main(int i_argc,
       else if (l_setupName == "TSUNAMI1D")
       {
         // assumptions: headerless csv, 4 columns, 3rd being length along path and 4th being height
-        std::string i_filePath = l_arg1Str;
+        std::string l_filePath = l_arg1Str;
         rapidcsv::Document l_doc;
         size_t l_rowCount;
 
-        tsunami_lab::io::Csv::openCSV(i_filePath, l_doc, l_rowCount);
+        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, l_rowCount, false);
 
         l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc, l_rowCount);
         l_width = 250 * l_rowCount;
@@ -222,14 +240,23 @@ int main(int i_argc,
 
       // split string by space
       std::stringstream l_stream(l_arg);
-      std::string l_boundaryLName, l_boundaryRName;
-      l_stream >> l_boundaryLName >> l_boundaryRName;
+      std::string l_boundaryLName, l_boundaryRName, l_boundaryBName, l_boundaryTName;
+      l_stream >> l_boundaryLName >> l_boundaryRName >> l_boundaryBName >> l_boundaryTName;
 
       std::cout << "  using boundary conditions " << l_boundaryLName << " " << l_boundaryRName << std::endl;
 
       // convert to t_boundary
       getBoundary(l_boundaryLName, &l_boundaryL);
       getBoundary(l_boundaryRName, &l_boundaryR);
+      getBoundary(l_boundaryBName, &l_boundaryB);
+      getBoundary(l_boundaryTName, &l_boundaryT);
+      break;
+    }
+    // stations
+    case 'r':
+    {
+      std::string i_filePath(optarg);
+      l_stations = new tsunami_lab::io::Stations(i_filePath);
       break;
     }
     // unknown option
@@ -241,6 +268,12 @@ int main(int i_argc,
     }
   }
 
+  if (l_stations == nullptr)
+  {
+    std::cout << "  using stations file at src/data/stations.json" << std::endl;
+    l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
+  }
+
   // command line prints
 
   if (l_setup == nullptr)
@@ -250,6 +283,8 @@ int main(int i_argc,
                                                   5,
                                                   5);
   }
+
+  // FWave or Roe Solver
   if (l_useFwave == false)
   {
     std::cout << "  using Roe solver" << std::endl;
@@ -258,15 +293,30 @@ int main(int i_argc,
   {
     std::cout << "  using FWave solver" << std::endl;
   }
-  // calculate cell size
-  tsunami_lab::t_real l_dxy = l_width / l_nx;
-  std::cout << "  cell size:       " << l_dxy << " m" << std::endl;
-  std::cout << "  width simulated: " << l_width << " m" << std::endl;
-  std::cout << "  time simulated:  " << l_endTime << " s" << std::endl;
-
   // construct solver
   tsunami_lab::patches::WavePropagation *l_waveProp;
-  l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
+
+  // 1d or 2d solver
+  if (l_ny == 1)
+  {
+    l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
+    std::cout << "  using 1d solver" << std::endl;
+  }
+  else
+  {
+    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    std::cout << "  using 2d solver" << std::endl;
+  }
+
+  // calculate cell size
+  tsunami_lab::t_real l_dxy = l_width / l_nx;
+  std::cout << "  cell size:                      " << l_dxy << " m" << std::endl;
+  std::cout << "  width simulated:                " << l_width << " m" << std::endl;
+  std::cout << "  coordinates simulated:          x e [" << l_xOffset << ", " << l_width + l_xOffset << "]" << std::endl;
+  std::cout << "                                  y e [" << l_yOffset << ", " << l_width * float(l_ny) / float(l_nx) + l_yOffset << "]" << std::endl;
+  std::cout << "  time simulated:                 " << l_endTime << " s" << std::endl;
+  std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
+  std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
 
   // maximum observed height in the setup
   tsunami_lab::t_real l_hMax = std::numeric_limits<tsunami_lab::t_real>::lowest();
@@ -274,11 +324,11 @@ int main(int i_argc,
   // set up solver
   for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
   {
-    tsunami_lab::t_real l_y = l_cy * l_dxy;
+    tsunami_lab::t_real l_y = l_cy * l_dxy + l_yOffset;
 
     for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
     {
-      tsunami_lab::t_real l_x = l_cx * l_dxy;
+      tsunami_lab::t_real l_x = l_cx * l_dxy + l_xOffset;
 
       // get initial values of the setup
       tsunami_lab::t_real l_h = l_setup->getHeight(l_x,
@@ -287,8 +337,10 @@ int main(int i_argc,
 
       tsunami_lab::t_real l_hu = l_setup->getMomentumX(l_x,
                                                        l_y);
+
       tsunami_lab::t_real l_hv = l_setup->getMomentumY(l_x,
                                                        l_y);
+
       tsunami_lab::t_real l_b = l_setup->getBathymetry(l_x,
                                                        l_y);
 
@@ -315,7 +367,7 @@ int main(int i_argc,
   tsunami_lab::t_real l_speedMax = std::sqrt(9.81 * l_hMax);
 
   // derive constant time step; changes at simulation time are ignored
-  tsunami_lab::t_real l_dt = 0.5 * l_dxy / l_speedMax;
+  tsunami_lab::t_real l_dt = 0.45 * l_dxy / l_speedMax;
 
   // derive scaling for a time step
   tsunami_lab::t_real l_scaling = l_dt / l_dxy;
@@ -336,6 +388,16 @@ int main(int i_argc,
   }
   std::filesystem::create_directory("solutions");
 
+  // delete old stations
+  if (std::filesystem::exists("stations"))
+  {
+    std::filesystem::remove_all("stations");
+  }
+  std::filesystem::create_directory("stations");
+  l_stations->init();
+
+  int l_nFreqStation = 0;
+
   while (l_simTime < l_endTime)
   {
     if (l_timeStep % 25 == 0)
@@ -351,18 +413,39 @@ int main(int i_argc,
 
       tsunami_lab::io::Csv::write(l_dxy,
                                   l_nx,
-                                  1,
-                                  1,
+                                  l_ny,
+                                  l_waveProp->getStride(),
+                                  l_waveProp->getGhostCellsX(),
+                                  l_waveProp->getGhostCellsY(),
+                                  l_xOffset,
+                                  l_yOffset,
                                   l_waveProp->getHeight(),
                                   l_waveProp->getMomentumX(),
-                                  nullptr,
+                                  l_waveProp->getMomentumY(),
                                   l_waveProp->getBathymetry(),
                                   l_file);
       l_file.close();
       l_nOut++;
     }
 
-    l_waveProp->setGhostOutflow();
+    if (l_simTime > l_nFreqStation * l_stations->getT())
+    {
+      l_stations->write(l_dxy,
+                        l_nx,
+                        l_ny,
+                        l_waveProp->getStride(),
+                        l_waveProp->getGhostCellsX(),
+                        l_waveProp->getGhostCellsY(),
+                        l_simTime,
+                        l_xOffset,
+                        l_yOffset,
+                        l_waveProp->getHeight(),
+                        l_waveProp->getMomentumX(),
+                        l_waveProp->getMomentumY(),
+                        l_waveProp->getBathymetry());
+      ++l_nFreqStation;
+    }
+
     l_waveProp->timeStep(l_scaling);
 
     l_timeStep++;
@@ -375,6 +458,7 @@ int main(int i_argc,
   std::cout << "freeing memory" << std::endl;
   delete l_setup;
   delete l_waveProp;
+  delete l_stations;
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

@@ -47,8 +47,8 @@ and subtracting it from the flux jump.
     t_real l_flux0Jump = l_flux0R - l_flux0L;
     t_real l_flux1Jump = l_flux1R - l_flux1L - l_deltaXPsi;
 
-3.1.2 Implent an example which illistrates the effect of bathemetry
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.1.2 Implement an example which illustrates the effect of bathymetry
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. video:: _static/3_DamBreak1d_10_2_bathymetry.mp4
   :width: 700

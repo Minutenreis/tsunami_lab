@@ -6,6 +6,7 @@
 name: Tsunami Lab
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
   pull_request:
@@ -31,7 +32,7 @@ jobs:
 
       - name: Static Code Analysis
         run:
-          cppcheck src/ --template=gcc --force --error-exitcode=1
+          cppcheck src/ --template=gcc --force --error-exitcode=1 --suppressions-list=suppressions.txt
 
       - name: Sanitize
         run: |

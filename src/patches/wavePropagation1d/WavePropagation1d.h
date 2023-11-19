@@ -1,5 +1,8 @@
 /**
  * @author Alexander Breuer (alex.breuer AT uni-jena.de)
+ * @author Justus Dreßler (justus.dressler AT uni-jena.de)
+ * @author Thorsten Kröhl (thorsten.kroehl AT uni-jena.de)
+ * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
  * One-dimensional wave propagation patch.
@@ -7,7 +10,7 @@
 #ifndef TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_1D
 #define TSUNAMI_LAB_PATCHES_WAVE_PROPAGATION_1D
 
-#include "WavePropagation.h"
+#include "../WavePropagation.h"
 
 namespace tsunami_lab
 {
@@ -44,6 +47,11 @@ private:
   //! bathymetry for the current and next time step for all cells
   t_real *m_b = nullptr;
 
+  /**
+   * Sets the values of the ghost cells according to t_boundary set in the class.
+   **/
+  void setGhostCells();
+
 public:
   /**
    * Constructs the 1d wave propagation solver.
@@ -68,11 +76,6 @@ public:
   void timeStep(t_real i_scaling);
 
   /**
-   * Sets the values of the ghost cells according to outflow boundary conditions.
-   **/
-  void setGhostOutflow();
-
-  /**
    * Gets the stride in y-direction. x-direction is stride-1.
    *
    * @return stride in y-direction.
@@ -89,7 +92,7 @@ public:
    */
   t_real const *getHeight()
   {
-    return m_h[m_step] + 1;
+    return m_h[m_step];
   }
 
   /**
@@ -99,7 +102,7 @@ public:
    **/
   t_real const *getMomentumX()
   {
-    return m_hu[m_step] + 1;
+    return m_hu[m_step];
   }
 
   /**
@@ -117,7 +120,27 @@ public:
    */
   t_real const *getBathymetry()
   {
-    return m_b + 1;
+    return m_b;
+  }
+
+  /**
+   * @brief Gets number of ghost cells in x-direction.
+   *
+   * @return number of ghost cells in x-direction.
+   */
+  t_idx getGhostCellsX()
+  {
+    return 1;
+  }
+
+  /**
+   * @brief Gets number of ghost cells in y-direction.
+   *
+   * @return number of ghost cells in y-direction.
+   */
+  t_idx getGhostCellsY()
+  {
+    return 0;
   }
 
   /**

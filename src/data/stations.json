@@ -1,0 +1,15 @@
+{
+    "period": 2,
+    "stations": [
+        {
+            "name": "Radio 1",
+            "x": 9,
+            "y": 0
+        },
+        {
+            "name": "Radio 2",
+            "x": 14,
+            "y": 0
+        }
+    ]
+}
