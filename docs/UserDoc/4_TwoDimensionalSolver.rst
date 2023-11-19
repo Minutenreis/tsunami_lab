@@ -280,6 +280,3 @@ The peaks are higher and troughs lower for the 1d case though.
 The explanation probably lies in the balancing of the heights in the 2d case.
 Instead of just front and back the cells also flow out to the sides (and getting flown back from them) which makes peaks lower and troughs higher.
 We see that in the end both end with the same solution though, which probably is mainly caused by the open outflow condition on all sides and it regressing to the initial 5m height.
-
-4.2.4 (optional) Run a “convergence study”
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
