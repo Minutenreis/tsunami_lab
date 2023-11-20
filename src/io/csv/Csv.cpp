@@ -5,7 +5,7 @@
  * @author Julius Halank (julius.halank AT uni-jena.de)
  *
  * @section DESCRIPTION
- * IO-routines for writing a snapshot as Comma Separated Values (CSV).
+ * IO-routines for reading / writing a snapshot as Comma Separated Values (CSV).
  **/
 #include "Csv.h"
 
