@@ -29,9 +29,15 @@ vars.AddVariables(
 if vars.UnknownVariables():
   print( "build configuration corrupted, don't know what to do with: " + str(vars.UnknownVariables().keys()) )
   exit(1)
-
+  
 # create environment
 env = Environment( variables = vars )
+
+# check for libs
+conf = Configure(env)
+if not conf.CheckLibWithHeader('netcdf'):
+  print('Did not find lib m.a or m.lib, exiting!')
+  Exit(1)
 
 # generate help message
 Help( vars.GenerateHelpText( env ) )
