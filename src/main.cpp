@@ -14,6 +14,7 @@
 #include "setups/subcritical1d/Subcritical1d.h"
 #include "setups/tsunamiEvent1d/TsunamiEvent1d.h"
 #include "setups/damBreak2d/DamBreak2d.h"
+#include "setups/artificialTsunami2d/ArtificialTsunami2d.h"
 #include "io/csv/Csv.h"
 #include "io/stations/Stations.h"
 #include "constants.h"
@@ -217,6 +218,16 @@ int main(int i_argc,
         l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc, l_rowCount);
         l_width = 250 * l_rowCount;
         l_endTime = stof(l_arg2Str);
+      }
+      else if (l_setupName == "ARTIFICIALTSUNAMI2D")
+      {
+        std::cout << "  using ArtificialTsunami2d() setup" << std::endl;
+        l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
+        l_width = 10000;
+        l_ny = l_nx; // square domain
+        l_xOffset = -5000;
+        l_yOffset = -5000;
+        l_endTime = 20;
       }
       else
       {
