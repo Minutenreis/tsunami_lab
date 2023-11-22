@@ -20,15 +20,15 @@ tsunami_lab::t_real *tsunami_lab::io::NetCdf::pruneGhostCells(t_real const *i_da
     return l_outData;
 }
 
-tsunami_lab::io::NetCdf::NetCdf(t_real i_dxy,
-                                t_idx i_nx,
-                                t_idx i_ny,
-                                t_idx i_stride,
-                                t_idx i_ghostCellsX,
-                                t_idx i_ghostCellsY,
-                                t_real i_offsetX,
-                                t_real i_offsetY,
-                                t_real const *i_b)
+void tsunami_lab::io::NetCdf::init(t_real i_dxy,
+                                   t_idx i_nx,
+                                   t_idx i_ny,
+                                   t_idx i_stride,
+                                   t_idx i_ghostCellsX,
+                                   t_idx i_ghostCellsY,
+                                   t_real i_offsetX,
+                                   t_real i_offsetY,
+                                   t_real const *i_b)
 {
     // saves setup parameters
     m_dxy = i_dxy;
@@ -87,29 +87,29 @@ tsunami_lab::io::NetCdf::NetCdf(t_real i_dxy,
 void tsunami_lab::io::NetCdf::write(t_real const *i_h,
                                     t_real const *i_hu,
                                     t_real const *i_hv,
-                                    t_real i_time)
+                                    t_real i_time,
+                                    t_idx i_nOut)
 {
     // write data
     t_real *l_hPruned = pruneGhostCells(i_h);
     t_real *l_huPruned = pruneGhostCells(i_hu);
     t_real *l_hvPruned = pruneGhostCells(i_hv);
 
-    size_t l_startp[3] = {m_timeStep, 0, 0};
+    size_t l_startp[3] = {i_nOut, 0, 0};
     size_t l_countp[3] = {1, m_ny, m_nx};
 
     netCDF::ncCheck(nc_put_vara_float(m_ncidp, m_varHId, l_startp, l_countp, l_hPruned), __FILE__, __LINE__);
     netCDF::ncCheck(nc_put_vara_float(m_ncidp, m_varHuId, l_startp, l_countp, l_huPruned), __FILE__, __LINE__);
     netCDF::ncCheck(nc_put_vara_float(m_ncidp, m_varHvId, l_startp, l_countp, l_hvPruned), __FILE__, __LINE__);
-    netCDF::ncCheck(nc_put_var1_float(m_ncidp, m_varTimeId, &m_timeStep, &i_time), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_var1_float(m_ncidp, m_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
 
     delete[] l_hPruned;
     delete[] l_huPruned;
     delete[] l_hvPruned;
-
-    m_timeStep++;
 }
 
 tsunami_lab::io::NetCdf::~NetCdf()
 {
-    netCDF::ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
+    if (m_ncidp != -1) // if file is open
+        netCDF::ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
 }

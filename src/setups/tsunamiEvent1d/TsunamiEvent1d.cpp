@@ -8,10 +8,9 @@
  **/
 #include "TsunamiEvent1d.h"
 
-tsunami_lab::setups::TsunamiEvent1d::TsunamiEvent1d(rapidcsv::Document i_doc, size_t i_rowCount)
+tsunami_lab::setups::TsunamiEvent1d::TsunamiEvent1d(rapidcsv::Document i_doc)
 {
   m_doc = i_doc;
-  m_rowCount = i_rowCount;
 }
 
 tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent1d::getHeight(t_real i_x,
@@ -75,6 +74,6 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent1d::getDisplacement(t_real 
 tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent1d::getBathymetryBin(t_real i_x) const
 {
   // convert i_x to cell index (assuming 250m cells)
-  int l_row = i_x / 250;
+  size_t l_row = i_x / 250;
   return m_doc.GetCell<t_real>(3, l_row);
 }
