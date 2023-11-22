@@ -33,11 +33,11 @@ TEST_CASE("Test the artificial tsunami setup.", "[ArtificialTsunami2d]")
   REQUIRE(l_artificialTsunami.getBathymetry(0, 0) == -100);
 
   // x = 250, y = 250
-  // f(x) = sin(1.5 pi)  = 1
+  // f(x) = sin(1.5 pi)  = -1
   // g(x) = -0.25 + 1 = 0.75
   // d(x,y) = 5 * f(x)g(y) = 3.75
   REQUIRE(l_artificialTsunami.getHeight(250, 250) == 100);
   REQUIRE(l_artificialTsunami.getMomentumX(250, 250) == 0);
   REQUIRE(l_artificialTsunami.getMomentumY(250, 250) == 0);
-  REQUIRE(l_artificialTsunami.getBathymetry(250, 250) == -96.25);
+  REQUIRE(l_artificialTsunami.getBathymetry(250, 250) == -103.75);
 }

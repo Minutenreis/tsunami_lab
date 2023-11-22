@@ -127,6 +127,8 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
       REQUIRE(testDoc.GetCell<tsunami_lab::t_real>(4, l_row) == l_hv[(l_x + 1) + (l_y + 1) * 4]);
       l_row++;
     }
+
+  delete l_csv;
 }
 
 TEST_CASE("Test the CSV-reader with a 4 column file.", "[CsvRead4Columns]")

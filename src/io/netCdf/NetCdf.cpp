@@ -52,12 +52,20 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
     int l_dimB[2] = {l_dimYId, l_dimXId};
     int l_dimQ[3] = {l_dimTimeId, l_dimYId, l_dimXId};
     netCDF::ncCheck(nc_def_var(m_ncidp, "x", NC_FLOAT, 1, &l_dimXId, &m_varXId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_att_text(m_ncidp, l_dimXId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
     netCDF::ncCheck(nc_def_var(m_ncidp, "y", NC_FLOAT, 1, &l_dimYId, &m_varYId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_att_text(m_ncidp, l_dimYId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
     netCDF::ncCheck(nc_def_var(m_ncidp, "time", NC_FLOAT, 1, &l_dimTimeId, &m_varTimeId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_att_text(m_ncidp, l_dimTimeId, "units", strlen("seconds since simulationstart"), "seconds since simulationstart"), __FILE__, __LINE__);
+
     netCDF::ncCheck(nc_def_var(m_ncidp, "height", NC_FLOAT, 3, l_dimQ, &m_varHId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varHId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
     netCDF::ncCheck(nc_def_var(m_ncidp, "momentum_x", NC_FLOAT, 3, l_dimQ, &m_varHuId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varHuId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
     netCDF::ncCheck(nc_def_var(m_ncidp, "momentum_y", NC_FLOAT, 3, l_dimQ, &m_varHvId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varHvId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
     netCDF::ncCheck(nc_def_var(m_ncidp, "bathymetry", NC_FLOAT, 2, l_dimB, &m_varBId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varBId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
 
     // write data
     netCDF::ncCheck(nc_enddef(m_ncidp), __FILE__, __LINE__);
