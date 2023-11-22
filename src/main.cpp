@@ -17,6 +17,7 @@
 #include "setups/artificialTsunami2d/ArtificialTsunami2d.h"
 #include "io/csv/Csv.h"
 #include "io/stations/Stations.h"
+#include "io/netCdf/NetCdf.h"
 #include "constants.h"
 #include <cstdlib>
 #include <iostream>
@@ -402,6 +403,22 @@ int main(int i_argc,
   std::filesystem::create_directory("stations");
   l_stations->init();
 
+  // write initial solution
+  tsunami_lab::io::NetCdf *l_netCdfWriter = new tsunami_lab::io::NetCdf(l_dxy,
+                                                                        l_nx,
+                                                                        l_ny,
+                                                                        l_waveProp->getStride(),
+                                                                        l_waveProp->getGhostCellsX(),
+                                                                        l_waveProp->getGhostCellsY(),
+                                                                        l_xOffset,
+                                                                        l_yOffset,
+                                                                        l_waveProp->getBathymetry());
+
+  l_netCdfWriter->write(l_waveProp->getHeight(),
+                        l_waveProp->getMomentumX(),
+                        l_waveProp->getMomentumY(),
+                        1);
+
   int l_nFreqStation = 0;
 
   while (l_simTime < l_endTime)
@@ -465,6 +482,7 @@ int main(int i_argc,
   delete l_setup;
   delete l_waveProp;
   delete l_stations;
+  delete l_netCdfWriter;
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

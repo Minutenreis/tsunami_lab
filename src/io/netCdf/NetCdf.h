@@ -48,6 +48,20 @@ private:
     //! netCdf file id.
     int m_ncidp;
 
+    //! netCdf dimension ids.
+    int m_varXId, m_varYId, m_varTimeId, m_varHId, m_varHuId, m_varHvId, m_varBId;
+
+    /**
+     * @brief Prune Ghost Cells of Data
+     *
+     * @param i_data input data
+     * @return output data (new allocated array)
+     */
+    t_real *pruneGhostCells(t_real const *i_data);
+
+    //! timestep counter.
+    size_t m_timeStep = 0;
+
 public:
     /**
      * Constructor.
@@ -73,16 +87,23 @@ public:
            t_real const *i_b);
 
     /**
+     * @brief Destroy the Net Cdf object
+     *
+     * Closes the netCdf file and frees the memory.
+     */
+    ~NetCdf();
+
+    /**
      * Writes the data as CSV to the given stream.
      * @param i_h water height of the cells; optional: use nullptr if not required.
      * @param i_hu momentum in x-direction of the cells; optional: use nullptr if not required.
      * @param i_hv momentum in y-direction of the cells; optional: use nullptr if not required.
-     * @param io_stream stream to which the netCdf-data is written.
+     * @param i_time time at point.
      **/
     void write(t_real const *i_h,
                t_real const *i_hu,
                t_real const *i_hv,
-               std::ostream &io_stream);
+               t_real i_time);
 };
 
 #endif

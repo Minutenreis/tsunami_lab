@@ -8,8 +8,8 @@
  **/
 #include "ArtificialTsunami2d.h"
 
-tsunami_lab::t_real tsunami_lab::setups::ArtificialTsunami2d::getHeight(t_real i_x,
-                                                                        t_real i_y) const
+tsunami_lab::t_real tsunami_lab::setups::ArtificialTsunami2d::getHeight(t_real,
+                                                                        t_real) const
 {
   return 100;
 }

@@ -35,8 +35,11 @@ env = Environment( variables = vars )
 
 # check for libs
 conf = Configure(env)
-if not conf.CheckLibWithHeader('netcdf'):
-  print('Did not find lib m.a or m.lib, exiting!')
+if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
+  print('Did not find netcdf.h, exiting!')
+  Exit(1)
+if not conf.CheckLibWithHeader('libnetcdf_c++4','ncCheck.h','cxx'):
+  print('Did not find ncCheck.h, exiting!')
   Exit(1)
 
 # generate help message

@@ -18,9 +18,12 @@ l_sources = [ 'solvers/roe/Roe.cpp',
               'setups/subcritical1d/Subcritical1d.cpp',
               'setups/supercritical1d/Supercritical1d.cpp',
               'setups/tsunamiEvent1d/TsunamiEvent1d.cpp',
+              'setups/artificialTsunami2d/ArtificialTsunami2d.cpp',
+              'setups/tsunamiEvent2d/TsunamiEvent2d.cpp',
               'setups/damBreak2d/DamBreak2d.cpp',
               'io/csv/Csv.cpp',
-              'io/stations/Stations.cpp',]
+              'io/stations/Stations.cpp',
+              'io/netCdf/NetCdf.cpp',]
 
 for l_so in l_sources:
   env.sources.append( env.Object( l_so ) )
@@ -40,9 +43,12 @@ l_tests = [ 'tests.cpp',
             'setups/subcritical1d/Subcritical1d.test.cpp',
             'setups/supercritical1d/Supercritical1d.test.cpp',
             'setups/tsunamiEvent1d/TsunamiEvent1d.test.cpp',
+            'setups/artificialTsunami2d/ArtificialTsunami2d.test.cpp',
+            'setups/tsunamiEvent2d/TsunamiEvent2d.test.cpp',
             'setups/damBreak2d/DamBreak2d.test.cpp',
             'io/csv/Csv.test.cpp',
-            'io/stations/Stations.test.cpp',]
+            'io/stations/Stations.test.cpp',
+            'io/netCdf/NetCdf.test.cpp',]
 
 for l_te in l_tests:
   env.tests.append( env.Object( l_te ) )

@@ -26,34 +26,17 @@ namespace tsunami_lab
 class tsunami_lab::setups::TsunamiEvent2d : public Setup
 {
 private:
-
   //! delta for heights
   t_real m_delta = 20;
 
-    /**
+  /**
    * @brief Gets displacement
-   * 
+   *
    * @param i_x x-coordinate of the queried point.
    * @param i_y y-coordinate of the queried point.
-  */
+   */
   t_real getDisplacement(t_real i_x,
                          t_real i_y) const;
-
-  /**
-   * @brief Gets the F
-   * 
-   * @param i_x x-coordinate of the queried point.
-   */
-  t_real getF(t_real i_x,
-              t_real) const;
-  
-  /**
-   * @brief Gets the G
-   * 
-   * @param i_y y-coordinate of the queried point.
-   */
-  t_real getG(t_real,
-              t_real i_y) const;
 
   /**
    * @brief Get the Bathymetry of the NC file

@@ -26,45 +26,42 @@ namespace tsunami_lab
 class tsunami_lab::setups::ArtificialTsunami2d : public Setup
 {
 private:
-
   //! delta for heights
   t_real m_delta = 20;
 
-    /**
+  /**
    * @brief Gets displacement
-   * 
+   *
    * @param i_x x-coordinate of the queried point.
    * @param i_y y-coordinate of the queried point.
-  */
+   */
   t_real getDisplacement(t_real i_x,
                          t_real i_y) const;
 
   /**
    * @brief Gets the F
-   * 
+   *
    * @param i_x x-coordinate of the queried point.
    */
   t_real getF(t_real i_x,
               t_real) const;
-  
+
   /**
    * @brief Gets the G
-   * 
+   *
    * @param i_y y-coordinate of the queried point.
    */
   t_real getG(t_real,
               t_real i_y) const;
 
-
 public:
   /**
    * Gets the water height at a given point.
    *
-   * @param i_x x-coordinate of the queried point.
    * @return height at the given point.
    **/
-  t_real getHeight(t_real i_x,
-                   t_real i_y) const;
+  t_real getHeight(t_real,
+                   t_real) const;
 
   /**
    * Gets the momentum in x-direction.

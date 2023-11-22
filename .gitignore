@@ -1,9 +1,19 @@
+# build directories
 /build/**
-/.vscode/**
-.sconsign.dblite
 /docs/UserDoc/_build/**
 /docs/UserDoc/_build_doxygen/**
+/.sconf_temp/**
+
+# configs & caches
+/.vscode/**
+.sconsign.dblite
+config.log
+
+# output files
 /solutions/**
 /stations/**
+*.nc
+
+# submissions binaries
 **.tar.xz
 !**.gitkeep
