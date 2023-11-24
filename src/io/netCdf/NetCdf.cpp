@@ -62,8 +62,11 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
     netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varHId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
     netCDF::ncCheck(nc_def_var(m_ncidp, "momentum_x", NC_FLOAT, 3, l_dimQ, &m_varHuId), __FILE__, __LINE__);
     netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varHuId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
-    netCDF::ncCheck(nc_def_var(m_ncidp, "momentum_y", NC_FLOAT, 3, l_dimQ, &m_varHvId), __FILE__, __LINE__);
-    netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varHvId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
+    if (m_ny > 1)
+    {
+        netCDF::ncCheck(nc_def_var(m_ncidp, "momentum_y", NC_FLOAT, 3, l_dimQ, &m_varHvId), __FILE__, __LINE__);
+        netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varHvId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
+    }
     netCDF::ncCheck(nc_def_var(m_ncidp, "bathymetry", NC_FLOAT, 2, l_dimB, &m_varBId), __FILE__, __LINE__);
     netCDF::ncCheck(nc_put_att_text(m_ncidp, m_varBId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
 
@@ -101,19 +104,24 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
     // write data
     t_real *l_hPruned = pruneGhostCells(i_h);
     t_real *l_huPruned = pruneGhostCells(i_hu);
-    t_real *l_hvPruned = pruneGhostCells(i_hv);
 
     size_t l_startp[3] = {i_nOut, 0, 0};
     size_t l_countp[3] = {1, m_ny, m_nx};
 
     netCDF::ncCheck(nc_put_vara_float(m_ncidp, m_varHId, l_startp, l_countp, l_hPruned), __FILE__, __LINE__);
     netCDF::ncCheck(nc_put_vara_float(m_ncidp, m_varHuId, l_startp, l_countp, l_huPruned), __FILE__, __LINE__);
-    netCDF::ncCheck(nc_put_vara_float(m_ncidp, m_varHvId, l_startp, l_countp, l_hvPruned), __FILE__, __LINE__);
     netCDF::ncCheck(nc_put_var1_float(m_ncidp, m_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
 
     delete[] l_hPruned;
     delete[] l_huPruned;
-    delete[] l_hvPruned;
+
+    // write momentum_y only if ny > 1 (2D)
+    if (m_ny > 1)
+    {
+        t_real *l_hvPruned = pruneGhostCells(i_hv);
+        netCDF::ncCheck(nc_put_vara_float(m_ncidp, m_varHvId, l_startp, l_countp, l_hvPruned), __FILE__, __LINE__);
+        delete[] l_hvPruned;
+    }
 }
 
 tsunami_lab::io::NetCdf::~NetCdf()
