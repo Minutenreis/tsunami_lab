@@ -113,9 +113,9 @@ public:
      * @param o_nx number of cells in x-direction.
      * @param o_ny number of cells in y-direction.
      * @param o_nz number of cells in z-direction.
-     * @param o_x pointer to array of x-coordinates.
-     * @param o_y pointer to array of y-coordinates.
-     * @param o_z pointer to array of z-coordinates.
+     * @param o_x pointer to array of x-coordinates (Important: Gets a new dynamically allocated array written on it).
+     * @param o_y pointer to array of y-coordinates (Important: Gets a new dynamically allocated array written on it).
+     * @param o_z pointer to array of z-coordinates (Important: Gets a new dynamically allocated array written on it).
      */
     static void read(char *i_fileName,
                      t_idx *o_nx,
