@@ -23,6 +23,8 @@ Julius Halank: all members contributed equally
 5.1.1 Provide a mechanism which shares netCDF's files with your solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+We used the highlighted Scons mechanism to share the netCDF files with the solver.
+
 5.1.2 Implement a class io::NetCdf
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -123,6 +123,17 @@ public:
                      t_real **o_x,
                      t_real **o_y,
                      t_real **o_z);
+
+    /**
+     * @brief checks if netCdf operation was successful and prints error on failure
+     *
+     * @param i_status status code of the operation
+     * @param i_file file name of the operation
+     * @param i_line line number of the operation
+     */
+    static void ncCheck(int i_status,
+                        char const *i_file,
+                        int i_line);
 };
 
 #endif
