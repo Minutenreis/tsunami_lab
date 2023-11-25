@@ -12,7 +12,7 @@ print( '###                              ###' )
 print( '### https://scalable.uni-jena.de ###' )
 print( '####################################' )
 print()
-print('runnning build script')
+print('running build script')
 
 # configuration
 vars = Variables()
@@ -73,6 +73,7 @@ if 'san' in  env['mode']:
 
 # add Catch2
 env.Append( CXXFLAGS = [ '-isystem', 'submodules/Catch2/single_include' ] )
+env.Append( CXXFLAGS = [ '-isystem', 'submodules/json/single_include'] )
 
 # get source files
 VariantDir( variant_dir = 'build/src',

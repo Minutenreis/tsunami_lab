@@ -7,7 +7,7 @@
  * Stations Controller Class to get data at specific points in space
  */
 #include "Stations.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <string>
 

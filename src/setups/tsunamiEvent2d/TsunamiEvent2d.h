@@ -105,6 +105,7 @@ public:
    * Gets the water height at a given point.
    *
    * @param i_x x-coordinate of the queried point.
+   * @param i_y y-coordinate of the queried point.
    * @return height at the given point.
    **/
   t_real getHeight(t_real i_x,

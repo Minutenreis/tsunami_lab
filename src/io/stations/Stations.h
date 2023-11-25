@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 #include "../../constants.h"
-#include "json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace tsunami_lab
 {
