@@ -33,7 +33,6 @@ private:
   rapidcsv::Document m_doc;
 
   //! row count of csv file
-  size_t m_rowCount;
 
   //! delta for heights
   t_real m_delta = 20;
@@ -59,9 +58,8 @@ public:
    * @brief Construct a new TsunamiEvent1d object
    *
    * @param i_doc csv file as rapidcsv::Document
-   * @param i_rowCount row count of csv file
    */
-  TsunamiEvent1d(rapidcsv::Document i_doc, size_t i_rowCount);
+  TsunamiEvent1d(rapidcsv::Document i_doc);
 
   /**
    * Gets the water height at a given point.

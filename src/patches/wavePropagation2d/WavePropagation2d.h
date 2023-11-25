@@ -67,7 +67,7 @@ private:
    *
    * @param i_x x index
    * @param i_y y index
-   * @return t_idx coordinate
+   * @return coordinate
    */
   t_idx getCoord(t_idx i_x, t_idx i_y);
 

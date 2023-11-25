@@ -12,7 +12,7 @@ print( '###                              ###' )
 print( '### https://scalable.uni-jena.de ###' )
 print( '####################################' )
 print()
-print('runnning build script')
+print('running build script')
 
 # configuration
 vars = Variables()
@@ -29,9 +29,15 @@ vars.AddVariables(
 if vars.UnknownVariables():
   print( "build configuration corrupted, don't know what to do with: " + str(vars.UnknownVariables().keys()) )
   exit(1)
-
+  
 # create environment
 env = Environment( variables = vars )
+
+# check for libs
+conf = Configure(env)
+if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
+  print('Did not find netcdf.h, exiting!')
+  Exit(1)
 
 # generate help message
 Help( vars.GenerateHelpText( env ) )
@@ -64,6 +70,7 @@ if 'san' in  env['mode']:
 
 # add Catch2
 env.Append( CXXFLAGS = [ '-isystem', 'submodules/Catch2/single_include' ] )
+env.Append( CXXFLAGS = [ '-isystem', 'submodules/json/single_include'] )
 
 # get source files
 VariantDir( variant_dir = 'build/src',

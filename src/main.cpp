@@ -14,8 +14,11 @@
 #include "setups/subcritical1d/Subcritical1d.h"
 #include "setups/tsunamiEvent1d/TsunamiEvent1d.h"
 #include "setups/damBreak2d/DamBreak2d.h"
+#include "setups/artificialTsunami2d/ArtificialTsunami2d.h"
+#include "setups/tsunamiEvent2d/TsunamiEvent2d.h"
 #include "io/csv/Csv.h"
 #include "io/stations/Stations.h"
+#include "io/netCdf/NetCdf.h"
 #include "constants.h"
 #include <cstdlib>
 #include <iostream>
@@ -64,12 +67,7 @@ int main(int i_argc,
   {
     // removed invalid number of arguments message for -h option
     std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] n_cells_x" << std::endl;
-    // std::cerr << "  ./build/tsunami_lab [-s SOLVER] [-u SETUP] [-b BOUNDARY] N_CELLS_X" << std::endl;
-    // std::cerr << "  N_CELLS_X = the number of cells in x-direction." << std::endl;
-    // std::cerr << "  -s SOLVER = 'Roe','FWave', default is 'FWave'" << std::endl;
-    // std::cerr << "  -u SETUP  = 'DamBreak1d h_l h_r','RareRare1d h hu','ShockShock1d h hu', default is 'DamBreak1d 10 5'" << std::endl;
-    // std::cerr << "  example: ./build/tsunami_lab -s roe -u 'ShockShock1d 10 100' 100" << std::endl;
+    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] n_cells_x" << std::endl;
     std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
     return EXIT_FAILURE;
   }
@@ -98,10 +96,11 @@ int main(int i_argc,
   tsunami_lab::t_real l_xOffset = 0;
   tsunami_lab::t_real l_yOffset = 0;
   tsunami_lab::io::Stations *l_stations = nullptr;
+  tsunami_lab::io::IoWriter *l_writer = nullptr;
 
   std::cout << "runtime configuration" << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:")) != -1)
+  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:")) != -1)
   {
     switch (opt)
     {
@@ -215,14 +214,34 @@ int main(int i_argc,
         // assumptions: headerless csv, 4 columns, 3rd being length along path and 4th being height
         std::string l_filePath = l_arg1Str;
         rapidcsv::Document l_doc;
-        size_t l_rowCount;
 
-        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, l_rowCount, false);
+        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, false);
 
-        l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc, l_rowCount);
-        l_width = 250 * l_rowCount;
+        l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc);
+        l_width = 250 * l_doc.GetRowCount();
         l_endTime = stof(l_arg2Str);
       }
+      // 'ArtificialTsunami2d time' setup
+      else if (l_setupName == "ARTIFICIALTSUNAMI2D")
+      {
+        std::cout << "  using ArtificialTsunami2d() setup" << std::endl;
+        l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
+        l_width = 10000;
+        l_ny = l_nx; // square domain
+        l_xOffset = -5000;
+        l_yOffset = -5000;
+        l_endTime = stof(l_arg1Str);
+      }
+      // 'Tsunami2d pathToDisplacement pathToBathymetry time' setup
+      else if (l_setupName == "TSUNAMI2D")
+      {
+        std::cout << "  using Tsunami2d() setup" << std::endl;
+        tsunami_lab::t_real l_height = -1;
+        l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_arg1Str.data(), l_arg2Str.data(), &l_width, &l_height, &l_xOffset, &l_yOffset);
+        l_ny = l_nx * l_height / l_width;
+        l_endTime = stof(l_arg3Str);
+      }
+      // unknown setup
       else
       {
         std::cerr << "unknown setup " << l_setupName << std::endl;
@@ -259,6 +278,32 @@ int main(int i_argc,
       l_stations = new tsunami_lab::io::Stations(i_filePath);
       break;
     }
+    // output
+    case 'o':
+    {
+      std::string l_outputName(optarg);
+
+      // convert to upper case
+      std::transform(l_outputName.begin(), l_outputName.end(), l_outputName.begin(), ::toupper);
+
+      if (l_outputName == "CSV")
+      {
+        std::cout << "  using CSV output" << std::endl;
+        l_writer = new tsunami_lab::io::Csv();
+      }
+      else if (l_outputName == "NETCDF")
+      {
+        std::cout << "  using NetCDF output" << std::endl;
+        l_writer = new tsunami_lab::io::NetCdf();
+      }
+      else
+      {
+        std::cerr << "unknown output " << l_outputName << std::endl;
+        return EXIT_FAILURE;
+      }
+
+      break;
+    }
     // unknown option
     case '?':
     {
@@ -274,14 +319,18 @@ int main(int i_argc,
     l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
   }
 
-  // command line prints
-
   if (l_setup == nullptr)
   {
     std::cout << "  using DamBreak1d(10,5,5) setup" << std::endl;
     l_setup = new tsunami_lab::setups::DamBreak1d(10,
                                                   5,
                                                   5);
+  }
+
+  if (l_writer == nullptr)
+  {
+    std::cout << "  using CSV output" << std::endl;
+    l_writer = new tsunami_lab::io::Csv();
   }
 
   // FWave or Roe Solver
@@ -394,6 +443,17 @@ int main(int i_argc,
     std::filesystem::remove_all("stations");
   }
   std::filesystem::create_directory("stations");
+
+  // init IO
+  l_writer->init(l_dxy,
+                 l_nx,
+                 l_ny,
+                 l_waveProp->getStride(),
+                 l_waveProp->getGhostCellsX(),
+                 l_waveProp->getGhostCellsY(),
+                 l_xOffset,
+                 l_yOffset,
+                 l_waveProp->getBathymetry());
   l_stations->init();
 
   int l_nFreqStation = 0;
@@ -405,26 +465,12 @@ int main(int i_argc,
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;
 
-      std::string l_path = "solutions/solution_" + std::to_string(l_nOut) + ".csv";
-      std::cout << "  writing wave field to " << l_path << std::endl;
-
-      std::ofstream l_file;
-      l_file.open(l_path);
-
-      tsunami_lab::io::Csv::write(l_dxy,
-                                  l_nx,
-                                  l_ny,
-                                  l_waveProp->getStride(),
-                                  l_waveProp->getGhostCellsX(),
-                                  l_waveProp->getGhostCellsY(),
-                                  l_xOffset,
-                                  l_yOffset,
-                                  l_waveProp->getHeight(),
-                                  l_waveProp->getMomentumX(),
-                                  l_waveProp->getMomentumY(),
-                                  l_waveProp->getBathymetry(),
-                                  l_file);
-      l_file.close();
+      l_writer->write(
+          l_waveProp->getHeight(),
+          l_waveProp->getMomentumX(),
+          l_waveProp->getMomentumY(),
+          l_simTime,
+          l_nOut);
       l_nOut++;
     }
 
@@ -459,6 +505,7 @@ int main(int i_argc,
   delete l_setup;
   delete l_waveProp;
   delete l_stations;
+  delete l_writer;
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

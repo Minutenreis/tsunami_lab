@@ -11,6 +11,7 @@
 #define TSUNAMI_LAB_IO_CSV
 
 #include "../../constants.h"
+#include "../IoWriter.h"
 #include <cstring>
 #include <string>
 #include <iostream>
@@ -25,48 +26,84 @@ namespace tsunami_lab
   }
 }
 
-class tsunami_lab::io::Csv
+class tsunami_lab::io::Csv : public IoWriter
 {
+private:
+  //! cell width in x- and y-direction.
+  t_real m_dxy;
+
+  //! number of cells in x-direction.
+  t_idx m_nx;
+
+  //! number of cells in y-direction.
+  t_idx m_ny;
+
+  //! stride of the data arrays.
+  t_idx m_stride;
+
+  //! number of ghost cells in x-direction.
+  t_idx m_ghostCellsX;
+
+  //! number of ghost cells in y-direction.
+  t_idx m_ghostCellsY;
+
+  //! offset in x-direction.
+  t_real m_offsetX;
+
+  //! offset in y-direction.
+  t_real m_offsetY;
+
+  //! file stream
+  char *m_outputPath;
+
+  //! bathymetry.
+  t_real const *m_b;
+
 public:
   /**
-   * Writes the data as CSV to the given stream.
+   * @brief Initialize the CSV File.
    *
-   * @param i_dxy cell width in x- and y-direction.
+   * @param i_dxy cell size.
    * @param i_nx number of cells in x-direction.
    * @param i_ny number of cells in y-direction.
-   * @param i_stride stride of the data arrays in y-direction (x is assumed to be stride-1).
+   * @param i_stride stride of the data.
    * @param i_ghostCellsX number of ghost cells in x-direction.
    * @param i_ghostCellsY number of ghost cells in y-direction.
    * @param i_offsetX offset in x-direction.
    * @param i_offsetY offset in y-direction.
-   * @param i_h water height of the cells; optional: use nullptr if not required.
-   * @param i_hu momentum in x-direction of the cells; optional: use nullptr if not required.
-   * @param i_hv momentum in y-direction of the cells; optional: use nullptr if not required.
-   * @param i_b bathymetry of the cells; optional: use nullptr if not required.
-   * @param io_stream stream to which the CSV-data is written.
-   **/
-  static void write(t_real i_dxy,
-                    t_idx i_nx,
-                    t_idx i_ny,
-                    t_idx i_stride,
-                    t_idx i_ghostCellsX,
-                    t_idx i_ghostCellsY,
-                    t_real i_offsetX,
-                    t_real i_offsetY,
-                    t_real const *i_h,
-                    t_real const *i_hu,
-                    t_real const *i_hv,
-                    t_real const *i_b,
-                    std::ostream &io_stream);
+   * @param i_b bathymetry.
+   */
+  void init(t_real i_dxy,
+            t_idx i_nx,
+            t_idx i_ny,
+            t_idx i_stride,
+            t_idx i_ghostCellsX,
+            t_idx i_ghostCellsY,
+            t_real i_offsetX,
+            t_real i_offsetY,
+            t_real const *i_b);
+
+  /**
+   * @brief Writes the data to the output.
+   *
+   * @param i_h water height.
+   * @param i_hu momentum in x-direction.
+   * @param i_hv momentum in y-direction.
+   * @param i_nOut number of the output.
+   */
+  void write(t_real const *i_h,
+             t_real const *i_hu,
+             t_real const *i_hv,
+             t_real,
+             t_idx i_nOut);
 
   /**
    * @brief gets rapidcsv::Document and row count from CSV file
    *
    * @param i_filePath path to CSV file
    * @param o_doc csv file as rapidcsv::Document
-   * @param o_rowCount row count of csv file
    */
-  static void openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, size_t &o_rowCount, bool header);
+  static void openCSV(const std::string &i_filePath, rapidcsv::Document &o_doc, bool header);
 };
 
 #endif

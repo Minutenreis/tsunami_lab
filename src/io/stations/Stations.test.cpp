@@ -50,10 +50,9 @@ TEST_CASE("Test Writing JSons for all Stations", "[StationsWrite]")
     REQUIRE(std::filesystem::exists("stations/station_Test_2.csv"));
 
     rapidcsv::Document test1Doc, test2Doc;
-    size_t test1RowCount, test2RowCount;
 
-    tsunami_lab::io::Csv::openCSV("stations/station_Test_1.csv", test1Doc, test1RowCount, true);
-    tsunami_lab::io::Csv::openCSV("stations/station_Test_2.csv", test2Doc, test2RowCount, true);
+    tsunami_lab::io::Csv::openCSV("stations/station_Test_1.csv", test1Doc, true);
+    tsunami_lab::io::Csv::openCSV("stations/station_Test_2.csv", test2Doc, true);
 
     REQUIRE(test1Doc.GetRowCount() == 3);
     REQUIRE(test2Doc.GetRowCount() == 0);

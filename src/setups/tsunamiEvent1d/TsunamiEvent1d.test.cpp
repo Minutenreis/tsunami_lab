@@ -13,8 +13,7 @@
 TEST_CASE("Test the one-dimensional tsunamievent setup.", "[TsunamiEvent1d]")
 {
   rapidcsv::Document l_doc;
-  size_t l_rowCount;
-  tsunami_lab::io::Csv::openCSV("src/data/test.csv", l_doc, l_rowCount, false);
+  tsunami_lab::io::Csv::openCSV("src/data/test.csv", l_doc, false);
 
   // delta = 20
   // row = b_in < 0 and -b_in > delta and usage of getDisplacement
@@ -32,7 +31,7 @@ TEST_CASE("Test the one-dimensional tsunamievent setup.", "[TsunamiEvent1d]")
   // b_in > 20
   tsunami_lab::t_real l_b_in_gtz_htd = 11000.01274;
 
-  tsunami_lab::setups::TsunamiEvent1d l_tsunamievent(l_doc, l_rowCount);
+  tsunami_lab::setups::TsunamiEvent1d l_tsunamievent(l_doc);
 
   // row = b_in < 0 and -b_in > delta and usage of getDisplacement
   // bin = -7139.13368559
