@@ -28,7 +28,7 @@ Installing and Running
 
 * clone the project with :code:`git clone https://github.com/Minutenreis/tsunami_lab.git` 
 * add the submodules with :code:`git submodule init` and :code:`git submodule update`
-* install dependencies with :code:`apt-get install libnetcdf-c++4-dev`
+* install dependencies with :code:`apt-get install libnetcdf-dev`
 * build with :code:`scons`
 * execute the Program with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] [-o outputType] n_cells_x` 
 * execute the tests with :code:`./build/tests`
