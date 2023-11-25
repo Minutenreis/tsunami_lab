@@ -20,7 +20,7 @@ Julius Halank: all members contributed equally
 5.1. NetCDF Output
 ------------------
 
-5.1.1 Provide a mechanism which shares netCDF’s files with your solver
+5.1.1 Provide a mechanism which shares netCDF's files with your solver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 5.1.2 Implement a class io::NetCdf

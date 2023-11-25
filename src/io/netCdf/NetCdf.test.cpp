@@ -9,6 +9,9 @@
 #include "NetCdf.h"
 #include "../IoWriter.h"
 #include <filesystem>
+#include <string>
+#include <netcdf.h>
+#include <ncCheck.h>
 
 TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 {
@@ -32,4 +35,25 @@ TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
     REQUIRE(std::filesystem::exists("output.nc"));
 
     // todo: read data back in and compare
+}
+
+TEST_CASE("Test Reading NetCdf Data", "[NetCdfRead]")
+{
+    tsunami_lab::t_idx l_nx, l_ny;
+    tsunami_lab::t_real *l_x, *l_y, *l_z;
+    std::string l_file = "src/data/testDispl.nc";
+    tsunami_lab::io::NetCdf::read(l_file.data(), &l_nx, &l_ny, &l_x, &l_y, &l_z);
+
+    REQUIRE(l_nx == 10);
+    REQUIRE(l_ny == 5);
+    for (tsunami_lab::t_idx l_ix = 0; l_ix < l_nx; l_ix++)
+        REQUIRE(l_x[l_ix] == l_ix);
+    for (tsunami_lab::t_idx l_iy = 0; l_iy < l_ny; l_iy++)
+        REQUIRE(l_y[l_iy] == l_iy);
+    for (tsunami_lab::t_idx l_iz = 0; l_iz < l_ny * l_nx; l_iz++)
+        REQUIRE(l_z[l_iz] == l_iz);
+
+    delete[] l_x;
+    delete[] l_y;
+    delete[] l_z;
 }

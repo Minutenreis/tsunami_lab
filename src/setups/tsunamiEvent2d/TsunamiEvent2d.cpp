@@ -9,7 +9,6 @@
 #include "TsunamiEvent2d.h"
 #include "../../io/netCdf/NetCdf.h"
 #include <stdexcept>
-#include <iostream>
 
 tsunami_lab::setups::TsunamiEvent2d::TsunamiEvent2d(char *i_displacement,
                                                     char *i_bathymetry,
@@ -21,13 +20,6 @@ tsunami_lab::setups::TsunamiEvent2d::TsunamiEvent2d(char *i_displacement,
   // read netCDF files
   io::NetCdf::read(i_displacement, &m_ndX, &m_ndY, &m_displacementX, &m_displacementY, &m_displacement);
   io::NetCdf::read(i_bathymetry, &m_nbX, &m_nbY, &m_bathymetryX, &m_bathymetryY, &m_bathymetry);
-
-  std::cout << "Displacement: " << m_ndX << "x" << m_ndY << std::endl;
-  std::cout << "Bathymetry: " << m_nbX << "x" << m_nbY << std::endl;
-  std::cout << "DisplacementX: " << m_displacementX[0] << std::endl;
-  std::cout << "DisplacementY: " << m_displacementY[0] << std::endl;
-  std::cout << "BathymetryX: " << m_bathymetryX[0] << std::endl;
-  std::cout << "BathymetryY: " << m_bathymetryY[0] << std::endl;
 
   // calculate width
   *o_width = m_bathymetryX[m_nbX - 1] - m_bathymetryX[0];

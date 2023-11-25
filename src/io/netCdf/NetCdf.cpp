@@ -8,7 +8,6 @@
 #include <netcdf.h>
 #include <ncCheck.h>
 #include "NetCdf.h"
-#include <iostream>
 
 tsunami_lab::t_real *tsunami_lab::io::NetCdf::pruneGhostCells(t_real const *i_data)
 {
@@ -149,9 +148,6 @@ void tsunami_lab::io::NetCdf::read(char *i_fileName,
 
     netCDF::ncCheck(nc_inq_dimlen(l_ncidp, l_dimXId, o_nx), __FILE__, __LINE__);
     netCDF::ncCheck(nc_inq_dimlen(l_ncidp, l_dimYId, o_ny), __FILE__, __LINE__);
-
-    std::cout << "nx: " << *o_nx << std::endl;
-    std::cout << "ny: " << *o_ny << std::endl;
 
     // read variables
     int l_varXId, l_varYId, l_varZId;
