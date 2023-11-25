@@ -15,6 +15,7 @@
 #include "setups/tsunamiEvent1d/TsunamiEvent1d.h"
 #include "setups/damBreak2d/DamBreak2d.h"
 #include "setups/artificialTsunami2d/ArtificialTsunami2d.h"
+#include "setups/tsunamiEvent2d/TsunamiEvent2d.h"
 #include "io/csv/Csv.h"
 #include "io/stations/Stations.h"
 #include "io/netCdf/NetCdf.h"
@@ -220,6 +221,7 @@ int main(int i_argc,
         l_width = 250 * l_doc.GetRowCount();
         l_endTime = stof(l_arg2Str);
       }
+      // 'ArtificialTsunami2d time' setup
       else if (l_setupName == "ARTIFICIALTSUNAMI2D")
       {
         std::cout << "  using ArtificialTsunami2d() setup" << std::endl;
@@ -230,6 +232,16 @@ int main(int i_argc,
         l_yOffset = -5000;
         l_endTime = stof(l_arg1Str);
       }
+      // 'Tsunami2d pathToDisplacement pathToBathymetry time' setup
+      else if (l_setupName == "TSUNAMI2D")
+      {
+        std::cout << "  using Tsunami2d() setup" << std::endl;
+        tsunami_lab::t_real l_height = -1;
+        l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_arg1Str.data(), l_arg2Str.data(), &l_width, &l_height, &l_xOffset, &l_yOffset);
+        l_ny = l_nx * l_height / l_width;
+        l_endTime = stof(l_arg3Str);
+      }
+      // unknown setup
       else
       {
         std::cerr << "unknown setup " << l_setupName << std::endl;

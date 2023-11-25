@@ -105,6 +105,24 @@ public:
                t_real const *i_hv,
                t_real i_time,
                t_idx i_nOut);
+
+    /**
+     * @brief read 3D data from netCdf file.
+     *
+     * @param i_fileName name of the netCdf file.
+     * @param o_nx number of cells in x-direction.
+     * @param o_ny number of cells in y-direction.
+     * @param o_nz number of cells in z-direction.
+     * @param o_x pointer to array of x-coordinates.
+     * @param o_y pointer to array of y-coordinates.
+     * @param o_z pointer to array of z-coordinates.
+     */
+    static void read(char *i_fileName,
+                     t_idx *o_nx,
+                     t_idx *o_ny,
+                     t_real **o_x,
+                     t_real **o_y,
+                     t_real **o_z);
 };
 
 #endif

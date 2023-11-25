@@ -8,6 +8,7 @@
 #include <netcdf.h>
 #include <ncCheck.h>
 #include "NetCdf.h"
+#include <iostream>
 
 tsunami_lab::t_real *tsunami_lab::io::NetCdf::pruneGhostCells(t_real const *i_data)
 {
@@ -128,4 +129,44 @@ tsunami_lab::io::NetCdf::~NetCdf()
 {
     if (m_ncidp != -1) // if file is open
         netCDF::ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
+}
+
+void tsunami_lab::io::NetCdf::read(char *i_fileName,
+                                   t_idx *o_nx,
+                                   t_idx *o_ny,
+                                   t_real **o_x,
+                                   t_real **o_y,
+                                   t_real **o_z)
+{
+    int l_ncidp = -1;
+    // open netCdf file
+    netCDF::ncCheck(nc_open(i_fileName, NC_NOWRITE, &l_ncidp), __FILE__, __LINE__);
+
+    // read dimensions
+    int l_dimXId, l_dimYId;
+    netCDF::ncCheck(nc_inq_dimid(l_ncidp, "x", &l_dimXId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_inq_dimid(l_ncidp, "y", &l_dimYId), __FILE__, __LINE__);
+
+    netCDF::ncCheck(nc_inq_dimlen(l_ncidp, l_dimXId, o_nx), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_inq_dimlen(l_ncidp, l_dimYId, o_ny), __FILE__, __LINE__);
+
+    std::cout << "nx: " << *o_nx << std::endl;
+    std::cout << "ny: " << *o_ny << std::endl;
+
+    // read variables
+    int l_varXId, l_varYId, l_varZId;
+    netCDF::ncCheck(nc_inq_varid(l_ncidp, "x", &l_varXId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_inq_varid(l_ncidp, "y", &l_varYId), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_inq_varid(l_ncidp, "z", &l_varZId), __FILE__, __LINE__);
+
+    *o_x = new t_real[*o_nx];
+    *o_y = new t_real[*o_ny];
+    *o_z = new t_real[(*o_nx) * (*o_ny)];
+
+    netCDF::ncCheck(nc_get_var_float(l_ncidp, l_varXId, *o_x), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_get_var_float(l_ncidp, l_varYId, *o_y), __FILE__, __LINE__);
+    netCDF::ncCheck(nc_get_var_float(l_ncidp, l_varZId, *o_z), __FILE__, __LINE__);
+
+    // close netCdf file
+    netCDF::ncCheck(nc_close(l_ncidp), __FILE__, __LINE__);
 }

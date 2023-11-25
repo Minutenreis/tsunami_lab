@@ -17,3 +17,4 @@ config.log
 # submissions binaries
 **.tar.xz
 !**.gitkeep
+!/src/data/**
