@@ -382,6 +382,8 @@ We get the displacement at a given point by finding the closest x and y value in
 
 The bathymetry gets calculated analogue to the displacement.
 
+Users can set the simulation time in the TsunamiEvent2d setup :code:`['Tsunami2d path_to_displacement path_to_bathymetry time_simulated']` and the x and y resolution through the :code:`n_cells_x` variable in the command line.
+
 5.2.4 Check the correctness of your file input-based class setups::TsunamiEvent2d
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
