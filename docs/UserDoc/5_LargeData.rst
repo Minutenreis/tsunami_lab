@@ -368,7 +368,7 @@ We get the displacement at a given point by finding the closest x and y value in
     {
         if (m_displacementY[l_iy] > i_y)
         {
-            if (i_y - m_displacementX[l_iy - 1] < m_displacementX[l_iy] - i_y)
+            if (i_y - m_displacementY[l_iy - 1] < m_displacementY[l_iy] - i_y)
                 l_y = l_iy - 1;
             else
                 l_y = l_iy;
@@ -377,7 +377,7 @@ We get the displacement at a given point by finding the closest x and y value in
     }
 
     // return displacement
-    return m_displacement[l_x * m_ndY + l_y];
+    return m_displacement[l_y * m_ndX + l_x];
     }
 
 The bathymetry gets calculated analogue to the displacement.
@@ -403,6 +403,18 @@ The Artificial Tsunami Setup simulated over 5 Minutes (300s).
 
 The Tsunami Event with the artificial Tsunami setups data given as netCdf files simulated over 5 Minutes (300s).
 
-As we see in the videos both setups behave the same, so we can assume that the netCdf input works correctly.
+Both Setups seem to work very similarly, but to confirm we also added a Testcase that just runs the dataFiles through :code:`TsunamiEvent2d` and compares them to :code:`ArtificialTsunami2d`.
+
+.. code-block:: cpp
+
+    // check if artificialTsunami and tsunamiEvent2d are the same for the artificial tsunami data
+  for (tsunami_lab::t_real l_x = -4985; l_x < 4985; l_x += 50)
+    for (tsunami_lab::t_real l_y = -4985; l_y < 4985; l_y += 50)
+    {
+      REQUIRE(l_tsunamiEvent2d->getBathymetry(l_x, l_y) == Approx(l_artificialTsunami2d->getBathymetry(l_x, l_y)));
+      REQUIRE(l_tsunamiEvent2d->getHeight(l_x, l_y) == Approx(l_artificialTsunami2d->getHeight(l_x, l_y)));
+      REQUIRE(l_tsunamiEvent2d->getMomentumX(l_x, l_y) == Approx(l_artificialTsunami2d->getMomentumX(l_x, l_y)));
+      REQUIRE(l_tsunamiEvent2d->getMomentumY(l_x, l_y) == Approx(l_artificialTsunami2d->getMomentumY(l_x, l_y)));
+    }
 
 

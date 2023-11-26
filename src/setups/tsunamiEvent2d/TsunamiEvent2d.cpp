@@ -107,7 +107,7 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getDisplacement(t_real 
   {
     if (m_displacementY[l_iy] > i_y)
     {
-      if (i_y - m_displacementX[l_iy - 1] < m_displacementX[l_iy] - i_y)
+      if (i_y - m_displacementY[l_iy - 1] < m_displacementY[l_iy] - i_y)
         l_y = l_iy - 1;
       else
         l_y = l_iy;
@@ -116,7 +116,7 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getDisplacement(t_real 
   }
 
   // return displacement
-  return m_displacement[l_x * m_ndY + l_y];
+  return m_displacement[l_y * m_ndX + l_x];
 }
 
 tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getBathymetryBin(t_real i_x, t_real i_y) const
@@ -143,7 +143,7 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getBathymetryBin(t_real
   {
     if (m_bathymetryY[l_iy] > i_y)
     {
-      if (i_y - m_bathymetryX[l_iy - 1] < m_bathymetryX[l_iy] - i_y)
+      if (i_y - m_bathymetryY[l_iy - 1] < m_bathymetryY[l_iy] - i_y)
         l_y = l_iy - 1;
       else
         l_y = l_iy;
