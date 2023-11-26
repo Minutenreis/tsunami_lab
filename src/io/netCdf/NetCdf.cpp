@@ -15,7 +15,7 @@ void tsunami_lab::io::NetCdf::ncCheck(int i_status, char const *i_file, int i_li
     if (i_status != NC_NOERR)
     {
         std::cerr << "NetCdf Error: " << nc_strerror(i_status) << " in " << i_file << " at line " << i_line << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 }
 

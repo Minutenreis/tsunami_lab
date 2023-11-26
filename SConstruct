@@ -37,7 +37,7 @@ env = Environment( variables = vars )
 conf = Configure(env)
 if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
   print('Did not find netcdf.h, exiting!')
-  Exit(1)
+  exit(1)
 
 # generate help message
 Help( vars.GenerateHelpText( env ) )
