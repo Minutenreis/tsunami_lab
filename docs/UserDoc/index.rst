@@ -40,7 +40,7 @@ The output of the Stations is in :code:`/stations`
 Command Line Parameters
 -----------------------
 
-| :code:`n_cells_x` = number of cells the simulation gets broken up into in x-direction; y-direction depends on setup.
+| :code:`n_cells_x` = number of cells the simulation gets broken up into in x-direction; y-direction depends on setup; specially cased in the tsunami2d Setup to mean the cell length instead.
 | :code:`[-s solver]` = choose between :code:`roe` and :code:`fWave` solver, default is :code:`fWave`
 | :code:`[-u setup]` = choose between :code:`'DamBreak1d h_l h_r'`, :code:`'ShockShock1d h hu'`,
  :code:`'RareRare1d h hu'`, :code:`'Custom1d h_l h_r hu_l hu_r middle'`, :code:`Subcrit1d`,
