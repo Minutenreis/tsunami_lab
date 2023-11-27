@@ -125,13 +125,13 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getBathymetryBin(t_real
   t_idx l_y = 0;
 
   // find closest x and y
-  if (i_x < m_bathymetryX[0])
+  if (i_x <= m_bathymetryX[0])
     l_x = 0;
-  else if (i_x > m_bathymetryX[m_nbX - 1])
+  else if (i_x >= m_bathymetryX[m_nbX - 1])
     l_x = m_nbX - 1;
   else
   {
-    for (t_idx l_ix = 0; l_ix < m_nbX; l_ix++)
+    for (t_idx l_ix = 1; l_ix < m_nbX; l_ix++)
     {
       if (m_bathymetryX[l_ix] > i_x)
       {
@@ -144,13 +144,13 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getBathymetryBin(t_real
     }
   }
 
-  if (i_y < m_bathymetryY[0])
+  if (i_y <= m_bathymetryY[0])
     l_y = 0;
-  else if (i_y > m_bathymetryY[m_nbY - 1])
+  else if (i_y >= m_bathymetryY[m_nbY - 1])
     l_y = m_nbY - 1;
   else
   {
-    for (t_idx l_iy = 0; l_iy < m_nbY; l_iy++)
+    for (t_idx l_iy = 1; l_iy < m_nbY; l_iy++)
     {
       if (m_bathymetryY[l_iy] > i_y)
       {

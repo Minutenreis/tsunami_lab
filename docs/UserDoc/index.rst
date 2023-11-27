@@ -13,6 +13,7 @@
    3_BathymetryBoundaryConditions
    4_TwoDimensionalSolver
    5_LargeData
+   6_TsunamiSimulation
    doxygen
 
   
