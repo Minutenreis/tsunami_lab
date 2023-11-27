@@ -12,9 +12,12 @@ config.log
 # output files
 /solutions/**
 /stations/**
+/output/**
+/plots/**
 *.nc
 
 # submissions binaries
 **.tar.xz
+
 !**.gitkeep
 !/src/data/**

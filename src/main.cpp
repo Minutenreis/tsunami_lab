@@ -238,6 +238,7 @@ int main(int i_argc,
         std::cout << "  using Tsunami2d() setup" << std::endl;
         tsunami_lab::t_real l_height = -1;
         l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_arg1Str.data(), l_arg2Str.data(), &l_width, &l_height, &l_xOffset, &l_yOffset);
+        l_nx = l_width / l_nx; // l_nx is the resolution in meter in this case
         l_ny = l_nx * l_height / l_width;
         l_endTime = stof(l_arg3Str);
       }
