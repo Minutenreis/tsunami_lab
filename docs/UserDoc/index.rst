@@ -31,7 +31,7 @@ Installing and Running
 * add the submodules with :code:`git submodule init` and :code:`git submodule update`
 * install dependencies with :code:`apt-get install libnetcdf-dev`
 * build with :code:`scons`
-* execute the Program with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] [-o outputType] n_cells_x` 
+* execute the Program with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] [-o outputType] [-f frames] n_cells_x` 
 * execute the tests with :code:`./build/tests`
 
 The output of Solver is saved in :code:`/solutions` if you use :code:`csv` as outputType.
@@ -52,6 +52,7 @@ Command Line Parameters
  default is :code:`open` for each; any boundary left out is set to :code:`open`
 | :code:`[-r stationsJson]` = path of the stations json file, default is :code:`src/data/stations.json`
 | :code:`[-o outputType]` = outputtype, choose between :code:`csv` and :code:`netCdf`, default is :code:`csv`
+| :code: `[-f frames]` = (minimum) number of frames to be saved, default is :code:`100`
 
 stationsJson Format:
 

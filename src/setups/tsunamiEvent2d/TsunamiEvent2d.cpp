@@ -9,6 +9,7 @@
 #include "TsunamiEvent2d.h"
 #include "../../io/netCdf/NetCdf.h"
 #include <stdexcept>
+#include <iostream>
 
 tsunami_lab::setups::TsunamiEvent2d::TsunamiEvent2d(char *i_displacement,
                                                     char *i_bathymetry,
@@ -68,6 +69,9 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getBathymetry(t_real i_
                                                                        t_real i_y) const
 {
   t_real l_bin = getBathymetryBin(i_x, i_y);
+
+  if (std::isnan(l_bin))
+    std::cout << "nan bathymetry " << i_x << i_y << std::endl;
   if (l_bin < 0)
   {
     if (l_bin < -m_delta)

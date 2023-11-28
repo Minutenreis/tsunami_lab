@@ -67,7 +67,7 @@ int main(int i_argc,
   {
     // removed invalid number of arguments message for -h option
     std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] n_cells_x" << std::endl;
+    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] n_cells_x" << std::endl;
     std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
     return EXIT_FAILURE;
   }
@@ -97,10 +97,11 @@ int main(int i_argc,
   tsunami_lab::t_real l_yOffset = 0;
   tsunami_lab::io::Stations *l_stations = nullptr;
   tsunami_lab::io::IoWriter *l_writer = nullptr;
+  tsunami_lab::t_idx l_nFrames = 100;
 
   std::cout << "runtime configuration" << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:")) != -1)
+  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:")) != -1)
   {
     switch (opt)
     {
@@ -305,6 +306,12 @@ int main(int i_argc,
 
       break;
     }
+    // frames
+    case 'f':
+    {
+      l_nFrames = atoi(optarg);
+      break;
+    }
     // unknown option
     case '?':
     {
@@ -361,6 +368,7 @@ int main(int i_argc,
   // calculate cell size
   tsunami_lab::t_real l_dxy = l_width / l_nx;
   std::cout << "  cell size:                      " << l_dxy << " m" << std::endl;
+  std::cout << "  frames output:                  " << l_nFrames << std::endl;
   std::cout << "  width simulated:                " << l_width << " m" << std::endl;
   std::cout << "  coordinates simulated:          x e [" << l_xOffset << ", " << l_width + l_xOffset << "]" << std::endl;
   std::cout << "                                  y e [" << l_yOffset << ", " << l_width * float(l_ny) / float(l_nx) + l_yOffset << "]" << std::endl;
@@ -423,6 +431,15 @@ int main(int i_argc,
   tsunami_lab::t_real l_scaling = l_dt / l_dxy;
 
   // set up time and print control
+  tsunami_lab::t_idx l_nTimeSteps = ceil(l_endTime / l_dt);
+  tsunami_lab::t_idx l_nTimeStepsPerFrame = floor((double)l_nTimeSteps / (double)l_nFrames);
+  if (l_nTimeStepsPerFrame <= 0)
+  {
+    l_nTimeStepsPerFrame = 1;
+  }
+  std::cout << "  time step:                      " << l_dt << " s" << std::endl;
+  std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
+  std::cout << "  number of time steps per frame: " << l_nTimeStepsPerFrame << std::endl;
   tsunami_lab::t_idx l_timeStep = 0;
   tsunami_lab::t_idx l_nOut = 0;
   tsunami_lab::t_real l_simTime = 0;
@@ -461,7 +478,7 @@ int main(int i_argc,
 
   while (l_simTime < l_endTime)
   {
-    if (l_timeStep % 25 == 0)
+    if (l_timeStep % l_nTimeStepsPerFrame == 0)
     {
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;

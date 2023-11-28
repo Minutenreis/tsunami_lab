@@ -25,7 +25,7 @@ tsunami_lab::t_real *tsunami_lab::io::NetCdf::pruneGhostCells(t_real const *i_da
     for (t_idx l_ix = 0; l_ix < m_nx; l_ix++)
         for (t_idx l_iy = 0; l_iy < m_ny; l_iy++)
         {
-            l_outData[l_iy * m_ny + l_ix] = i_data[(l_iy + m_ghostCellsY) * m_stride + (l_ix + m_ghostCellsX)];
+            l_outData[l_iy * m_nx + l_ix] = i_data[(l_iy + m_ghostCellsY) * m_stride + (l_ix + m_ghostCellsX)];
         }
     return l_outData;
 }
@@ -111,6 +111,11 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
                                     t_real i_time,
                                     t_idx i_nOut)
 {
+    if (m_ncidp == -1)
+    {
+        std::cerr << "NetCdf Error: File not initialized!" << std::endl;
+        exit(EXIT_FAILURE);
+    }
     // write data
     t_real *l_hPruned = pruneGhostCells(i_h);
     t_real *l_huPruned = pruneGhostCells(i_hu);
