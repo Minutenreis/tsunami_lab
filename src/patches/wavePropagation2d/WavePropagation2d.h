@@ -72,9 +72,14 @@ private:
   t_idx getCoord(t_idx i_x, t_idx i_y);
 
   /**
-   * Sets the values of the ghost cells according to t_boundary set in the class.
+   * Sets the values of the ghost cells according to t_boundary set in the class for the X Sweep.
    **/
-  void setGhostCells();
+  void setGhostCellsX();
+
+  /**
+   * Sets the values of the ghost cells according to t_boundary set in the class for the Y Sweep.
+   **/
+  void setGhostCellsY();
 
 public:
   /**
