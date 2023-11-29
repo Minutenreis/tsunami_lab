@@ -69,21 +69,18 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   setGhostCells();
   // pointers to old and new data
   t_real *l_hOld = m_h[m_step];
-  t_real *l_huOld = m_hu[m_step];
-  t_real *l_hvOld = m_hv[m_step];
+  t_real *l_huNew = m_hu[m_step]; // after 2 steps the data is espected in the original m_step
 
   m_step = (m_step + 1) % 2;
   t_real *l_hNew = m_h[m_step];
-  t_real *l_huNew = m_hu[m_step];
-  t_real *l_hvNew = m_hv[m_step];
+  t_real *l_huOld = m_hu[m_step];
 
   // init new cell quantities
   for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
     {
       l_hNew[getCoord(l_cx, l_cy)] = l_hOld[getCoord(l_cx, l_cy)];
-      l_huNew[getCoord(l_cx, l_cy)] = l_huOld[getCoord(l_cx, l_cy)];
-      l_hvNew[getCoord(l_cx, l_cy)] = l_hvOld[getCoord(l_cx, l_cy)];
+      l_huOld[getCoord(l_cx, l_cy)] = l_huNew[getCoord(l_cx, l_cy)]; // the real old data is in the hu_new
     }
 
   // iterate over edges and update with Riemann solutions in x direction
@@ -129,21 +126,18 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   setGhostCells();
   // pointers to old and new data
   l_hOld = m_h[m_step];
-  l_huOld = m_hu[m_step];
-  l_hvOld = m_hv[m_step];
+  t_real *l_hvOld = m_hv[m_step];
 
   m_step = (m_step + 1) % 2;
   l_hNew = m_h[m_step];
-  l_huNew = m_hu[m_step];
-  l_hvNew = m_hv[m_step];
+  t_real *l_hvNew = m_hv[m_step];
 
   // init new cell quantities
   for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
     {
       l_hNew[getCoord(l_cx, l_cy)] = l_hOld[getCoord(l_cx, l_cy)];
-      l_huNew[getCoord(l_cx, l_cy)] = l_huOld[getCoord(l_cx, l_cy)];
-      l_hvNew[getCoord(l_cx, l_cy)] = l_hvOld[getCoord(l_cx, l_cy)];
+      l_hvOld[getCoord(l_cx, l_cy)] = l_hvNew[getCoord(l_cx, l_cy)]; // we didn't update the first time so the old data is in the new
     }
 
   // iterate over edges and update with Riemann solutions in y direction
