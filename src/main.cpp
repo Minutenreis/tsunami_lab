@@ -30,6 +30,7 @@
 #include <vector>
 #include <sstream>
 #include <filesystem>
+#include <chrono>
 
 // converts a string to a boundary condition (tsunami_lab::t_boundary)
 void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
@@ -52,6 +53,7 @@ void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
 int main(int i_argc,
          char *i_argv[])
 {
+  auto start = std::chrono::high_resolution_clock::now();
   // number of cells in x- and y-direction
   tsunami_lab::t_idx l_nx = 0;
   tsunami_lab::t_idx l_ny = 1;
@@ -440,6 +442,7 @@ int main(int i_argc,
   std::cout << "  time step:                      " << l_dt << " s" << std::endl;
   std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
   std::cout << "  number of time steps per frame: " << l_nTimeStepsPerFrame << std::endl;
+  std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
   tsunami_lab::t_idx l_timeStep = 0;
   tsunami_lab::t_idx l_nOut = 0;
   tsunami_lab::t_real l_simTime = 0;
@@ -517,6 +520,16 @@ int main(int i_argc,
   }
 
   std::cout << "finished time loop" << std::endl;
+  auto end = std::chrono::high_resolution_clock::now();
+  auto duration = end - start;
+  std::cout << "time elapsed: ";
+  if (duration > std::chrono::hours(1))
+    std::cout << std::chrono::duration_cast<std::chrono::hours>(duration).count() << "h ";
+  if (duration > std::chrono::minutes(1))
+    std::cout << std::chrono::duration_cast<std::chrono::minutes>(duration).count() % 60 << "min ";
+  if (duration > std::chrono::seconds(1))
+    std::cout << std::chrono::duration_cast<std::chrono::seconds>(duration).count() % 60 << "s ";
+  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() % 1000 << "ms" << std::endl;
 
   // free memory
   std::cout << "freeing memory" << std::endl;
