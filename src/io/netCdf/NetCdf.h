@@ -57,9 +57,10 @@ private:
      * @brief Prune Ghost Cells of Data
      *
      * @param i_data input data
-     * @return output data (new allocated array)
+     * @param i_var variable id to input
+     * @param i_nOut output time step
      */
-    t_real *pruneGhostCells(t_real const *i_data);
+    void putVaraWithGhostcells(t_real const *i_data, int i_var, t_idx i_nOut);
 
 public:
     /**

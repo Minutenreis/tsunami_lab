@@ -19,15 +19,14 @@ void tsunami_lab::io::NetCdf::ncCheck(int i_status, char const *i_file, int i_li
     }
 }
 
-tsunami_lab::t_real *tsunami_lab::io::NetCdf::pruneGhostCells(t_real const *i_data)
+void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int i_var, t_idx i_nOut)
 {
-    t_real *l_outData = new t_real[m_nx * m_ny];
-    for (t_idx l_ix = 0; l_ix < m_nx; l_ix++)
-        for (t_idx l_iy = 0; l_iy < m_ny; l_iy++)
-        {
-            l_outData[l_iy * m_nx + l_ix] = i_data[(l_iy + m_ghostCellsY) * m_stride + (l_ix + m_ghostCellsX)];
-        }
-    return l_outData;
+    t_idx start_p[3] = {i_nOut, 0, 0};
+    t_idx count_p[3] = {1, 1, m_nx};
+    for (start_p[1] = 0; start_p[1] < m_ny; ++start_p[1])
+    {
+        ncCheck(nc_put_vara_float(m_ncidp, i_var, start_p, count_p, i_data + m_ghostCellsX + (start_p[1] + m_ghostCellsY) * m_stride), __FILE__, __LINE__);
+    }
 }
 
 void tsunami_lab::io::NetCdf::init(t_real i_dxy,
@@ -98,11 +97,14 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
     ncCheck(nc_put_var_float(m_ncidp, m_varYId, l_y), __FILE__, __LINE__);
 
     // write bathymetry
-    t_real *l_bPruned = pruneGhostCells(i_b);
-    ncCheck(nc_put_var_float(m_ncidp, m_varBId, l_bPruned), __FILE__, __LINE__);
+    t_idx start_p[3] = {0, 0};
+    t_idx count_p[3] = {1, m_nx};
+    for (start_p[0] = 0; start_p[0] < m_ny; ++start_p[0])
+    {
+        ncCheck(nc_put_vara_float(m_ncidp, m_varBId, start_p, count_p, i_b + m_ghostCellsX + (start_p[0] + m_ghostCellsY) * m_stride), __FILE__, __LINE__);
+    }
     delete[] l_x;
     delete[] l_y;
-    delete[] l_bPruned;
 }
 
 void tsunami_lab::io::NetCdf::write(t_real const *i_h,
@@ -117,26 +119,13 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
         exit(EXIT_FAILURE);
     }
     // write data
-    t_real *l_hPruned = pruneGhostCells(i_h);
-    t_real *l_huPruned = pruneGhostCells(i_hu);
-
-    size_t l_startp[3] = {i_nOut, 0, 0};
-    size_t l_countp[3] = {1, m_ny, m_nx};
-
-    ncCheck(nc_put_vara_float(m_ncidp, m_varHId, l_startp, l_countp, l_hPruned), __FILE__, __LINE__);
-    ncCheck(nc_put_vara_float(m_ncidp, m_varHuId, l_startp, l_countp, l_huPruned), __FILE__, __LINE__);
-    ncCheck(nc_put_var1_float(m_ncidp, m_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
-
-    delete[] l_hPruned;
-    delete[] l_huPruned;
-
+    putVaraWithGhostcells(i_h, m_varHId, i_nOut);
+    putVaraWithGhostcells(i_hu, m_varHuId, i_nOut);
     // write momentum_y only if ny > 1 (2D)
     if (m_ny > 1)
-    {
-        t_real *l_hvPruned = pruneGhostCells(i_hv);
-        ncCheck(nc_put_vara_float(m_ncidp, m_varHvId, l_startp, l_countp, l_hvPruned), __FILE__, __LINE__);
-        delete[] l_hvPruned;
-    }
+        putVaraWithGhostcells(i_hv, m_varHvId, i_nOut);
+    // write time
+    ncCheck(nc_put_var1_float(m_ncidp, m_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
 }
 
 tsunami_lab::io::NetCdf::~NetCdf()
