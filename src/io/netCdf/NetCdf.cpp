@@ -105,6 +105,7 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
     }
     delete[] l_x;
     delete[] l_y;
+    ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
 }
 
 void tsunami_lab::io::NetCdf::write(t_real const *i_h,
@@ -113,6 +114,7 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
                                     t_real i_time,
                                     t_idx i_nOut)
 {
+    ncCheck(nc_open("output.nc", NC_WRITE, &m_ncidp), __FILE__, __LINE__);
     if (m_ncidp == -1)
     {
         std::cerr << "NetCdf Error: File not initialized!" << std::endl;
@@ -126,12 +128,7 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
         putVaraWithGhostcells(i_hv, m_varHvId, i_nOut);
     // write time
     ncCheck(nc_put_var1_float(m_ncidp, m_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
-}
-
-tsunami_lab::io::NetCdf::~NetCdf()
-{
-    if (m_ncidp != -1) // if file is open
-        ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
+    ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
 }
 
 void tsunami_lab::io::NetCdf::read(char *i_fileName,

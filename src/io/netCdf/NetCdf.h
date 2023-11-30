@@ -64,13 +64,6 @@ private:
 
 public:
     /**
-     * @brief Destroy the Net Cdf object
-     *
-     * Closes the netCdf file and frees the memory.
-     */
-    ~NetCdf();
-
-    /**
      * @brief Initialize the netCdf File.
      *
      * @param i_dxy cell size.
