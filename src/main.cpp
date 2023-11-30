@@ -450,6 +450,7 @@ int main(int i_argc,
   std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
   std::cout << "  number of time steps per frame: " << l_nTimeStepsPerFrame << std::endl;
   std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
+  std::cout << "  maximum runtime:                " << max_hours << " h" << std::endl;
   tsunami_lab::t_idx l_timeStep = 0;
   tsunami_lab::t_idx l_nOut = 0;
   tsunami_lab::t_real l_simTime = 0;
