@@ -53,7 +53,7 @@ void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
 int main(int i_argc,
          char *i_argv[])
 {
-  auto start = std::chrono::high_resolution_clock::now();
+  auto l_start = std::chrono::high_resolution_clock::now();
   // number of cells in x- and y-direction
   tsunami_lab::t_idx l_nx = 0;
   tsunami_lab::t_idx l_ny = 1;
@@ -69,7 +69,7 @@ int main(int i_argc,
   {
     // removed invalid number of arguments message for -h option
     std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] n_cells_x" << std::endl;
+    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] [-t maxtime] n_cells_x" << std::endl;
     std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
     return EXIT_FAILURE;
   }
@@ -100,10 +100,11 @@ int main(int i_argc,
   tsunami_lab::io::Stations *l_stations = nullptr;
   tsunami_lab::io::IoWriter *l_writer = nullptr;
   tsunami_lab::t_idx l_nFrames = 100;
+  int max_hours = 24;
 
   std::cout << "runtime configuration" << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:")) != -1)
+  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:")) != -1)
   {
     switch (opt)
     {
@@ -314,6 +315,12 @@ int main(int i_argc,
       l_nFrames = atoi(optarg);
       break;
     }
+    // maxtime
+    case 't':
+    {
+      max_hours = atoi(optarg);
+      break;
+    }
     // unknown option
     case '?':
     {
@@ -493,6 +500,15 @@ int main(int i_argc,
           l_simTime,
           l_nOut);
       l_nOut++;
+
+      // stop if current time exceeds max_hours
+      auto l_now = std::chrono::high_resolution_clock::now();
+      auto l_elapsed = l_now - l_start;
+      if (l_elapsed >= std::chrono::hours(max_hours))
+      {
+        std::cout << "  maximum time exceeded, exiting" << std::endl;
+        break;
+      }
     }
 
     if (l_simTime > l_nFreqStation * l_stations->getT())
@@ -520,16 +536,16 @@ int main(int i_argc,
   }
 
   std::cout << "finished time loop" << std::endl;
-  auto end = std::chrono::high_resolution_clock::now();
-  auto duration = end - start;
+  auto l_end = std::chrono::high_resolution_clock::now();
+  auto l_duration = l_end - l_start;
   std::cout << "time elapsed: ";
-  if (duration > std::chrono::hours(1))
-    std::cout << std::chrono::duration_cast<std::chrono::hours>(duration).count() << "h ";
-  if (duration > std::chrono::minutes(1))
-    std::cout << std::chrono::duration_cast<std::chrono::minutes>(duration).count() % 60 << "min ";
-  if (duration > std::chrono::seconds(1))
-    std::cout << std::chrono::duration_cast<std::chrono::seconds>(duration).count() % 60 << "s ";
-  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() % 1000 << "ms" << std::endl;
+  if (l_duration > std::chrono::hours(1))
+    std::cout << std::chrono::duration_cast<std::chrono::hours>(l_duration).count() << "h ";
+  if (l_duration > std::chrono::minutes(1))
+    std::cout << std::chrono::duration_cast<std::chrono::minutes>(l_duration).count() % 60 << "min ";
+  if (l_duration > std::chrono::seconds(1))
+    std::cout << std::chrono::duration_cast<std::chrono::seconds>(l_duration).count() % 60 << "s ";
+  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(l_duration).count() % 1000 << "ms" << std::endl;
 
   // free memory
   std::cout << "freeing memory" << std::endl;
