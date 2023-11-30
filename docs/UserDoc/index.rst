@@ -53,7 +53,7 @@ Command Line Parameters
 | :code:`[-r stationsJson]` = path of the stations json file, default is :code:`src/data/stations.json`
 | :code:`[-o outputType]` = outputtype, choose between :code:`csv` and :code:`netCdf`, default is :code:`csv`
 | :code:`[-f frames]` = (minimum) number of frames to be saved, default is :code:`100`
-| :code:`[-t maxtime]` = maxTime of simulation, default is :code:`10`
+| :code:`[-t maxtime]` = maxTime of simulation, default is :code:`24`
 
 stationsJson Format:
 
