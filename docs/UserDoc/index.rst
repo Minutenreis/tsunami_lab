@@ -13,6 +13,7 @@
    3_BathymetryBoundaryConditions
    4_TwoDimensionalSolver
    5_LargeData
+   6_TsunamiSimulation
    doxygen
 
   
@@ -30,7 +31,7 @@ Installing and Running
 * add the submodules with :code:`git submodule init` and :code:`git submodule update`
 * install dependencies with :code:`apt-get install libnetcdf-dev`
 * build with :code:`scons`
-* execute the Program with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] [-o outputType] n_cells_x` 
+* execute the Program with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] [-o outputType] [-f frames] n_cells_x` 
 * execute the tests with :code:`./build/tests`
 
 The output of Solver is saved in :code:`/solutions` if you use :code:`csv` as outputType.
@@ -40,7 +41,7 @@ The output of the Stations is in :code:`/stations`
 Command Line Parameters
 -----------------------
 
-| :code:`n_cells_x` = number of cells the simulation gets broken up into in x-direction; y-direction depends on setup.
+| :code:`n_cells_x` = number of cells the simulation gets broken up into in x-direction; y-direction depends on setup; specially cased in the tsunami2d Setup to mean the cell length instead.
 | :code:`[-s solver]` = choose between :code:`roe` and :code:`fWave` solver, default is :code:`fWave`
 | :code:`[-u setup]` = choose between :code:`'DamBreak1d h_l h_r'`, :code:`'ShockShock1d h hu'`,
  :code:`'RareRare1d h hu'`, :code:`'Custom1d h_l h_r hu_l hu_r middle'`, :code:`Subcrit1d`,
@@ -51,6 +52,8 @@ Command Line Parameters
  default is :code:`open` for each; any boundary left out is set to :code:`open`
 | :code:`[-r stationsJson]` = path of the stations json file, default is :code:`src/data/stations.json`
 | :code:`[-o outputType]` = outputtype, choose between :code:`csv` and :code:`netCdf`, default is :code:`csv`
+| :code:`[-f frames]` = (minimum) number of frames to be saved, default is :code:`100`
+| :code:`[-t maxtime]` = maxTime of simulation, default is :code:`24`
 
 stationsJson Format:
 

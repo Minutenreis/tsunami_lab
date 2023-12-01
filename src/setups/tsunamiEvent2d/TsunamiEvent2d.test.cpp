@@ -54,6 +54,8 @@ TEST_CASE("Test the two-dimensional tsunamiEvent setup.", "[TsunamiEvent2d]")
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(9, 4);
   REQUIRE(l_bathymetryValue == Approx(-20));
 
+  l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(-2, -2);
+  REQUIRE(l_bathymetryValue == Approx(-20));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(2.9, 1.1);
   REQUIRE(l_bathymetryValue == Approx(-20));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(3.1, 1.1);
@@ -97,6 +99,8 @@ TEST_CASE("Test the two-dimensional tsunamiEvent setup.", "[TsunamiEvent2d]")
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(6.9, 2.9);
   REQUIRE(l_bathymetryValue == Approx(-6));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(7.1, 2.9);
+  REQUIRE(l_bathymetryValue == Approx(-20));
+  l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(30, 30);
   REQUIRE(l_bathymetryValue == Approx(-20));
 
   // check if getHeight works correct in combination with displacements, should be 20 everywhere
