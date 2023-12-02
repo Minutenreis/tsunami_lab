@@ -13,12 +13,8 @@
    3_BathymetryBoundaryConditions
    4_TwoDimensionalSolver
    5_LargeData
-   6_TsunamiSimulation
+   6_TsunamiSimulations
    doxygen
-
-  
-
-
 
 Tsunami-Simulation User Documentation
 =====================================
