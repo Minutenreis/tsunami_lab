@@ -5,6 +5,7 @@
 # Entry-point for builds.
 ##
 import SCons
+import platform
 
 print( '####################################' )
 print( '### Tsunami Lab                  ###' )
@@ -32,6 +33,10 @@ if vars.UnknownVariables():
   
 # create environment
 env = Environment( variables = vars )
+
+# workaround to find the right g++ version on Ara
+if 'centos' in platform.platform():
+  env.Replace(CXX="/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++")
 
 # check for libs
 conf = Configure(env)

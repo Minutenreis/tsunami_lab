@@ -10,13 +10,13 @@
 
 # Load any necessary modules (if needed)
 # module load mymodule
-# todo: load netcdf
-# todo: checkout repo on ara!
-# todo: include submodules!
+module load tools/python/3.8
+module load compiler/gcc/11.2.0
+python3.8 -m pip install --user scons
 
 # Enter your executable commands here
 # Execute the compiled program
 date
+cd tsunami_lab
 scons
-#todo: add paths to files (use tohoku)
-./build/tsunami_lab -t 10 -u "Tsunami2d <path_to_displ> <path_to_bath> 18000" -o netcdf 500
+./build/tsunami_lab -t 10 -u "Tsunami2d chile_gebco20_usgs_250m_displ.nc chile_gebco20_usgs_250m_bath.nc 18000" -o netcdf 500
