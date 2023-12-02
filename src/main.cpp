@@ -50,6 +50,19 @@ void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
   }
 }
 
+// prints "i_message: xh xmin xs xms"
+void printTime(std::chrono::nanoseconds i_duration, std::string i_message)
+{
+  std::cout << i_message << ": ";
+  if (i_duration > std::chrono::hours(1))
+    std::cout << std::chrono::duration_cast<std::chrono::hours>(i_duration).count() << "h ";
+  if (i_duration > std::chrono::minutes(1))
+    std::cout << std::chrono::duration_cast<std::chrono::minutes>(i_duration).count() % 60 << "min ";
+  if (i_duration > std::chrono::seconds(1))
+    std::cout << std::chrono::duration_cast<std::chrono::seconds>(i_duration).count() % 60 << "s ";
+  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(i_duration).count() % 1000 << "ms" << std::endl;
+}
+
 int main(int i_argc,
          char *i_argv[])
 {
@@ -224,6 +237,7 @@ int main(int i_argc,
         l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc);
         l_width = 250 * l_doc.GetRowCount();
         l_endTime = stof(l_arg2Str);
+        std::cout << "  using Tsunami1d(" << l_filePath << ") setup" << std::endl;
       }
       // 'ArtificialTsunami2d time' setup
       else if (l_setupName == "ARTIFICIALTSUNAMI2D")
@@ -239,12 +253,12 @@ int main(int i_argc,
       // 'Tsunami2d pathToDisplacement pathToBathymetry time' setup
       else if (l_setupName == "TSUNAMI2D")
       {
-        std::cout << "  using Tsunami2d() setup" << std::endl;
         tsunami_lab::t_real l_height = -1;
         l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_arg1Str.data(), l_arg2Str.data(), &l_width, &l_height, &l_xOffset, &l_yOffset);
         l_nx = l_width / l_nx; // l_nx is the resolution in meter in this case
         l_ny = l_nx * l_height / l_width;
         l_endTime = stof(l_arg3Str);
+        std::cout << "  using Tsunami2d(" << l_arg1Str << "," << l_arg2Str << "," << l_endTime << ") setup" << std::endl;
       }
       // unknown setup
       else
@@ -487,6 +501,9 @@ int main(int i_argc,
 
   int l_nFreqStation = 0;
 
+  auto l_timeSetup = std::chrono::high_resolution_clock::now();
+  std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
+
   while (l_simTime < l_endTime)
   {
     if (l_timeStep % l_nTimeStepsPerFrame == 0)
@@ -494,6 +511,7 @@ int main(int i_argc,
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;
 
+      auto l_writeStart = std::chrono::high_resolution_clock::now();
       l_writer->write(
           l_waveProp->getHeight(),
           l_waveProp->getMomentumX(),
@@ -502,9 +520,11 @@ int main(int i_argc,
           l_nOut);
       l_nOut++;
 
+      auto l_WriteEnd = std::chrono::high_resolution_clock::now();
+      l_duration_write += l_WriteEnd - l_writeStart;
+
       // stop if current time exceeds max_hours
-      auto l_now = std::chrono::high_resolution_clock::now();
-      auto l_elapsed = l_now - l_start;
+      auto l_elapsed = l_WriteEnd - l_start;
       if (l_elapsed >= std::chrono::hours(max_hours))
       {
         std::cout << "  maximum time exceeded, exiting" << std::endl;
@@ -538,15 +558,13 @@ int main(int i_argc,
 
   std::cout << "finished time loop" << std::endl;
   auto l_end = std::chrono::high_resolution_clock::now();
-  auto l_duration = l_end - l_start;
-  std::cout << "time elapsed: ";
-  if (l_duration > std::chrono::hours(1))
-    std::cout << std::chrono::duration_cast<std::chrono::hours>(l_duration).count() << "h ";
-  if (l_duration > std::chrono::minutes(1))
-    std::cout << std::chrono::duration_cast<std::chrono::minutes>(l_duration).count() % 60 << "min ";
-  if (l_duration > std::chrono::seconds(1))
-    std::cout << std::chrono::duration_cast<std::chrono::seconds>(l_duration).count() % 60 << "s ";
-  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(l_duration).count() % 1000 << "ms" << std::endl;
+  auto l_duration_total = l_end - l_start;
+  printTime(l_duration_total, "total time");
+  auto l_duration_setup = l_timeSetup - l_start;
+  printTime(l_duration_setup, "setup time");
+  auto l_duration_loop = l_end - l_timeSetup;
+  printTime(l_duration_loop - l_duration_write, "calc time ");
+  printTime(l_duration_write, "write time");
 
   // free memory
   std::cout << "freeing memory" << std::endl;

@@ -62,6 +62,9 @@ Cellupdates were calculated as :math:`Height \cdot Width \cdot Timesteps \cdot 4
 ..
     todo: check with simulation of Ara
 
+..
+    todo: simulation with 1000m resolution Julius
+
 .. video:: _static/6_chile_500_1h.mp4
    :width: 700
 
@@ -79,8 +82,6 @@ One could probably fix this by increasing the :math:`\delta` value in the :code:
 
   The problematic region in our simulation (500m Resolution).
 
-..
-    todo: simulation with 1000m resolution Julius
 
 6.2 2011 M 9.1 Tohoku Event
 ---------------------------
@@ -104,8 +105,8 @@ The computational demands for the simulations are approximated by the following 
 
 We see the simulation is significantly faster than the Chile Event due to the smaller size.
 
-The first wave leaves the computational domain after roughly 16500 seconds (4.5 hours).
-(Tested in the 1000m 10h simulation and means we'll only simulate 5h in our 500m simulation)
+The first wave leaves the computational domain after roughly 10000 seconds (2.8 hours).
+(Tested in the 1000m 5h simulation)
 
 .. video:: _static/6_Tohoku_1000_Sim_20_20000_water2d_topo.mp4
    :width: 700
@@ -173,15 +174,15 @@ We used the coordinates to ensure us actually landing in the water in our simula
 .. figure:: _static/6_Soma_h.png
   :width: 700
 
-  height at Sõma over 5h (500m resolution)
+  height at Sõma over 5h (1000m resolution, plotted every 30s)
 
 .. figure:: _static/6_Soma_hhuhv.png
   :width: 700 
 
-  height, momentum_x and momentum_y at Sõma over 5h (500m resolution)
+  height, momentum_x and momentum_y at Sõma over 5h (1000m resolution, plotted every 30s)
 
 We see that the first wave reaches Sõma at roughly :math:`2400s \approx 40min`, so slightly earlier than calculated.
 This is likely a result of the calculation being from the epicenter to Sõma while the displacement extends nearer to Sõma.
 Since both are pretty close too each other so we feel relatively confident in our simulation.
 
-According to the simulation Sõma saw a maximum height of roughly :math:`5m`, which is significantly smaller than the measured :math:`9.3m` of NOAA which is likely explained by our station being 4km off of Sõmas coast.
+According to the simulation Sõma saw a maximum height of roughly :math:`6.25m`.
