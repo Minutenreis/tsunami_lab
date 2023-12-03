@@ -17,8 +17,8 @@ Thorsten Kröhl: all members contributed equally
 
 Julius Halank: all members contributed equally
 
-6.1. 2010 M 8.8 Chile Event
----------------------------
+6.1 2010 M 8.8 Chile Event
+--------------------------
 
 6.1.1 Visualize the Input data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,14 +56,17 @@ The computational demands for the simulations are approximated by the following 
 Cellupdates were calculated as :math:`Height \cdot Width \cdot Timesteps \cdot 4`.
 (4 for the 4 directions in each update)
 
-..
-    todo: simulated time till first waves leave domain
+The first wave leaves the computational domain after roughly 4 hours.
 
-..
-    todo: check with simulation of Ara
+.. video:: _static/6_chile_1000_10h.mp4
+   :width: 700
 
-..
-    todo: simulation with 1000m resolution Julius
+*Simulation of the 2010 M8.8 Chile Event with 1000m Resolution for 10h.*
+
+.. video:: _static/6_chile_500_1_5h.mp4
+   :width: 700
+
+*Simulation of the 2010 M8.8 Chile Event with 500m Resolution for 1.5h.*
 
 .. video:: _static/6_chile_500_1h.mp4
    :width: 700
@@ -71,10 +74,10 @@ Cellupdates were calculated as :math:`Height \cdot Width \cdot Timesteps \cdot 4
 *Simulation of the 2010 M8.8 Chile Event with 500m Resolution for 1h.
 The height of the waves is scaled by a factor of 20000 and the bathymetry is scaled by a factor of 20.*
 
-We noticed our simulation breaking down near the end of the hour when the wave hit the stones sticking out of the ocean (see image below).
+We noticed our simulation breaking down near 1h when the wave hit the stones sticking out of the ocean (see image below).
 Our running theory is that the stones are to shallow in the water and the rarefaction wave following the shockwave reduces the waterheight to a very low value.
 This causes the FWave solver to break down (specifically the :code:`t_real l_uL = i_huL / i_hL;` calculating the particle velocity).
-that would explain the sudden explosion in height around these areas in the end.
+that would explain the sudden explosion in height around these areas after roughly 2h (the big wave centered on the stones).
 One could probably fix this by increasing the :math:`\delta` value in the :code:`TsunamiEvent2d` setup, we didn't have time to test this.
 
 .. figure:: _static/6_Chile_shallow_stones.png
@@ -82,6 +85,17 @@ One could probably fix this by increasing the :math:`\delta` value in the :code:
 
   The problematic region in our simulation (500m Resolution).
 
+Another bug happened around 2h in the 1000m simulation, when the wave hit the coast in the south of Chile.
+We identified the location as the following piece of land:
+
+.. figure:: _static/6_chile_bug2.png
+  :width: 700
+
+  Trapped cell in Chile (1000m Resolution).
+
+We identified a bug in our FWave solver that sometimes caused inaccurate updates to the left / bottom cell so that might be the cause.
+Due to a lack of time (and loss of data on the reproducing simulation) we couldn't verify if the faulty FWave solver was indeed the cause.
+But that bug should be the cause of the total corruption of the simulation past 4h.
 
 6.2 2011 M 9.1 Tohoku Event
 ---------------------------
