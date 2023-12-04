@@ -31,6 +31,7 @@
 #include <sstream>
 #include <filesystem>
 #include <chrono>
+#include <vector>
 
 // converts a string to a boundary condition (tsunami_lab::t_boundary)
 void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
@@ -101,7 +102,6 @@ int main(int i_argc,
 
   // defaults
   bool l_useFwave = true;
-  tsunami_lab::setups::Setup *l_setup = nullptr;
   tsunami_lab::t_boundary l_boundaryL = tsunami_lab::t_boundary::OPEN;
   tsunami_lab::t_boundary l_boundaryR = tsunami_lab::t_boundary::OPEN;
   tsunami_lab::t_boundary l_boundaryB = tsunami_lab::t_boundary::OPEN;
@@ -110,296 +110,328 @@ int main(int i_argc,
   tsunami_lab::t_real l_width = 10.0; // width in x direction, y is scaled by l_ny / l_nx
   tsunami_lab::t_real l_xOffset = 0;
   tsunami_lab::t_real l_yOffset = 0;
+  tsunami_lab::t_real l_hMax = std::numeric_limits<tsunami_lab::t_real>::lowest();
+  tsunami_lab::setups::Setup *l_setup = nullptr;
   tsunami_lab::io::Stations *l_stations = nullptr;
   tsunami_lab::io::IoWriter *l_writer = nullptr;
+  tsunami_lab::patches::WavePropagation *l_waveProp = nullptr;
   tsunami_lab::t_idx l_nFrames = 100;
   tsunami_lab::t_idx l_k = 1;
+  tsunami_lab::t_idx l_timeStep = 0;
+  tsunami_lab::t_idx l_nOut = 0;
+  tsunami_lab::t_idx l_nFreqStation = 0;
+  tsunami_lab::t_real l_simTime = 0;
+  tsunami_lab::t_idx l_nCheckpoints = 0;
   int max_hours = 24;
+  bool l_useCheckpoint = false;
 
   std::cout << "runtime configuration" << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:")) != -1)
+  if (std::filesystem::exists("checkpoints") && std::filesystem::is_directory("checkpoints") && !std::filesystem::is_empty("checkpoints"))
   {
-    switch (opt)
+    l_useCheckpoint = true;
+
+    // find newest checkpoint
+    std::vector<std::string> l_checkpoints = {};
+    for (const auto &entry : std::filesystem::directory_iterator("checkpoints"))
     {
-    // solver
-    case 's':
-    {
-      std::string l_arg(optarg);
-      std::transform(l_arg.begin(), l_arg.end(), l_arg.begin(), ::toupper);
-      if (l_arg == "ROE")
-      {
-        l_useFwave = false;
-      }
-      else if (l_arg == "FWAVE")
-      {
-        l_useFwave = true;
-      }
-      else
-      {
-        std::cerr << "unknown solver " << l_arg << std::endl;
-        return EXIT_FAILURE;
-      }
-      break;
+      l_checkpoints.push_back(entry.path());
     }
-    // setup
-    case 'u':
+    // todo: how to sort
+    std::sort(l_checkpoints.begin(), l_checkpoints.end());
+    std::string l_newestCheckpoint = l_checkpoints.back();
+
+    // load checkpoint
+    std::cout << "  loading checkpoint " << l_newestCheckpoint << std::endl;
+    tsunami_lab::io::NetCdf l_netcdfCheckpoint = tsunami_lab::io::NetCdf();
+
+    // todo: save timestep, nOut, simTime, h_max
+    // todo: implement custom setup
+  }
+  else
+  {
+
+    while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:")) != -1)
     {
-      std::string l_arg(optarg);
-
-      // split string by space
-      std::stringstream l_stream(l_arg);
-      std::string l_setupName, l_arg1Str, l_arg2Str, l_arg3Str, l_arg4Str, l_arg5Str;
-      l_stream >> l_setupName >> l_arg1Str >> l_arg2Str >> l_arg3Str >> l_arg4Str >> l_arg5Str;
-
-      // convert to upper case
-      std::transform(l_setupName.begin(), l_setupName.end(), l_setupName.begin(), ::toupper);
-
-      // 'Dambreak1d h_l h_r' setup
-      if (l_setupName == "DAMBREAK1D")
+      switch (opt)
       {
-        double l_arg1 = std::stof(l_arg1Str);
-        double l_arg2 = std::stof(l_arg2Str);
-        std::cout << "  using DamBreak1d(" << l_arg1 << "," << l_arg2 << ",5) setup" << std::endl;
-        l_setup = new tsunami_lab::setups::DamBreak1d(l_arg1,
-                                                      l_arg2,
-                                                      5);
+      // solver
+      case 's':
+      {
+        std::string l_arg(optarg);
+        std::transform(l_arg.begin(), l_arg.end(), l_arg.begin(), ::toupper);
+        if (l_arg == "ROE")
+        {
+          l_useFwave = false;
+        }
+        else if (l_arg == "FWAVE")
+        {
+          l_useFwave = true;
+        }
+        else
+        {
+          std::cerr << "unknown solver " << l_arg << std::endl;
+          return EXIT_FAILURE;
+        }
+        break;
       }
-      else if (l_setupName == "DAMBREAK2D")
+      // setup
+      case 'u':
       {
-        std::cout << "  using DamBreak2d() setup" << std::endl;
-        l_setup = new tsunami_lab::setups::DamBreak2d();
-        l_width = 100;
-        l_ny = l_nx; // square domain
-        l_xOffset = -50;
-        l_yOffset = -50;
-        l_endTime = 20;
-      }
-      // 'RareRare1d h hu' setup
-      else if (l_setupName == "RARERARE1D")
-      {
-        double l_arg1 = std::stof(l_arg1Str);
-        double l_arg2 = std::stof(l_arg2Str);
-        std::cout << "  using RareRare1d(" << l_arg1 << "," << l_arg2 << ",5) setup" << std::endl;
-        l_setup = new tsunami_lab::setups::RareRare1d(l_arg1,
-                                                      l_arg2,
-                                                      5);
-      }
-      // 'ShockShock1d h hu' setup
-      else if (l_setupName == "SHOCKSHOCK1D")
-      {
-        double l_arg1 = std::stof(l_arg1Str);
-        double l_arg2 = std::stof(l_arg2Str);
-        std::cout << "  using ShockShock1d(" << l_arg1 << "," << l_arg2 << ",5) setup" << std::endl;
-        l_setup = new tsunami_lab::setups::ShockShock1d(l_arg1,
+        std::string l_arg(optarg);
+
+        // split string by space
+        std::stringstream l_stream(l_arg);
+        std::string l_setupName, l_arg1Str, l_arg2Str, l_arg3Str, l_arg4Str, l_arg5Str;
+        l_stream >> l_setupName >> l_arg1Str >> l_arg2Str >> l_arg3Str >> l_arg4Str >> l_arg5Str;
+
+        // convert to upper case
+        std::transform(l_setupName.begin(), l_setupName.end(), l_setupName.begin(), ::toupper);
+
+        // 'Dambreak1d h_l h_r' setup
+        if (l_setupName == "DAMBREAK1D")
+        {
+          double l_arg1 = std::stof(l_arg1Str);
+          double l_arg2 = std::stof(l_arg2Str);
+          std::cout << "  using DamBreak1d(" << l_arg1 << "," << l_arg2 << ",5) setup" << std::endl;
+          l_setup = new tsunami_lab::setups::DamBreak1d(l_arg1,
                                                         l_arg2,
                                                         5);
-      }
-      // 'Custom1d h_l h_r hu_l hu_r middle' setup
-      else if (l_setupName == "CUSTOM1D")
-      {
-        double l_arg1 = std::stof(l_arg1Str);
-        double l_arg2 = std::stof(l_arg2Str);
-        double l_arg3 = std::stof(l_arg3Str);
-        double l_arg4 = std::stof(l_arg4Str);
-        double l_arg5 = std::stof(l_arg5Str);
-        std::cout << "  using Custom1d(" << l_arg1 << "," << l_arg2 << "," << l_arg3 << "," << l_arg4 << "," << l_arg5 << ") setup" << std::endl;
-        l_setup = new tsunami_lab::setups::Custom1d(l_arg1,
-                                                    l_arg2,
-                                                    l_arg3,
-                                                    l_arg4,
-                                                    l_arg5);
-      }
-      // 'Supercrit1d' setup
-      else if (l_setupName == "SUPERCRIT1D")
-      {
-        l_width = 25.0;  // 25 m domain
-        l_endTime = 200; // 200 s simulation time
-        std::cout << "  using Supercritical1d() setup" << std::endl;
-        l_setup = new tsunami_lab::setups::Supercritical1d();
-      }
-      // 'Subcrit1d' setup
-      else if (l_setupName == "SUBCRIT1D")
-      {
-        l_width = 25.0;  // 25 m domain
-        l_endTime = 200; // 200 s simulation time
-        std::cout << "  using Subcritical1d() setup" << std::endl;
-        l_setup = new tsunami_lab::setups::Subcritical1d();
-      }
-      // 'Tsunami1d pathToCsv time' setup
-      else if (l_setupName == "TSUNAMI1D")
-      {
-        // assumptions: headerless csv, 4 columns, 3rd being length along path and 4th being height
-        std::string l_filePath = l_arg1Str;
-        rapidcsv::Document l_doc;
+        }
+        else if (l_setupName == "DAMBREAK2D")
+        {
+          std::cout << "  using DamBreak2d() setup" << std::endl;
+          l_setup = new tsunami_lab::setups::DamBreak2d();
+          l_width = 100;
+          l_ny = l_nx; // square domain
+          l_xOffset = -50;
+          l_yOffset = -50;
+          l_endTime = 20;
+        }
+        // 'RareRare1d h hu' setup
+        else if (l_setupName == "RARERARE1D")
+        {
+          double l_arg1 = std::stof(l_arg1Str);
+          double l_arg2 = std::stof(l_arg2Str);
+          std::cout << "  using RareRare1d(" << l_arg1 << "," << l_arg2 << ",5) setup" << std::endl;
+          l_setup = new tsunami_lab::setups::RareRare1d(l_arg1,
+                                                        l_arg2,
+                                                        5);
+        }
+        // 'ShockShock1d h hu' setup
+        else if (l_setupName == "SHOCKSHOCK1D")
+        {
+          double l_arg1 = std::stof(l_arg1Str);
+          double l_arg2 = std::stof(l_arg2Str);
+          std::cout << "  using ShockShock1d(" << l_arg1 << "," << l_arg2 << ",5) setup" << std::endl;
+          l_setup = new tsunami_lab::setups::ShockShock1d(l_arg1,
+                                                          l_arg2,
+                                                          5);
+        }
+        // 'Custom1d h_l h_r hu_l hu_r middle' setup
+        else if (l_setupName == "CUSTOM1D")
+        {
+          double l_arg1 = std::stof(l_arg1Str);
+          double l_arg2 = std::stof(l_arg2Str);
+          double l_arg3 = std::stof(l_arg3Str);
+          double l_arg4 = std::stof(l_arg4Str);
+          double l_arg5 = std::stof(l_arg5Str);
+          std::cout << "  using Custom1d(" << l_arg1 << "," << l_arg2 << "," << l_arg3 << "," << l_arg4 << "," << l_arg5 << ") setup" << std::endl;
+          l_setup = new tsunami_lab::setups::Custom1d(l_arg1,
+                                                      l_arg2,
+                                                      l_arg3,
+                                                      l_arg4,
+                                                      l_arg5);
+        }
+        // 'Supercrit1d' setup
+        else if (l_setupName == "SUPERCRIT1D")
+        {
+          l_width = 25.0;  // 25 m domain
+          l_endTime = 200; // 200 s simulation time
+          std::cout << "  using Supercritical1d() setup" << std::endl;
+          l_setup = new tsunami_lab::setups::Supercritical1d();
+        }
+        // 'Subcrit1d' setup
+        else if (l_setupName == "SUBCRIT1D")
+        {
+          l_width = 25.0;  // 25 m domain
+          l_endTime = 200; // 200 s simulation time
+          std::cout << "  using Subcritical1d() setup" << std::endl;
+          l_setup = new tsunami_lab::setups::Subcritical1d();
+        }
+        // 'Tsunami1d pathToCsv time' setup
+        else if (l_setupName == "TSUNAMI1D")
+        {
+          // assumptions: headerless csv, 4 columns, 3rd being length along path and 4th being height
+          std::string l_filePath = l_arg1Str;
+          rapidcsv::Document l_doc;
 
-        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, false);
+          tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, false);
 
-        l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc);
-        l_width = 250 * l_doc.GetRowCount();
-        l_endTime = stof(l_arg2Str);
-        std::cout << "  using Tsunami1d(" << l_filePath << ") setup" << std::endl;
+          l_setup = new tsunami_lab::setups::TsunamiEvent1d(l_doc);
+          l_width = 250 * l_doc.GetRowCount();
+          l_endTime = stof(l_arg2Str);
+          std::cout << "  using Tsunami1d(" << l_filePath << ") setup" << std::endl;
+        }
+        // 'ArtificialTsunami2d time' setup
+        else if (l_setupName == "ARTIFICIALTSUNAMI2D")
+        {
+          l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
+          l_width = 10000;
+          l_ny = l_nx; // square domain
+          l_xOffset = -5000;
+          l_yOffset = -5000;
+          l_endTime = stof(l_arg1Str);
+          std::cout << "  using ArtificialTsunami2d(" << l_endTime << ") setup" << std::endl;
+        }
+        // 'Tsunami2d pathToDisplacement pathToBathymetry time' setup
+        else if (l_setupName == "TSUNAMI2D")
+        {
+          tsunami_lab::t_real l_height = -1;
+          l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_arg1Str.data(), l_arg2Str.data(), &l_width, &l_height, &l_xOffset, &l_yOffset);
+          l_nx = l_width / l_nx; // l_nx is the resolution in meter in this case
+          l_ny = l_nx * l_height / l_width;
+          l_endTime = stof(l_arg3Str);
+          std::cout << "  using Tsunami2d(" << l_arg1Str << "," << l_arg2Str << "," << l_endTime << ") setup" << std::endl;
+        }
+        // unknown setup
+        else
+        {
+          std::cerr << "unknown setup " << l_setupName << std::endl;
+          return EXIT_FAILURE;
+        }
+        break;
       }
-      // 'ArtificialTsunami2d time' setup
-      else if (l_setupName == "ARTIFICIALTSUNAMI2D")
+      // boundary
+      case 'b':
       {
-        l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
-        l_width = 10000;
-        l_ny = l_nx; // square domain
-        l_xOffset = -5000;
-        l_yOffset = -5000;
-        l_endTime = stof(l_arg1Str);
-        std::cout << "  using ArtificialTsunami2d(" << l_endTime << ") setup" << std::endl;
+        std::string l_arg(optarg);
+
+        // convert to upper case
+        std::transform(l_arg.begin(), l_arg.end(), l_arg.begin(), ::toupper);
+
+        // split string by space
+        std::stringstream l_stream(l_arg);
+        std::string l_boundaryLName, l_boundaryRName, l_boundaryBName, l_boundaryTName;
+        l_stream >> l_boundaryLName >> l_boundaryRName >> l_boundaryBName >> l_boundaryTName;
+
+        std::cout << "  using boundary conditions " << l_boundaryLName << " " << l_boundaryRName << std::endl;
+
+        // convert to t_boundary
+        getBoundary(l_boundaryLName, &l_boundaryL);
+        getBoundary(l_boundaryRName, &l_boundaryR);
+        getBoundary(l_boundaryBName, &l_boundaryB);
+        getBoundary(l_boundaryTName, &l_boundaryT);
+        break;
       }
-      // 'Tsunami2d pathToDisplacement pathToBathymetry time' setup
-      else if (l_setupName == "TSUNAMI2D")
+      // stations
+      case 'r':
       {
-        tsunami_lab::t_real l_height = -1;
-        l_setup = new tsunami_lab::setups::TsunamiEvent2d(l_arg1Str.data(), l_arg2Str.data(), &l_width, &l_height, &l_xOffset, &l_yOffset);
-        l_nx = l_width / l_nx; // l_nx is the resolution in meter in this case
-        l_ny = l_nx * l_height / l_width;
-        l_endTime = stof(l_arg3Str);
-        std::cout << "  using Tsunami2d(" << l_arg1Str << "," << l_arg2Str << "," << l_endTime << ") setup" << std::endl;
+        std::string i_filePath(optarg);
+        l_stations = new tsunami_lab::io::Stations(i_filePath);
+        break;
       }
-      // unknown setup
-      else
+      // output
+      case 'o':
       {
-        std::cerr << "unknown setup " << l_setupName << std::endl;
-        return EXIT_FAILURE;
+        std::string l_outputName(optarg);
+
+        // convert to upper case
+        std::transform(l_outputName.begin(), l_outputName.end(), l_outputName.begin(), ::toupper);
+
+        if (l_outputName == "CSV")
+        {
+          std::cout << "  using CSV output" << std::endl;
+          l_writer = new tsunami_lab::io::Csv();
+        }
+        else if (l_outputName == "NETCDF")
+        {
+          std::cout << "  using NetCDF output" << std::endl;
+          l_writer = new tsunami_lab::io::NetCdf();
+        }
+        else
+        {
+          std::cerr << "unknown output " << l_outputName << std::endl;
+          return EXIT_FAILURE;
+        }
+
+        break;
       }
-      break;
+      // frames
+      case 'f':
+      {
+        l_nFrames = atoi(optarg);
+        break;
+      }
+      // maxtime
+      case 't':
+      {
+        max_hours = atoi(optarg);
+        break;
+      }
+      // coarse output
+      case 'k':
+      {
+        l_k = atoi(optarg);
+        if (l_k < 1)
+        {
+          std::cerr << "invalid coarse output " << l_k << std::endl;
+          return EXIT_FAILURE;
+        }
+        std::cout << "  using coarse output " << l_k << "x" << l_k << " cells output averaged (only used in 2d netcdf)" << std::endl;
+        break;
+      }
+      // unknown option
+      case '?':
+      {
+        std::cerr << "unknown option: " << char(optopt) << std::endl;
+        break;
+      }
+      }
     }
-    // boundary
-    case 'b':
+
+    if (l_stations == nullptr)
     {
-      std::string l_arg(optarg);
-
-      // convert to upper case
-      std::transform(l_arg.begin(), l_arg.end(), l_arg.begin(), ::toupper);
-
-      // split string by space
-      std::stringstream l_stream(l_arg);
-      std::string l_boundaryLName, l_boundaryRName, l_boundaryBName, l_boundaryTName;
-      l_stream >> l_boundaryLName >> l_boundaryRName >> l_boundaryBName >> l_boundaryTName;
-
-      std::cout << "  using boundary conditions " << l_boundaryLName << " " << l_boundaryRName << std::endl;
-
-      // convert to t_boundary
-      getBoundary(l_boundaryLName, &l_boundaryL);
-      getBoundary(l_boundaryRName, &l_boundaryR);
-      getBoundary(l_boundaryBName, &l_boundaryB);
-      getBoundary(l_boundaryTName, &l_boundaryT);
-      break;
+      std::cout << "  using stations file at src/data/stations.json" << std::endl;
+      l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
     }
-    // stations
-    case 'r':
+
+    if (l_setup == nullptr)
     {
-      std::string i_filePath(optarg);
-      l_stations = new tsunami_lab::io::Stations(i_filePath);
-      break;
+      std::cout << "  using DamBreak1d(10,5,5) setup" << std::endl;
+      l_setup = new tsunami_lab::setups::DamBreak1d(10,
+                                                    5,
+                                                    5);
     }
-    // output
-    case 'o':
+
+    if (l_writer == nullptr)
     {
-      std::string l_outputName(optarg);
-
-      // convert to upper case
-      std::transform(l_outputName.begin(), l_outputName.end(), l_outputName.begin(), ::toupper);
-
-      if (l_outputName == "CSV")
-      {
-        std::cout << "  using CSV output" << std::endl;
-        l_writer = new tsunami_lab::io::Csv();
-      }
-      else if (l_outputName == "NETCDF")
-      {
-        std::cout << "  using NetCDF output" << std::endl;
-        l_writer = new tsunami_lab::io::NetCdf();
-      }
-      else
-      {
-        std::cerr << "unknown output " << l_outputName << std::endl;
-        return EXIT_FAILURE;
-      }
-
-      break;
+      std::cout << "  using NetCdf output" << std::endl;
+      l_writer = new tsunami_lab::io::NetCdf();
     }
-    // frames
-    case 'f':
+
+    // FWave or Roe Solver
+    if (l_useFwave == false)
     {
-      l_nFrames = atoi(optarg);
-      break;
+      std::cout << "  using Roe solver" << std::endl;
     }
-    // maxtime
-    case 't':
+    else
     {
-      max_hours = atoi(optarg);
-      break;
+      std::cout << "  using FWave solver" << std::endl;
     }
-    // coarse output
-    case 'k':
+
+    // 1d or 2d solver
+    if (l_ny == 1)
     {
-      l_k = atoi(optarg);
-      if (l_k < 1)
-      {
-        std::cerr << "invalid coarse output " << l_k << std::endl;
-        return EXIT_FAILURE;
-      }
-      std::cout << "  using coarse output " << l_k << "x" << l_k << " cells output averaged (only used in 2d netcdf)" << std::endl;
-      break;
+      l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
+      l_k = 1;
+      std::cout << "  using 1d solver" << std::endl;
     }
-    // unknown option
-    case '?':
+    else
     {
-      std::cerr << "unknown option: " << char(optopt) << std::endl;
-      break;
+      l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+      std::cout << "  using 2d solver" << std::endl;
     }
-    }
-  }
-
-  if (l_stations == nullptr)
-  {
-    std::cout << "  using stations file at src/data/stations.json" << std::endl;
-    l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
-  }
-
-  if (l_setup == nullptr)
-  {
-    std::cout << "  using DamBreak1d(10,5,5) setup" << std::endl;
-    l_setup = new tsunami_lab::setups::DamBreak1d(10,
-                                                  5,
-                                                  5);
-  }
-
-  if (l_writer == nullptr)
-  {
-    std::cout << "  using NetCdf output" << std::endl;
-    l_writer = new tsunami_lab::io::NetCdf();
-  }
-
-  // FWave or Roe Solver
-  if (l_useFwave == false)
-  {
-    std::cout << "  using Roe solver" << std::endl;
-  }
-  else
-  {
-    std::cout << "  using FWave solver" << std::endl;
-  }
-  // construct solver
-  tsunami_lab::patches::WavePropagation *l_waveProp;
-
-  // 1d or 2d solver
-  if (l_ny == 1)
-  {
-    l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
-    l_k = 1;
-    std::cout << "  using 1d solver" << std::endl;
-  }
-  else
-  {
-    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
-    std::cout << "  using 2d solver" << std::endl;
   }
 
   // calculate cell size
@@ -413,9 +445,6 @@ int main(int i_argc,
   std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
   std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
 
-  // maximum observed height in the setup
-  tsunami_lab::t_real l_hMax = std::numeric_limits<tsunami_lab::t_real>::lowest();
-
   // set up solver
   for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
   {
@@ -428,7 +457,8 @@ int main(int i_argc,
       // get initial values of the setup
       tsunami_lab::t_real l_h = l_setup->getHeight(l_x,
                                                    l_y);
-      l_hMax = std::max(l_h, l_hMax);
+      if (!l_useCheckpoint)
+        l_hMax = std::max(l_h, l_hMax);
 
       tsunami_lab::t_real l_hu = l_setup->getMomentumX(l_x,
                                                        l_y);
@@ -479,42 +509,40 @@ int main(int i_argc,
   std::cout << "  number of time steps per frame: " << l_nTimeStepsPerFrame << std::endl;
   std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
   std::cout << "  maximum runtime:                " << max_hours << " h" << std::endl;
-  tsunami_lab::t_idx l_timeStep = 0;
-  tsunami_lab::t_idx l_nOut = 0;
-  tsunami_lab::t_real l_simTime = 0;
 
   std::cout << "entering time loop" << std::endl;
 
   // iterate over time
 
-  // delete old solutions
-  if (std::filesystem::exists("solutions"))
+  if (!l_useCheckpoint)
   {
-    std::filesystem::remove_all("solutions");
+    // delete old solutions
+    if (std::filesystem::exists("solutions"))
+    {
+      std::filesystem::remove_all("solutions");
+    }
+    std::filesystem::create_directory("solutions");
+
+    // delete old stations
+    if (std::filesystem::exists("stations"))
+    {
+      std::filesystem::remove_all("stations");
+    }
+    std::filesystem::create_directory("stations");
+
+    // init IO
+    l_writer->init(l_dxy,
+                   l_nx,
+                   l_ny,
+                   l_waveProp->getStride(),
+                   l_waveProp->getGhostCellsX(),
+                   l_waveProp->getGhostCellsY(),
+                   l_xOffset,
+                   l_yOffset,
+                   l_k,
+                   l_waveProp->getBathymetry());
+    l_stations->init();
   }
-  std::filesystem::create_directory("solutions");
-
-  // delete old stations
-  if (std::filesystem::exists("stations"))
-  {
-    std::filesystem::remove_all("stations");
-  }
-  std::filesystem::create_directory("stations");
-
-  // init IO
-  l_writer->init(l_dxy,
-                 l_nx,
-                 l_ny,
-                 l_waveProp->getStride(),
-                 l_waveProp->getGhostCellsX(),
-                 l_waveProp->getGhostCellsY(),
-                 l_xOffset,
-                 l_yOffset,
-                 l_k,
-                 l_waveProp->getBathymetry());
-  l_stations->init();
-
-  int l_nFreqStation = 0;
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
   std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
