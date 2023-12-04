@@ -175,3 +175,63 @@ void tsunami_lab::io::NetCdf::read(char *i_fileName,
     // close netCdf file
     ncCheck(nc_close(l_ncidp), __FILE__, __LINE__);
 }
+
+void tsunami_lab::io::NetCdf::readCheckpoint(char *i_fileName,
+                                             t_idx *o_nx,
+                                             t_idx *o_ny,
+                                             bool *o_useFWave,
+                                             tsunami_lab::t_boundary *o_boundaryL,
+                                             tsunami_lab::t_boundary *o_boundaryR,
+                                             tsunami_lab::t_boundary *o_boundaryB,
+                                             tsunami_lab::t_boundary *o_boundaryT,
+                                             tsunami_lab::t_real *o_endTime,
+                                             tsunami_lab::t_real *o_width,
+                                             tsunami_lab::t_real *o_xOffset,
+                                             tsunami_lab::t_real *o_yOffset,
+                                             tsunami_lab::t_real *o_hMax,
+                                             std::string *o_stationFilePath,
+                                             tsunami_lab::t_idx *o_nFrames,
+                                             tsunami_lab::t_idx *o_k,
+                                             tsunami_lab::t_idx *o_timeStep,
+                                             tsunami_lab::t_idx *o_nOut,
+                                             tsunami_lab::t_idx *o_nFreqStation,
+                                             tsunami_lab::t_real *o_simTime,
+                                             int *o_maxHours,
+                                             t_real **o_b,
+                                             t_real **o_h,
+                                             t_real **o_hu,
+                                             t_real **o_hv)
+{
+}
+
+void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
+                                              t_idx i_ny,
+                                              bool i_useFWave,
+                                              tsunami_lab::t_boundary i_boundaryL,
+                                              tsunami_lab::t_boundary i_boundaryR,
+                                              tsunami_lab::t_boundary i_boundaryB,
+                                              tsunami_lab::t_boundary i_boundaryT,
+                                              tsunami_lab::t_real i_endTime,
+                                              tsunami_lab::t_real i_width,
+                                              tsunami_lab::t_real i_xOffset,
+                                              tsunami_lab::t_real i_yOffset,
+                                              tsunami_lab::t_real i_hMax,
+                                              std::string i_stationFilePath,
+                                              tsunami_lab::t_idx i_nFrames,
+                                              tsunami_lab::t_idx i_k,
+                                              tsunami_lab::t_idx i_timeStep,
+                                              tsunami_lab::t_idx i_nOut,
+                                              tsunami_lab::t_idx i_nFreqStation,
+                                              tsunami_lab::t_real i_simTime,
+                                              int i_maxHours,
+                                              t_real *i_b,
+                                              t_real *i_h,
+                                              t_real *i_hu,
+                                              t_real *i_hv)
+{
+    time_t now;
+    time(&now);
+    char buf[sizeof "2011-10-08T07:07:09Z"];
+    strftime(buf, sizeof buf, "%FT%TZ", gmtime(&now));
+    std::string l_fileName = "checkpoint_" + std::string(buf) + ".nc";
+}

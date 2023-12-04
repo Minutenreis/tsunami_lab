@@ -113,6 +113,7 @@ int main(int i_argc,
   tsunami_lab::t_real l_hMax = std::numeric_limits<tsunami_lab::t_real>::lowest();
   tsunami_lab::setups::Setup *l_setup = nullptr;
   tsunami_lab::io::Stations *l_stations = nullptr;
+  std::string l_stationFilePath;
   tsunami_lab::io::IoWriter *l_writer = nullptr;
   tsunami_lab::patches::WavePropagation *l_waveProp = nullptr;
   tsunami_lab::t_idx l_nFrames = 100;
@@ -121,8 +122,7 @@ int main(int i_argc,
   tsunami_lab::t_idx l_nOut = 0;
   tsunami_lab::t_idx l_nFreqStation = 0;
   tsunami_lab::t_real l_simTime = 0;
-  tsunami_lab::t_idx l_nCheckpoints = 0;
-  int max_hours = 24;
+  int l_maxHours = 24;
   bool l_useCheckpoint = false;
 
   std::cout << "runtime configuration" << std::endl;
@@ -137,16 +137,50 @@ int main(int i_argc,
     {
       l_checkpoints.push_back(entry.path());
     }
-    // todo: how to sort
     std::sort(l_checkpoints.begin(), l_checkpoints.end());
     std::string l_newestCheckpoint = l_checkpoints.back();
 
     // load checkpoint
     std::cout << "  loading checkpoint " << l_newestCheckpoint << std::endl;
-    tsunami_lab::io::NetCdf l_netcdfCheckpoint = tsunami_lab::io::NetCdf();
+    tsunami_lab::io::NetCdf *l_netcdfCheckpoint = new tsunami_lab::io::NetCdf();
+
+    // always uses netcdf
+    l_writer = l_netcdfCheckpoint;
+
+    tsunami_lab::t_real *l_b = nullptr;
+    tsunami_lab::t_real *l_h = nullptr;
+    tsunami_lab::t_real *l_hu = nullptr;
+    tsunami_lab::t_real *l_hv = nullptr;
+
+    l_netcdfCheckpoint->readCheckpoint(l_newestCheckpoint.data(),
+                                       &l_nx,
+                                       &l_ny,
+                                       &l_useFwave,
+                                       &l_boundaryL,
+                                       &l_boundaryR,
+                                       &l_boundaryB,
+                                       &l_boundaryT,
+                                       &l_endTime,
+                                       &l_width,
+                                       &l_xOffset,
+                                       &l_yOffset,
+                                       &l_hMax,
+                                       &l_stationFilePath,
+                                       &l_nFrames,
+                                       &l_k,
+                                       &l_timeStep,
+                                       &l_nOut,
+                                       &l_nFreqStation,
+                                       &l_simTime,
+                                       &l_maxHours,
+                                       &l_b,
+                                       &l_h,
+                                       &l_hu,
+                                       &l_hv);
 
     // todo: save timestep, nOut, simTime, h_max
     // todo: implement custom setup
+    // todo: when saving check that netcdf is used?
   }
   else
   {
@@ -328,6 +362,8 @@ int main(int i_argc,
       case 'r':
       {
         std::string i_filePath(optarg);
+        l_stationFilePath = i_filePath;
+        std::cout << "  using stations file at " << i_filePath << std::endl;
         l_stations = new tsunami_lab::io::Stations(i_filePath);
         break;
       }
@@ -366,7 +402,7 @@ int main(int i_argc,
       // maxtime
       case 't':
       {
-        max_hours = atoi(optarg);
+        l_maxHours = atoi(optarg);
         break;
       }
       // coarse output
@@ -409,29 +445,29 @@ int main(int i_argc,
       std::cout << "  using NetCdf output" << std::endl;
       l_writer = new tsunami_lab::io::NetCdf();
     }
+  }
 
-    // FWave or Roe Solver
-    if (l_useFwave == false)
-    {
-      std::cout << "  using Roe solver" << std::endl;
-    }
-    else
-    {
-      std::cout << "  using FWave solver" << std::endl;
-    }
+  // FWave or Roe Solver
+  if (l_useFwave == false)
+  {
+    std::cout << "  using Roe solver" << std::endl;
+  }
+  else
+  {
+    std::cout << "  using FWave solver" << std::endl;
+  }
 
-    // 1d or 2d solver
-    if (l_ny == 1)
-    {
-      l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
-      l_k = 1;
-      std::cout << "  using 1d solver" << std::endl;
-    }
-    else
-    {
-      l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
-      std::cout << "  using 2d solver" << std::endl;
-    }
+  // 1d or 2d solver
+  if (l_ny == 1)
+  {
+    l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
+    l_k = 1;
+    std::cout << "  using 1d solver" << std::endl;
+  }
+  else
+  {
+    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    std::cout << "  using 2d solver" << std::endl;
   }
 
   // calculate cell size
@@ -508,7 +544,7 @@ int main(int i_argc,
   std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
   std::cout << "  number of time steps per frame: " << l_nTimeStepsPerFrame << std::endl;
   std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
-  std::cout << "  maximum runtime:                " << max_hours << " h" << std::endl;
+  std::cout << "  maximum runtime:                " << l_maxHours << " h" << std::endl;
 
   std::cout << "entering time loop" << std::endl;
 
@@ -568,7 +604,7 @@ int main(int i_argc,
 
       // stop if current time exceeds max_hours
       auto l_elapsed = l_WriteEnd - l_start;
-      if (l_elapsed >= std::chrono::hours(max_hours))
+      if (l_elapsed >= std::chrono::hours(l_maxHours))
       {
         std::cout << "  maximum time exceeded, exiting" << std::endl;
         break;
