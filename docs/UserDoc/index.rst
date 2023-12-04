@@ -14,6 +14,7 @@
    4_TwoDimensionalSolver
    5_LargeData
    6_TsunamiSimulations
+   7_Checkpointing
    doxygen
 
 Tsunami-Simulation User Documentation
