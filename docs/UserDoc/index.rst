@@ -47,9 +47,10 @@ Command Line Parameters
  choose each boundary between :code:`wall` and :code:`open`, 
  default is :code:`open` for each; any boundary left out is set to :code:`open`
 | :code:`[-r stationsJson]` = path of the stations json file, default is :code:`src/data/stations.json`
-| :code:`[-o outputType]` = outputtype, choose between :code:`csv` and :code:`netCdf`, default is :code:`csv`
+| :code:`[-o outputType]` = outputtype, choose between :code:`csv` and :code:`netCdf`, default is :code:`netCdf`
 | :code:`[-f frames]` = (minimum) number of frames to be saved, default is :code:`100`
 | :code:`[-t maxtime]` = maxTime of simulation, default is :code:`24`
+| :code:`[-k size]` = size of cells in output as faktor, default is :code:`1`
 
 stationsJson Format:
 

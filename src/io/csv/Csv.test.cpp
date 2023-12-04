@@ -39,6 +39,7 @@ TEST_CASE("Test the CSV-writer for 1D settings.", "[CsvWrite1d]")
               0,
               0,
               0,
+              0,
               nullptr);
 
   std::stringstream l_stream0;
@@ -97,6 +98,7 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
               4,
               1,
               1,
+              0,
               0,
               0,
               nullptr);

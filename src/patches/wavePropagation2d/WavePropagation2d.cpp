@@ -26,26 +26,14 @@ tsunami_lab::patches::WavePropagation2d::WavePropagation2d(t_idx i_nCellsx,
   m_boundaryBottom = i_boundaryBottom;
   m_boundaryTop = i_boundaryTop;
 
-  // allocate memory including a single ghost cell on each side
+  // allocate memory including a single ghost cell on each side (zero initialised)
   for (unsigned short l_st = 0; l_st < 2; l_st++)
   {
-    m_h[l_st] = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
-    m_hu[l_st] = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
-    m_hv[l_st] = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+    m_h[l_st] = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)]{};
+    m_hu[l_st] = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)]{};
+    m_hv[l_st] = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)]{};
   }
-  m_b = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
-
-  // init to zero
-  for (unsigned short l_st = 0; l_st < 2; l_st++)
-  {
-    for (t_idx l_ce = 0; l_ce < (m_nCellsx + 2) * (m_nCellsy + 2); l_ce++)
-    {
-      m_h[l_st][l_ce] = 0;
-      m_hu[l_st][l_ce] = 0;
-      m_hv[l_st][l_ce] = 0;
-      m_b[l_ce] = 0;
-    }
-  }
+  m_b = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)]{};
 }
 
 tsunami_lab::patches::WavePropagation2d::~WavePropagation2d()

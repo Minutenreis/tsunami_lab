@@ -38,6 +38,7 @@ public:
      * @param i_ghostCellsY number of ghost cells in y-direction.
      * @param i_offsetX offset in x-direction.
      * @param i_offsetY offset in y-direction.
+     * @param i_k cell size to be averaged.
      * @param i_b bathymetry.
      */
     virtual void init(t_real i_dxy,
@@ -48,6 +49,7 @@ public:
                       t_idx i_ghostCellsY,
                       t_real i_offsetX,
                       t_real i_offsetY,
+                      t_real i_k,
                       t_real const *i_b) = 0;
 
     /**

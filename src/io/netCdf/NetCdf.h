@@ -47,6 +47,9 @@ private:
     //! offset in y-direction.
     t_real m_offsetY;
 
+    //! cell size to be averaged.
+    t_idx m_k;
+
     //! netCdf file id.
     int m_ncidp = -1;
 
@@ -59,8 +62,9 @@ private:
      * @param i_data input data
      * @param i_var variable id to input
      * @param i_nOut output time step
+     * @param i_hasTime true if data has time
      */
-    void putVaraWithGhostcells(t_real const *i_data, int i_var, t_idx i_nOut);
+    void putVaraWithGhostcells(t_real const *i_data, int i_var, t_idx i_nOut, bool i_hasTime);
 
 public:
     /**
@@ -74,6 +78,7 @@ public:
      * @param i_ghostCellsY number of ghost cells in y-direction.
      * @param i_offsetX offset in x-direction.
      * @param i_offsetY offset in y-direction.
+     * @param i_k cell size to be averaged.
      * @param i_b bathymetry.
      */
     void init(t_real i_dxy,
@@ -84,6 +89,7 @@ public:
               t_idx i_ghostCellsY,
               t_real i_offsetX,
               t_real i_offsetY,
+              t_real i_k,
               t_real const *i_b);
 
     /**

@@ -113,11 +113,12 @@ int main(int i_argc,
   tsunami_lab::io::Stations *l_stations = nullptr;
   tsunami_lab::io::IoWriter *l_writer = nullptr;
   tsunami_lab::t_idx l_nFrames = 100;
+  tsunami_lab::t_idx l_k = 1;
   int max_hours = 24;
 
   std::cout << "runtime configuration" << std::endl;
 
-  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:")) != -1)
+  while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:")) != -1)
   {
     switch (opt)
     {
@@ -242,13 +243,13 @@ int main(int i_argc,
       // 'ArtificialTsunami2d time' setup
       else if (l_setupName == "ARTIFICIALTSUNAMI2D")
       {
-        std::cout << "  using ArtificialTsunami2d() setup" << std::endl;
         l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
         l_width = 10000;
         l_ny = l_nx; // square domain
         l_xOffset = -5000;
         l_yOffset = -5000;
         l_endTime = stof(l_arg1Str);
+        std::cout << "  using ArtificialTsunami2d(" << l_endTime << ") setup" << std::endl;
       }
       // 'Tsunami2d pathToDisplacement pathToBathymetry time' setup
       else if (l_setupName == "TSUNAMI2D")
@@ -335,6 +336,18 @@ int main(int i_argc,
       max_hours = atoi(optarg);
       break;
     }
+    // coarse output
+    case 'k':
+    {
+      l_k = atoi(optarg);
+      if (l_k < 1)
+      {
+        std::cerr << "invalid coarse output " << l_k << std::endl;
+        return EXIT_FAILURE;
+      }
+      std::cout << "  using coarse output " << l_k << "x" << l_k << " cells output averaged (only used in 2d netcdf)" << std::endl;
+      break;
+    }
     // unknown option
     case '?':
     {
@@ -360,8 +373,8 @@ int main(int i_argc,
 
   if (l_writer == nullptr)
   {
-    std::cout << "  using CSV output" << std::endl;
-    l_writer = new tsunami_lab::io::Csv();
+    std::cout << "  using NetCdf output" << std::endl;
+    l_writer = new tsunami_lab::io::NetCdf();
   }
 
   // FWave or Roe Solver
@@ -380,6 +393,7 @@ int main(int i_argc,
   if (l_ny == 1)
   {
     l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
+    l_k = 1;
     std::cout << "  using 1d solver" << std::endl;
   }
   else
@@ -496,6 +510,7 @@ int main(int i_argc,
                  l_waveProp->getGhostCellsY(),
                  l_xOffset,
                  l_yOffset,
+                 l_k,
                  l_waveProp->getBathymetry());
   l_stations->init();
 

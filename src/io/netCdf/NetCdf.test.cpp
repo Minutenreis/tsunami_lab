@@ -16,7 +16,7 @@ TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 {
     tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf();
     tsunami_lab::t_real l_b[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    l_writer->init(1, 2, 2, 4, 1, 1, 0, 0, l_b);
+    l_writer->init(1, 2, 2, 4, 1, 1, 0, 0, 1, l_b);
 
     tsunami_lab::t_real l_h[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     tsunami_lab::t_real l_hu[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
@@ -123,6 +123,54 @@ TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 
     // close netCdf file
     tsunami_lab::io::NetCdf::ncCheck(nc_close(l_ncidp), __FILE__, __LINE__);
+}
+
+TEST_CASE("Test Writing Coarse Output", "[NetCdfWriteCoarse]")
+{
+    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf();
+    tsunami_lab::t_real l_b[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
+    l_writer->init(1, 4, 4, 4, 0, 0, 0, -1, 3, l_b);
+
+    // check if file exists
+    REQUIRE(std::filesystem::exists("output.nc"));
+
+    int l_ncidp;
+    // open netCDF file
+    tsunami_lab::io::NetCdf::ncCheck(nc_open("output.nc", NC_NOWRITE, &l_ncidp), __FILE__, __LINE__);
+
+    // read dimensions
+    int l_dimXId, l_dimYId, l_dimTimeId;
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_dimid(l_ncidp, "x", &l_dimXId), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_dimid(l_ncidp, "y", &l_dimYId), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_dimid(l_ncidp, "time", &l_dimTimeId), __FILE__, __LINE__);
+
+    size_t l_nx, l_ny, l_nt;
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_dimlen(l_ncidp, l_dimXId, &l_nx), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_dimlen(l_ncidp, l_dimYId, &l_ny), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_dimlen(l_ncidp, l_dimTimeId, &l_nt), __FILE__, __LINE__);
+
+    REQUIRE(l_nx == 1);
+    REQUIRE(l_ny == 1);
+    REQUIRE(l_nt == 0);
+
+    // read variables
+    int l_varXId, l_varYId, l_varBId;
+
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_varid(l_ncidp, "x", &l_varXId), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_varid(l_ncidp, "y", &l_varYId), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_inq_varid(l_ncidp, "bathymetry", &l_varBId), __FILE__, __LINE__);
+
+    tsunami_lab::t_real l_xR, l_yR, l_bR;
+
+    tsunami_lab::io::NetCdf::ncCheck(nc_get_var_float(l_ncidp, l_varXId, &l_xR), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_get_var_float(l_ncidp, l_varYId, &l_yR), __FILE__, __LINE__);
+    tsunami_lab::io::NetCdf::ncCheck(nc_get_var_float(l_ncidp, l_varBId, &l_bR), __FILE__, __LINE__);
+
+    REQUIRE(l_xR == Approx(1.5));
+    REQUIRE(l_yR == Approx(0.5));
+    REQUIRE(l_bR == Approx(5));
+
+    delete l_writer;
 }
 
 TEST_CASE("Test Reading NetCdf Data", "[NetCdfRead]")

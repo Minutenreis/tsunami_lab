@@ -17,6 +17,7 @@ void tsunami_lab::io::Csv::init(t_real i_dxy,
                                 t_idx i_ghostCellsY,
                                 t_real i_offsetX,
                                 t_real i_offsetY,
+                                t_real,
                                 t_real const *i_b)
 {
   // save setup parameters
