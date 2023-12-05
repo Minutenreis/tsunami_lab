@@ -13,10 +13,10 @@
 module load tools/python/3.8
 module load compiler/gcc/11.2.0
 python3.8 -m pip install --user scons
+python3.8 -m pip install --user distro
 
 # Enter your executable commands here
 # Execute the compiled program
 date
-cd tsunami_lab
 scons
-./build/tsunami_lab -t 10 -u "Tsunami2d chile_gebco20_usgs_250m_displ.nc chile_gebco20_usgs_250m_bath.nc 18000" -o netcdf 500
+./build/tsunami_lab -t 10 -u "Tsunami2d tohoku_gebco20_ucsb3_50m_displ.nc tohoku_gebco20_ucsb3_50m_bath.nc 600" -f 100 -o netcdf -k 5 50

@@ -115,7 +115,7 @@ The computational demands for the simulations are approximated by the following 
 | Timesteps        | 24566            | 24617            | 45572            |
 +------------------+------------------+------------------+------------------+
 | Cellupdates      | 0.4 * 10^12      | 1.6 * 10^12      | 12.8 * 10^12     |
-+------------------+------------------+------------------+------------------
++------------------+------------------+------------------+------------------+
 
 We see the simulation is significantly faster than the Chile Event due to the smaller size.
 
