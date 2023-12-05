@@ -343,10 +343,10 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
                                               tsunami_lab::t_idx i_nFreqStation,
                                               tsunami_lab::t_real i_simTime,
                                               int i_maxHours,
-                                              t_real *i_b,
-                                              t_real *i_h,
-                                              t_real *i_hu,
-                                              t_real *i_hv)
+                                              const t_real *i_b,
+                                              const t_real *i_h,
+                                              const t_real *i_hu,
+                                              const t_real *i_hv)
 {
     // netCdf file name: checkpoint_<iso-date>.nc
     time_t now;
@@ -415,7 +415,7 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     ncCheck(nc_put_var_float(l_ncidp, l_varXOffsetId, &i_xOffset), __FILE__, __LINE__);
     ncCheck(nc_put_var_float(l_ncidp, l_varYOffsetId, &i_yOffset), __FILE__, __LINE__);
     ncCheck(nc_put_var_float(l_ncidp, l_varHMaxId, &i_hMax), __FILE__, __LINE__);
-    char *l_stationFilePath = i_stationFilePath.data();
+    const char *l_stationFilePath = i_stationFilePath.data();
     ncCheck(nc_put_var_string(l_ncidp, l_varStationFilePathId, &l_stationFilePath), __FILE__, __LINE__);
     uint l_nFrames = i_nFrames;
     ncCheck(nc_put_var_uint(l_ncidp, l_varNFramesId, &l_nFrames), __FILE__, __LINE__);

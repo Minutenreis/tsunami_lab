@@ -198,10 +198,10 @@ public:
                                 tsunami_lab::t_idx i_nFreqStation,
                                 tsunami_lab::t_real i_simTime,
                                 int i_maxHours,
-                                t_real *i_b,
-                                t_real *i_h,
-                                t_real *i_hu,
-                                t_real *i_hv);
+                                const t_real *i_b,
+                                const t_real *i_h,
+                                const t_real *i_hu,
+                                const t_real *i_hv);
 };
 
 #endif

@@ -124,6 +124,7 @@ int main(int i_argc,
   tsunami_lab::t_real l_simTime = 0;
   int l_maxHours = 24;
   bool l_useCheckpoint = false;
+  bool l_useNetCdf = true;
 
   std::cout << "runtime configuration" << std::endl;
 
@@ -178,10 +179,33 @@ int main(int i_argc,
                                        &l_hu,
                                        &l_hv);
 
-    // set up wave propagation solver
+    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
 
-    // todo: implement custom setup => needs to delete l_b, l_h, l_hu, l_hv in destructor
-    // todo: when saving check that netcdf is used?
+    // set up solver
+    for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
+      for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
+      {
+        l_waveProp->setHeight(l_cx,
+                              l_cy,
+                              l_h[l_cx + l_cy * l_nx]);
+
+        l_waveProp->setMomentumX(l_cx,
+                                 l_cy,
+                                 l_hu[l_cx + l_cy * l_nx]);
+
+        l_waveProp->setMomentumY(l_cx,
+                                 l_cy,
+                                 l_hv[l_cx + l_cy * l_nx]);
+
+        l_waveProp->setBathymetry(l_cx,
+                                  l_cy,
+                                  l_b[l_cx + l_cy * l_nx]);
+      }
+
+    delete[] l_b;
+    delete[] l_h;
+    delete[] l_hu;
+    delete[] l_hv;
   }
   else
   {
@@ -380,6 +404,7 @@ int main(int i_argc,
         {
           std::cout << "  using CSV output" << std::endl;
           l_writer = new tsunami_lab::io::Csv();
+          l_useNetCdf = false;
         }
         else if (l_outputName == "NETCDF")
         {
@@ -446,6 +471,19 @@ int main(int i_argc,
       std::cout << "  using NetCdf output" << std::endl;
       l_writer = new tsunami_lab::io::NetCdf();
     }
+
+    // 1d or 2d solver
+    if (l_ny == 1)
+    {
+      l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
+      l_k = 1;
+      std::cout << "  using 1d solver" << std::endl;
+    }
+    else
+    {
+      l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+      std::cout << "  using 2d solver" << std::endl;
+    }
   }
 
   // FWave or Roe Solver
@@ -456,19 +494,6 @@ int main(int i_argc,
   else
   {
     std::cout << "  using FWave solver" << std::endl;
-  }
-
-  // 1d or 2d solver
-  if (l_ny == 1)
-  {
-    l_waveProp = new tsunami_lab::patches::WavePropagation1d(l_nx, l_useFwave, l_boundaryL, l_boundaryR);
-    l_k = 1;
-    std::cout << "  using 1d solver" << std::endl;
-  }
-  else
-  {
-    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
-    std::cout << "  using 2d solver" << std::endl;
   }
 
   // calculate cell size
@@ -482,46 +507,48 @@ int main(int i_argc,
   std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
   std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
 
-  // set up solver
-  for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
+  if (!l_useCheckpoint)
   {
-    tsunami_lab::t_real l_y = l_cy * l_dxy + l_yOffset;
-
-    for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
+    // set up solver
+    for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
     {
-      tsunami_lab::t_real l_x = l_cx * l_dxy + l_xOffset;
+      tsunami_lab::t_real l_y = l_cy * l_dxy + l_yOffset;
 
-      // get initial values of the setup
-      tsunami_lab::t_real l_h = l_setup->getHeight(l_x,
-                                                   l_y);
-      if (!l_useCheckpoint)
+      for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
+      {
+        tsunami_lab::t_real l_x = l_cx * l_dxy + l_xOffset;
+
+        // get initial values of the setup
+        tsunami_lab::t_real l_h = l_setup->getHeight(l_x,
+                                                     l_y);
         l_hMax = std::max(l_h, l_hMax);
 
-      tsunami_lab::t_real l_hu = l_setup->getMomentumX(l_x,
-                                                       l_y);
+        tsunami_lab::t_real l_hu = l_setup->getMomentumX(l_x,
+                                                         l_y);
 
-      tsunami_lab::t_real l_hv = l_setup->getMomentumY(l_x,
-                                                       l_y);
+        tsunami_lab::t_real l_hv = l_setup->getMomentumY(l_x,
+                                                         l_y);
 
-      tsunami_lab::t_real l_b = l_setup->getBathymetry(l_x,
-                                                       l_y);
+        tsunami_lab::t_real l_b = l_setup->getBathymetry(l_x,
+                                                         l_y);
 
-      // set initial values in wave propagation solver
-      l_waveProp->setHeight(l_cx,
-                            l_cy,
-                            l_h);
+        // set initial values in wave propagation solver
+        l_waveProp->setHeight(l_cx,
+                              l_cy,
+                              l_h);
 
-      l_waveProp->setMomentumX(l_cx,
-                               l_cy,
-                               l_hu);
+        l_waveProp->setMomentumX(l_cx,
+                                 l_cy,
+                                 l_hu);
 
-      l_waveProp->setMomentumY(l_cx,
-                               l_cy,
-                               l_hv);
+        l_waveProp->setMomentumY(l_cx,
+                                 l_cy,
+                                 l_hv);
 
-      l_waveProp->setBathymetry(l_cx,
-                                l_cy,
-                                l_b);
+        l_waveProp->setBathymetry(l_cx,
+                                  l_cy,
+                                  l_b);
+      }
     }
   }
 
@@ -583,6 +610,8 @@ int main(int i_argc,
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
   std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
+  // writing 1 checkpoint per hour
+  int l_nOutCheckpoint = 0;
 
   while (l_simTime < l_endTime)
   {
@@ -609,6 +638,52 @@ int main(int i_argc,
       {
         std::cout << "  maximum time exceeded, exiting" << std::endl;
         break;
+      }
+      // write checkpoint every hour (only 2D, netCdf)
+      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
+      {
+        std::cout << "  writing checkpoint" << std::endl;
+        tsunami_lab::io::NetCdf::writeCheckpoint(l_nx,
+                                                 l_ny,
+                                                 l_waveProp->getStride(),
+                                                 l_waveProp->getGhostCellsX(),
+                                                 l_waveProp->getGhostCellsY(),
+                                                 l_useFwave,
+                                                 l_boundaryL,
+                                                 l_boundaryR,
+                                                 l_boundaryB,
+                                                 l_boundaryT,
+                                                 l_endTime,
+                                                 l_width,
+                                                 l_xOffset,
+                                                 l_yOffset,
+                                                 l_hMax,
+                                                 l_stationFilePath,
+                                                 l_nFrames,
+                                                 l_k,
+                                                 l_timeStep,
+                                                 l_nOut,
+                                                 l_nFreqStation,
+                                                 l_simTime,
+                                                 l_maxHours,
+                                                 l_waveProp->getBathymetry(),
+                                                 l_waveProp->getHeight(),
+                                                 l_waveProp->getMomentumX(),
+                                                 l_waveProp->getMomentumY());
+        ++l_nOutCheckpoint;
+
+        // delete oldest checkpoint if at least 3 exist
+        std::vector<std::string> l_checkpoints = {};
+        for (const auto &entry : std::filesystem::directory_iterator("checkpoints"))
+        {
+          l_checkpoints.push_back(entry.path());
+        }
+        std::sort(l_checkpoints.begin(), l_checkpoints.end());
+        std::string l_newestCheckpoint = l_checkpoints.front();
+        if (l_checkpoints.size() > 2)
+        {
+          std::filesystem::remove(l_checkpoints.front());
+        }
       }
     }
 
