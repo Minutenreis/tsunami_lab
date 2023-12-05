@@ -66,6 +66,20 @@ private:
      */
     void putVaraWithGhostcells(t_real const *i_data, int i_var, t_idx i_nOut, bool i_hasTime);
 
+    /**
+     * @brief Converts saved boundary int to enum
+     *
+     * @param i_boundary int representing t_boundary
+     */
+    static tsunami_lab::t_boundary intToTBoundary(int i_boundary);
+
+    /**
+     * @brief Converts t_boundary enum to int
+     *
+     * @param i_boundary t_boundary enum
+     */
+    static int tBoundaryToInt(tsunami_lab::t_boundary i_boundary);
+
 public:
     /**
      * @brief Initialize the netCdf File.
@@ -163,6 +177,9 @@ public:
 
     static void writeCheckpoint(t_idx i_nx,
                                 t_idx i_ny,
+                                t_idx i_stride,
+                                t_idx i_ghostCellsX,
+                                t_idx i_ghostCellsY,
                                 bool i_useFWave,
                                 tsunami_lab::t_boundary i_boundaryL,
                                 tsunami_lab::t_boundary i_boundaryR,

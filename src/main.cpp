@@ -178,8 +178,9 @@ int main(int i_argc,
                                        &l_hu,
                                        &l_hv);
 
-    // todo: save timestep, nOut, simTime, h_max
-    // todo: implement custom setup
+    // set up wave propagation solver
+
+    // todo: implement custom setup => needs to delete l_b, l_h, l_hu, l_hv in destructor
     // todo: when saving check that netcdf is used?
   }
   else
