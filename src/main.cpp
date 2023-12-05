@@ -113,7 +113,6 @@ int main(int i_argc,
   tsunami_lab::t_real l_hMax = std::numeric_limits<tsunami_lab::t_real>::lowest();
   tsunami_lab::setups::Setup *l_setup = nullptr;
   tsunami_lab::io::Stations *l_stations = nullptr;
-  std::string l_stationFilePath;
   tsunami_lab::io::IoWriter *l_writer = nullptr;
   tsunami_lab::patches::WavePropagation *l_waveProp = nullptr;
   tsunami_lab::t_idx l_nFrames = 100;
@@ -143,43 +142,43 @@ int main(int i_argc,
 
     // load checkpoint
     std::cout << "  loading checkpoint " << l_newestCheckpoint << std::endl;
-    tsunami_lab::io::NetCdf *l_netcdfCheckpoint = new tsunami_lab::io::NetCdf();
-
-    // always uses netcdf
-    l_writer = l_netcdfCheckpoint;
 
     tsunami_lab::t_real *l_b = nullptr;
     tsunami_lab::t_real *l_h = nullptr;
     tsunami_lab::t_real *l_hu = nullptr;
     tsunami_lab::t_real *l_hv = nullptr;
+    std::string l_stationFilePath = "";
 
-    l_netcdfCheckpoint->readCheckpoint(l_newestCheckpoint.data(),
-                                       &l_nx,
-                                       &l_ny,
-                                       &l_useFwave,
-                                       &l_boundaryL,
-                                       &l_boundaryR,
-                                       &l_boundaryB,
-                                       &l_boundaryT,
-                                       &l_endTime,
-                                       &l_width,
-                                       &l_xOffset,
-                                       &l_yOffset,
-                                       &l_hMax,
-                                       &l_stationFilePath,
-                                       &l_nFrames,
-                                       &l_k,
-                                       &l_timeStep,
-                                       &l_nOut,
-                                       &l_nFreqStation,
-                                       &l_simTime,
-                                       &l_maxHours,
-                                       &l_b,
-                                       &l_h,
-                                       &l_hu,
-                                       &l_hv);
+    tsunami_lab::io::NetCdf::readCheckpoint(l_newestCheckpoint.data(),
+                                            &l_nx,
+                                            &l_ny,
+                                            &l_useFwave,
+                                            &l_boundaryL,
+                                            &l_boundaryR,
+                                            &l_boundaryB,
+                                            &l_boundaryT,
+                                            &l_endTime,
+                                            &l_width,
+                                            &l_xOffset,
+                                            &l_yOffset,
+                                            &l_hMax,
+                                            &l_stationFilePath,
+                                            &l_nFrames,
+                                            &l_k,
+                                            &l_timeStep,
+                                            &l_nOut,
+                                            &l_nFreqStation,
+                                            &l_simTime,
+                                            &l_maxHours,
+                                            &l_b,
+                                            &l_h,
+                                            &l_hu,
+                                            &l_hv);
 
+    // always netCdf 2D output
+    l_writer = new tsunami_lab::io::NetCdf();
     l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    l_stations = new tsunami_lab::io::Stations(l_stationFilePath);
 
     // set up solver
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
@@ -387,7 +386,6 @@ int main(int i_argc,
       case 'r':
       {
         std::string i_filePath(optarg);
-        l_stationFilePath = i_filePath;
         std::cout << "  using stations file at " << i_filePath << std::endl;
         l_stations = new tsunami_lab::io::Stations(i_filePath);
         break;
@@ -578,24 +576,19 @@ int main(int i_argc,
 
   // iterate over time
 
-  if (!l_useCheckpoint)
-  {
-    // delete old solutions
-    if (std::filesystem::exists("solutions"))
-    {
-      std::filesystem::remove_all("solutions");
-    }
-    std::filesystem::create_directory("solutions");
-
-    // delete old stations
-    if (std::filesystem::exists("stations"))
-    {
-      std::filesystem::remove_all("stations");
-    }
-    std::filesystem::create_directory("stations");
-
-    // init IO
-    l_writer->init(l_dxy,
+  // init IO
+  l_writer->init(l_dxy,
+                 l_nx,
+                 l_ny,
+                 l_waveProp->getStride(),
+                 l_waveProp->getGhostCellsX(),
+                 l_waveProp->getGhostCellsY(),
+                 l_xOffset,
+                 l_yOffset,
+                 l_k,
+                 l_waveProp->getBathymetry(),
+                 l_useCheckpoint);
+  l_stations->init(l_dxy,
                    l_nx,
                    l_ny,
                    l_waveProp->getStride(),
@@ -603,13 +596,12 @@ int main(int i_argc,
                    l_waveProp->getGhostCellsY(),
                    l_xOffset,
                    l_yOffset,
-                   l_k,
-                   l_waveProp->getBathymetry());
-    l_stations->init();
-  }
+                   l_waveProp->getBathymetry(),
+                   l_useCheckpoint);
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
   std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
+  std::chrono::nanoseconds l_duration_checkpoint = std::chrono::nanoseconds::zero();
   // writing 1 checkpoint per hour
   int l_nOutCheckpoint = 0;
 
@@ -658,7 +650,7 @@ int main(int i_argc,
                                                  l_xOffset,
                                                  l_yOffset,
                                                  l_hMax,
-                                                 l_stationFilePath,
+                                                 l_stations->getPath(),
                                                  l_nFrames,
                                                  l_k,
                                                  l_timeStep,
@@ -684,24 +676,17 @@ int main(int i_argc,
         {
           std::filesystem::remove(l_checkpoints.front());
         }
+        auto l_checkpointEnd = std::chrono::high_resolution_clock::now();
+        l_duration_checkpoint += l_checkpointEnd - l_WriteEnd;
       }
     }
 
     if (l_simTime > l_nFreqStation * l_stations->getT())
     {
-      l_stations->write(l_dxy,
-                        l_nx,
-                        l_ny,
-                        l_waveProp->getStride(),
-                        l_waveProp->getGhostCellsX(),
-                        l_waveProp->getGhostCellsY(),
-                        l_simTime,
-                        l_xOffset,
-                        l_yOffset,
+      l_stations->write(l_simTime,
                         l_waveProp->getHeight(),
                         l_waveProp->getMomentumX(),
-                        l_waveProp->getMomentumY(),
-                        l_waveProp->getBathymetry());
+                        l_waveProp->getMomentumY());
       ++l_nFreqStation;
     }
 
@@ -718,8 +703,9 @@ int main(int i_argc,
   auto l_duration_setup = l_timeSetup - l_start;
   printTime(l_duration_setup, "setup time");
   auto l_duration_loop = l_end - l_timeSetup;
-  printTime(l_duration_loop - l_duration_write, "calc time ");
+  printTime(l_duration_loop - l_duration_write - l_duration_checkpoint, "calc time ");
   printTime(l_duration_write, "write time");
+  printTime(l_duration_checkpoint, "checkpoint time");
 
   // free memory
   std::cout << "freeing memory" << std::endl;
@@ -727,6 +713,14 @@ int main(int i_argc,
   delete l_waveProp;
   delete l_stations;
   delete l_writer;
+
+  std::cout << "deleting checkpoints" << std::endl;
+
+  // delete checkpoints
+  if (std::filesystem::exists("checkpoints"))
+  {
+    std::filesystem::remove_all("checkpoints");
+  }
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

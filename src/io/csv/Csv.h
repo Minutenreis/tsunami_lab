@@ -72,6 +72,7 @@ public:
    * @param i_offsetX offset in x-direction.
    * @param i_offsetY offset in y-direction.
    * @param i_b bathymetry.
+   * @param i_useCheckpoint flag if checkpoint is used.
    */
   void init(t_real i_dxy,
             t_idx i_nx,
@@ -82,7 +83,8 @@ public:
             t_real i_offsetX,
             t_real i_offsetY,
             t_real,
-            t_real const *i_b);
+            t_real const *i_b,
+            bool i_useCheckpoint);
 
   /**
    * @brief Writes the data to the output.

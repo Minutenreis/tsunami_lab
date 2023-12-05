@@ -94,6 +94,7 @@ public:
      * @param i_offsetY offset in y-direction.
      * @param i_k cell size to be averaged.
      * @param i_b bathymetry.
+     * @param i_useCheckpoint flag if checkpoint is used.
      */
     void init(t_real i_dxy,
               t_idx i_nx,
@@ -104,7 +105,8 @@ public:
               t_real i_offsetX,
               t_real i_offsetY,
               t_real i_k,
-              t_real const *i_b);
+              t_real const *i_b,
+              bool i_useCheckpoint);
 
     /**
      * @brief Writes the data to the output.
@@ -123,7 +125,7 @@ public:
     /**
      * @brief read 3D data from netCdf file.
      *
-     * @param i_fileName name of the netCdf file.
+     * @param i_filePath path to the netCdf file.
      * @param o_nx number of cells in x-direction.
      * @param o_ny number of cells in y-direction.
      * @param o_nz number of cells in z-direction.
@@ -131,7 +133,7 @@ public:
      * @param o_y pointer to array of y-coordinates (Important: Gets a new dynamically allocated array written on it).
      * @param o_z pointer to array of z-coordinates (Important: Gets a new dynamically allocated array written on it).
      */
-    static void read(char *i_fileName,
+    static void read(char *i_filePath,
                      t_idx *o_nx,
                      t_idx *o_ny,
                      t_real **o_x,
@@ -149,7 +151,36 @@ public:
                         char const *i_file,
                         int i_line);
 
-    static void readCheckpoint(char *i_fileName,
+    /**
+     * @brief reads a checkpoint file
+     *
+     * @param i_filePath path to the checkpoint file
+     * @param o_nx number of cells in x-direction
+     * @param o_ny number of cells in y-direction
+     * @param o_useFWave flag if f-wave is used
+     * @param o_boundaryL left boundary
+     * @param o_boundaryR right boundary
+     * @param o_boundaryB bottom boundary
+     * @param o_boundaryT top boundary
+     * @param o_endTime end time of simulation
+     * @param o_width width of the domain
+     * @param o_xOffset x-offset of the domain
+     * @param o_yOffset y-offset of the domain
+     * @param o_hMax maximum water height
+     * @param o_stationFilePath path to the station file
+     * @param o_nFrames number of frames
+     * @param o_k cell size to be averaged
+     * @param o_timeStep time step
+     * @param o_nOut number of outputs
+     * @param o_nFreqStation number of station outputs
+     * @param o_simTime simulation time
+     * @param o_maxHours maximum hours of simulation
+     * @param o_b bathymetry
+     * @param o_h water height
+     * @param o_hu momentum in x-direction
+     * @param o_hv momentum in y-direction
+     */
+    static void readCheckpoint(char *i_filePath,
                                t_idx *o_nx,
                                t_idx *o_ny,
                                bool *o_useFWave,
@@ -175,6 +206,37 @@ public:
                                t_real **o_hu,
                                t_real **o_hv);
 
+    /**
+     * @brief writes a checkpoint file
+     *
+     * @param i_nx number of cells in x-direction
+     * @param i_ny number of cells in y-direction
+     * @param i_stride stride of the data
+     * @param i_ghostCellsX number of ghost cells in x-direction
+     * @param i_ghostCellsY number of ghost cells in y-direction
+     * @param i_useFWave flag if f-wave is used
+     * @param i_boundaryL left boundary
+     * @param i_boundaryR right boundary
+     * @param i_boundaryB bottom boundary
+     * @param i_boundaryT top boundary
+     * @param i_endTime end time of simulation
+     * @param i_width width of the domain
+     * @param i_xOffset x-offset of the domain
+     * @param i_yOffset y-offset of the domain
+     * @param i_hMax maximum water height
+     * @param i_stationFilePath path to the station file
+     * @param i_nFrames number of frames
+     * @param i_k cell size to be averaged
+     * @param i_timeStep time step
+     * @param i_nOut number of outputs
+     * @param i_nFreqStation number of station outputs
+     * @param i_simTime simulation time
+     * @param i_maxHours maximum hours of simulation
+     * @param i_b bathymetry
+     * @param i_h water height
+     * @param i_hu momentum in x-direction
+     * @param i_hv momentum in y-direction
+     */
     static void writeCheckpoint(t_idx i_nx,
                                 t_idx i_ny,
                                 t_idx i_stride,

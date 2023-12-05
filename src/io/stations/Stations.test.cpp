@@ -30,21 +30,15 @@ TEST_CASE("Test Writing JSons for all Stations", "[StationsWrite]")
     std::string l_path = "src/data/test.json";
     tsunami_lab::io::Stations l_stations(l_path);
 
-    // delete old stations
-    if (std::filesystem::exists("stations"))
-    {
-        std::filesystem::remove_all("stations");
-    }
-    std::filesystem::create_directory("stations");
-    l_stations.init();
     tsunami_lab::t_real l_h[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     tsunami_lab::t_real l_hu[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     tsunami_lab::t_real l_hv[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     tsunami_lab::t_real l_b[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    l_stations.init(1, 3, 3, 3, 0, 0, 0, 0, l_b, false);
 
-    l_stations.write(1, 3, 3, 3, 0, 0, 1, 0, 0, l_h, l_hu, l_hv, l_b);
-    l_stations.write(1, 3, 3, 3, 0, 0, 2, 0, 0, l_h, l_hu, l_hv, l_b);
-    l_stations.write(1, 3, 3, 3, 0, 0, 3, 0, 0, l_h, l_hu, l_hv, l_b);
+    l_stations.write(1, l_h, l_hu, l_hv);
+    l_stations.write(2, l_h, l_hu, l_hv);
+    l_stations.write(3, l_h, l_hu, l_hv);
 
     REQUIRE(std::filesystem::exists("stations/station_Test_1.csv"));
     REQUIRE(std::filesystem::exists("stations/station_Test_2.csv"));

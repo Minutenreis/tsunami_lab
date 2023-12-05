@@ -8,6 +8,7 @@
  * IO-routines for reading / writing a snapshot as Comma Separated Values (CSV).
  **/
 #include "Csv.h"
+#include <filesystem>
 
 void tsunami_lab::io::Csv::init(t_real i_dxy,
                                 t_idx i_nx,
@@ -18,7 +19,8 @@ void tsunami_lab::io::Csv::init(t_real i_dxy,
                                 t_real i_offsetX,
                                 t_real i_offsetY,
                                 t_real,
-                                t_real const *i_b)
+                                t_real const *i_b,
+                                bool i_useCheckpoint)
 {
   // save setup parameters
   m_dxy = i_dxy;
@@ -30,6 +32,16 @@ void tsunami_lab::io::Csv::init(t_real i_dxy,
   m_offsetX = i_offsetX;
   m_offsetY = i_offsetY;
   m_b = i_b;
+
+  if (!i_useCheckpoint)
+  {
+    // delete old solutions
+    if (std::filesystem::exists("solutions"))
+    {
+      std::filesystem::remove_all("solutions");
+    }
+    std::filesystem::create_directory("solutions");
+  }
 }
 
 void tsunami_lab::io::Csv::write(t_real const *i_h,

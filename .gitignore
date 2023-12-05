@@ -14,6 +14,7 @@ config.log
 /stations/**
 /output/**
 /plots/**
+/checkpoints/**
 *.nc
 
 # submissions binaries

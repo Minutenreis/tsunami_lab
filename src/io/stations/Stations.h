@@ -33,6 +33,36 @@ private:
     //! station data vector
     std::vector<t_station> m_stations;
 
+    //! stations file path
+    std::string m_path;
+
+    //! cell width in x- and y-direction.
+    t_real m_dxy;
+
+    //! number of cells in x-direction.
+    t_idx m_nx;
+
+    //! number of cells in y-direction.
+    t_idx m_ny;
+
+    //! stride of the data arrays.
+    t_idx m_stride;
+
+    //! number of ghost cells in x-direction.
+    t_idx m_ghostCellsX;
+
+    //! number of ghost cells in y-direction.
+    t_idx m_ghostCellsY;
+
+    //! offset in x-direction.
+    t_real m_offsetX;
+
+    //! offset in y-direction.
+    t_real m_offsetY;
+
+    //! bathymetry.
+    t_real const *m_b;
+
 public:
     /**
      * Constructs the stations controller.
@@ -56,7 +86,25 @@ public:
     std::vector<t_station> getStations() const;
 
     /**
+     * @brief Returns the path to the stations file.
+     */
+    std::string getPath() const;
+
+    /**
      * Writes the data as CSV to the given stream.
+     *
+     * @param i_simTime simulation time.
+     * @param i_h water height of the cells; optional: use nullptr if not required.
+     * @param i_hu momentum in x-direction of the cells; optional: use nullptr if not required.
+     * @param i_hv momentum in y-direction of the cells; optional: use nullptr if not required.
+     **/
+    void write(t_real i_simTime,
+               t_real const *i_h,
+               t_real const *i_hu,
+               t_real const *i_hv);
+
+    /**
+     * @brief Initializes output files
      *
      * @param i_dxy cell width in x- and y-direction.
      * @param i_nx number of cells in x-direction.
@@ -64,33 +112,21 @@ public:
      * @param i_stride stride of the data arrays in y-direction (x is assumed to be stride-1).
      * @param i_ghostCellsX number of ghost cells in x-direction.
      * @param i_ghostCellsY number of ghost cells in y-direction.
-     * @param i_simTime simulation time.
      * @param i_offsetX offset in x-direction.
      * @param i_offsetY offset in y-direction.
-     * @param i_h water height of the cells; optional: use nullptr if not required.
-     * @param i_hu momentum in x-direction of the cells; optional: use nullptr if not required.
-     * @param i_hv momentum in y-direction of the cells; optional: use nullptr if not required.
      * @param i_b bathymetry of the cells; optional: use nullptr if not required.
-     **/
-    void write(t_real i_dxy,
-               t_idx i_nx,
-               t_idx i_ny,
-               t_idx i_stride,
-               t_idx i_ghostCellsX,
-               t_idx i_ghostCellsY,
-               t_real i_simTime,
-               t_real i_offsetX,
-               t_real i_offsetY,
-               t_real const *i_h,
-               t_real const *i_hu,
-               t_real const *i_hv,
-               t_real const *i_b);
-
-    /**
-     * @brief Initializes output files
-     *
+     * @param i_useCheckpoint flag if checkpoint is used.
      */
-    void init();
+    void init(t_real i_dxy,
+              t_idx i_nx,
+              t_idx i_ny,
+              t_idx i_stride,
+              t_idx i_ghostCellsX,
+              t_idx i_ghostCellsY,
+              t_real i_offsetX,
+              t_real i_offsetY,
+              t_real const *i_b,
+              bool i_useCheckpoint);
 };
 
 #endif
