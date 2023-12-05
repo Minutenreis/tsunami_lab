@@ -123,6 +123,9 @@ TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 
     // close netCdf file
     tsunami_lab::io::NetCdf::ncCheck(nc_close(l_ncidp), __FILE__, __LINE__);
+
+    // delete file
+    std::filesystem::remove_all("output.nc");
 }
 
 TEST_CASE("Test Writing Coarse Output", "[NetCdfWriteCoarse]")
@@ -171,6 +174,9 @@ TEST_CASE("Test Writing Coarse Output", "[NetCdfWriteCoarse]")
     REQUIRE(l_bR == Approx(5));
 
     delete l_writer;
+
+    // delete file
+    std::filesystem::remove_all("output.nc");
 }
 
 TEST_CASE("Test Reading NetCdf Data", "[NetCdfRead]")
@@ -375,4 +381,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     delete[] l_hR;
     delete[] l_huR;
     delete[] l_hvR;
+
+    // delete checkpoint
+    std::filesystem::remove_all("checkpoints");
 }

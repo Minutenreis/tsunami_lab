@@ -106,11 +106,11 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
         t_real *l_y = new t_real[m_ny / m_k];
         for (t_idx l_ix = 0; l_ix < m_nx / m_k; l_ix++)
         {
-            l_x[l_ix] = m_offsetX + (l_ix + 0.5) * m_k * m_dxy;
+            l_x[l_ix] = m_offsetX + ((float)l_ix + 0.5) * (float)m_k * m_dxy;
         }
         for (t_idx l_iy = 0; l_iy < m_ny / m_k; l_iy++)
         {
-            l_y[l_iy] = m_offsetY + (l_iy + 0.5) * m_k * m_dxy;
+            l_y[l_iy] = m_offsetY + ((float)l_iy + 0.5) * (float)m_k * m_dxy;
         }
         ncCheck(nc_put_var_float(m_ncidp, m_varXId, l_x), __FILE__, __LINE__);
         ncCheck(nc_put_var_float(m_ncidp, m_varYId, l_y), __FILE__, __LINE__);

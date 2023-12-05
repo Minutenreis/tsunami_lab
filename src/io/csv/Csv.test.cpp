@@ -119,6 +119,9 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
     }
 
   delete l_csv;
+
+  // clean up
+  std::filesystem::remove_all("solutions");
 }
 
 TEST_CASE("Test the CSV-reader with a 4 column file.", "[CsvRead4Columns]")

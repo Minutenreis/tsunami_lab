@@ -61,4 +61,7 @@ TEST_CASE("Test Writing JSons for all Stations", "[StationsWrite]")
     REQUIRE(l_momentum_x == 7);
     REQUIRE(l_momentum_y == 7);
     REQUIRE(l_bathymetry == 7);
+
+    // clean up
+    std::filesystem::remove_all("stations");
 }

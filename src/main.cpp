@@ -438,7 +438,6 @@ int main(int i_argc,
           std::cerr << "invalid coarse output " << l_k << std::endl;
           return EXIT_FAILURE;
         }
-        std::cout << "  using coarse output " << l_k << "x" << l_k << " cells output averaged (only used in 2d netcdf)" << std::endl;
         break;
       }
       // unknown option
@@ -504,6 +503,7 @@ int main(int i_argc,
   std::cout << "  time simulated:                 " << l_endTime << " s" << std::endl;
   std::cout << "  number of cells in x-direction: " << l_nx << std::endl;
   std::cout << "  number of cells in y-direction: " << l_ny << std::endl;
+  std::cout << "  using coarse output (netcdf):   " << l_k << "x" << l_k << " cells" << std::endl;
 
   if (!l_useCheckpoint)
   {
@@ -632,7 +632,7 @@ int main(int i_argc,
         break;
       }
       // write checkpoint every hour (only 2D, netCdf)
-      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
+      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::minutes(l_nOutCheckpoint))
       {
         std::cout << "  writing checkpoint" << std::endl;
         tsunami_lab::io::NetCdf::writeCheckpoint(l_nx,
