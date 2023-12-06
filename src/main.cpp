@@ -201,6 +201,27 @@ int main(int i_argc,
                                   l_b[l_cx + l_cy * l_nx]);
       }
 
+    // delete all newer station outputs
+    if (std::filesystem::exists("stations"))
+    {
+      rapidcsv::Document l_doc;
+      for (const auto &entry : std::filesystem::directory_iterator("stations"))
+      {
+        std::string l_filePath{entry.path().u8string()};
+        tsunami_lab::io::Csv::openCSV(l_filePath, l_doc, true);
+        int l_rows = l_doc.GetRowCount();
+        for (int i = l_rows - 1; i >= 0; --i)
+        {
+          std::cout << l_doc.GetCell<std::string>(0, i) << std::endl;
+          if (l_doc.GetCell<tsunami_lab::t_real>(0, i) > l_simTime)
+            l_doc.RemoveRow(i);
+          else
+            break;
+        }
+        l_doc.Save();
+      }
+    }
+
     delete[] l_b;
     delete[] l_h;
     delete[] l_hu;
@@ -603,7 +624,7 @@ int main(int i_argc,
   std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
   std::chrono::nanoseconds l_duration_checkpoint = std::chrono::nanoseconds::zero();
   // writing 1 checkpoint per hour
-  int l_nOutCheckpoint = 0;
+  int l_nOutCheckpoint = 1;
 
   while (l_simTime < l_endTime)
   {
