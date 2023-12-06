@@ -44,6 +44,18 @@ private:
   //! bathymetry array.
   t_real *m_bathymetry;
 
+  //! cell size in x direction for bathymetry
+  t_real m_stepBathX;
+
+  //! cell size in y direction for bathymetry
+  t_real m_stepBathY;
+
+  //! offset in x direction for bathymetry
+  t_real m_offsetBathX;
+
+  //! offset in y direction for bathymetry
+  t_real m_offsetBathY;
+
   //! length of displacement in x direction.
   t_idx m_ndX;
 
@@ -58,6 +70,18 @@ private:
 
   //! displacement array.
   t_real *m_displacement;
+
+  //! cell size in x direction for displacement
+  t_real m_stepDisplX;
+
+  //! cell size in y direction for displacement
+  t_real m_stepDisplY;
+
+  //! offset in x direction for displacement
+  t_real m_offsetDisplX;
+
+  //! offset in y direction for displacement
+  t_real m_offsetDisplY;
 
   /**
    * @brief Gets displacement

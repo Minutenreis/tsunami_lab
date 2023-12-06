@@ -632,7 +632,7 @@ int main(int i_argc,
         break;
       }
       // write checkpoint every hour (only 2D, netCdf)
-      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::minutes(l_nOutCheckpoint))
+      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
       {
         std::cout << "  writing checkpoint" << std::endl;
         tsunami_lab::io::NetCdf::writeCheckpoint(l_nx,
