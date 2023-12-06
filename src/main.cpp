@@ -692,7 +692,6 @@ int main(int i_argc,
           l_checkpoints.push_back(entry.path());
         }
         std::sort(l_checkpoints.begin(), l_checkpoints.end());
-        std::string l_newestCheckpoint = l_checkpoints.front();
         if (l_checkpoints.size() > 2)
         {
           std::filesystem::remove(l_checkpoints.front());
