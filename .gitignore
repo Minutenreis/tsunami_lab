@@ -15,7 +15,8 @@ config.log
 /output/**
 /plots/**
 /checkpoints/**
-*.nc
+**.nc
+**.cdl
 
 # submissions binaries
 **.tar.xz

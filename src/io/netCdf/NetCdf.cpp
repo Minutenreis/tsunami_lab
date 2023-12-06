@@ -69,7 +69,7 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
     if (!i_useCheckpoint)
     {
         // create netCdf file
-        ncCheck(nc_create("output.nc", NC_CLOBBER, &m_ncidp), __FILE__, __LINE__);
+        ncCheck(nc_create("output.nc", NC_CLOBBER | NC_NETCDF4, &m_ncidp), __FILE__, __LINE__);
 
         // define dimensions & variables
         int l_dimXId, l_dimYId, l_dimTimeId;
@@ -371,7 +371,7 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     {
         std::filesystem::create_directory("checkpoints");
     }
-    ncCheck(nc_create(l_fileName.data(), NC_CLOBBER, &l_ncidp), __FILE__, __LINE__);
+    ncCheck(nc_create(l_fileName.data(), NC_CLOBBER | NC_NETCDF4, &l_ncidp), __FILE__, __LINE__);
 
     // define dimensions
     int l_dimXId, l_dimYId, l_dimTextId;
