@@ -212,7 +212,6 @@ int main(int i_argc,
         int l_rows = l_doc.GetRowCount();
         for (int i = l_rows - 1; i >= 0; --i)
         {
-          std::cout << l_doc.GetCell<std::string>(0, i) << std::endl;
           if (l_doc.GetCell<tsunami_lab::t_real>(0, i) > l_simTime)
             l_doc.RemoveRow(i);
           else
