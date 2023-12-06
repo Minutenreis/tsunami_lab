@@ -377,7 +377,8 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     int l_dimXId, l_dimYId, l_dimTextId;
     ncCheck(nc_def_dim(l_ncidp, "x", i_nx, &l_dimXId), __FILE__, __LINE__);
     ncCheck(nc_def_dim(l_ncidp, "y", i_ny, &l_dimYId), __FILE__, __LINE__);
-    ncCheck(nc_def_dim(l_ncidp, "text", i_stationFilePath.length(), &l_dimTextId), __FILE__, __LINE__);
+    // +1 for the null-terminator
+    ncCheck(nc_def_dim(l_ncidp, "text", i_stationFilePath.length() + 1, &l_dimTextId), __FILE__, __LINE__);
 
     // define dimensionless variables
     int l_varUseFWaveId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
