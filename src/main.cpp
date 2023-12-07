@@ -83,7 +83,7 @@ int main(int i_argc,
   {
     // removed invalid number of arguments message for -h option
     std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] [-t maxtime] n_cells_x" << std::endl;
+    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] [-t maxtime] [-k size] n_cells_x" << std::endl;
     std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
     return EXIT_FAILURE;
   }
@@ -732,14 +732,6 @@ int main(int i_argc,
   delete l_waveProp;
   delete l_stations;
   delete l_writer;
-
-  std::cout << "deleting checkpoints" << std::endl;
-
-  // delete checkpoints
-  if (std::filesystem::exists("checkpoints"))
-  {
-    std::filesystem::remove_all("checkpoints");
-  }
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;
