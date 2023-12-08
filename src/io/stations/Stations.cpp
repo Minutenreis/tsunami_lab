@@ -15,6 +15,7 @@ using json = nlohmann::json;
 
 tsunami_lab::io::Stations::Stations(const std::string path)
 {
+    m_path = path;
     std::ifstream f(path);
     json data = json::parse(f);
 
@@ -33,40 +34,65 @@ std::vector<tsunami_lab::t_station> tsunami_lab::io::Stations::getStations() con
     return m_stations;
 }
 
-void tsunami_lab::io::Stations::init()
+std::string tsunami_lab::io::Stations::getPath() const
 {
-    for (t_station l_station : m_stations)
+    return m_path;
+}
+
+void tsunami_lab::io::Stations::init(t_real i_dxy,
+                                     t_idx i_nx,
+                                     t_idx i_ny,
+                                     t_idx i_stride,
+                                     t_idx i_ghostCellsX,
+                                     t_idx i_ghostCellsY,
+                                     t_real i_offsetX,
+                                     t_real i_offsetY,
+                                     t_real const *i_b,
+                                     bool i_useCheckpoint)
+{
+    m_dxy = i_dxy;
+    m_nx = i_nx;
+    m_ny = i_ny;
+    m_stride = i_stride;
+    m_ghostCellsX = i_ghostCellsX;
+    m_ghostCellsY = i_ghostCellsY;
+    m_offsetX = i_offsetX;
+    m_offsetY = i_offsetY;
+    m_b = i_b;
+
+    // if checkpoint is used, the stations are already initialized
+    if (!i_useCheckpoint)
     {
-        std::string l_path = "stations/station_" + l_station.name + ".csv";
-        std::ofstream l_file;
-        l_file.open(l_path);
-        l_file << "time,height,momentum_x,momentum_y,bathymetry" << std::endl;
+        // delete old stations
+        if (std::filesystem::exists("stations"))
+        {
+            std::filesystem::remove_all("stations");
+        }
+        std::filesystem::create_directory("stations");
+        for (t_station l_station : m_stations)
+        {
+            std::string l_path = "stations/station_" + l_station.name + ".csv";
+            std::ofstream l_file;
+            l_file.open(l_path);
+            l_file << "time,height,momentum_x,momentum_y,bathymetry" << std::endl;
+        }
     }
 }
 
-void tsunami_lab::io::Stations::write(t_real i_dxy,
-                                      t_idx i_nx,
-                                      t_idx i_ny,
-                                      t_idx i_stride,
-                                      t_idx i_ghostCellsX,
-                                      t_idx i_ghostCellsY,
-                                      t_real i_simTime,
-                                      t_real i_offsetX,
-                                      t_real i_offsetY,
+void tsunami_lab::io::Stations::write(t_real i_simTime,
                                       t_real const *i_h,
                                       t_real const *i_hu,
-                                      t_real const *i_hv,
-                                      t_real const *i_b)
+                                      t_real const *i_hv)
 {
     for (t_station l_station : m_stations)
     {
-        if (l_station.x - i_offsetX < 0 || l_station.x - i_offsetX >= i_nx * i_dxy || l_station.y - i_offsetY < 0 || l_station.y - i_offsetY >= i_ny * i_dxy)
+        if (l_station.x - m_offsetX < 0 || l_station.x - m_offsetX >= m_nx * m_dxy || l_station.y - m_offsetY < 0 || l_station.y - m_offsetY >= m_ny * m_dxy)
             continue; // station is outside of the domain
 
-        t_idx l_ix = (l_station.x - i_offsetX) / i_dxy + i_ghostCellsX;
-        t_idx l_iy = (l_station.y - i_offsetY) / i_dxy + i_ghostCellsY;
+        t_idx l_ix = (l_station.x - m_offsetX) / m_dxy + m_ghostCellsX;
+        t_idx l_iy = (l_station.y - m_offsetY) / m_dxy + m_ghostCellsY;
 
-        t_idx l_id = l_ix + l_iy * i_stride;
+        t_idx l_id = l_ix + l_iy * m_stride;
 
         std::string l_path = "stations/station_" + l_station.name + ".csv";
         std::ofstream l_file;
@@ -85,8 +111,8 @@ void tsunami_lab::io::Stations::write(t_real i_dxy,
             l_file << "," << i_hv[l_id];
         else
             l_file << ",0";
-        if (i_b != nullptr)
-            l_file << "," << i_b[l_id];
+        if (m_b != nullptr)
+            l_file << "," << m_b[l_id];
         else
             l_file << ",0";
         l_file << std::endl

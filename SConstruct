@@ -5,7 +5,7 @@
 # Entry-point for builds.
 ##
 import SCons
-import platform
+import distro
 
 print( '####################################' )
 print( '### Tsunami Lab                  ###' )
@@ -35,7 +35,8 @@ if vars.UnknownVariables():
 env = Environment( variables = vars )
 
 # workaround to find the right g++ version on Ara
-if 'centos' in platform.platform():
+if 'centos' == distro.id():
+  print('running on Ara, using gcc-11.2.0')
   env.Replace(CXX="/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++")
 
 # check for libs

@@ -22,6 +22,18 @@ tsunami_lab::setups::TsunamiEvent2d::TsunamiEvent2d(char *i_displacement,
   io::NetCdf::read(i_displacement, &m_ndX, &m_ndY, &m_displacementX, &m_displacementY, &m_displacement);
   io::NetCdf::read(i_bathymetry, &m_nbX, &m_nbY, &m_bathymetryX, &m_bathymetryY, &m_bathymetry);
 
+  // calculate cell size
+  m_stepBathX = m_bathymetryX[1] - m_bathymetryX[0];
+  m_stepBathY = m_bathymetryY[1] - m_bathymetryY[0];
+  m_stepDisplX = m_displacementX[1] - m_displacementX[0];
+  m_stepDisplY = m_displacementY[1] - m_displacementY[0];
+
+  // get offsets
+  m_offsetBathX = m_bathymetryX[0];
+  m_offsetBathY = m_bathymetryY[0];
+  m_offsetDisplX = m_displacementX[0];
+  m_offsetDisplY = m_displacementY[0];
+
   // calculate width
   *o_width = m_bathymetryX[m_nbX - 1] - m_bathymetryX[0];
   *o_height = m_bathymetryY[m_nbY - 1] - m_bathymetryY[0];
@@ -44,13 +56,9 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getHeight(t_real i_x,
 {
   t_real l_bin = getBathymetryBin(i_x, i_y);
   if (l_bin < 0)
-  {
-    if (-l_bin > m_delta)
-      return -l_bin;
-    else
-      return m_delta;
-  }
-  return 0;
+    return std::max(-l_bin, m_delta);
+  else
+    return 0;
 }
 
 tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getMomentumX(t_real,
@@ -70,103 +78,52 @@ tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getBathymetry(t_real i_
 {
   t_real l_bin = getBathymetryBin(i_x, i_y);
 
-  if (std::isnan(l_bin))
-    std::cout << "nan bathymetry " << i_x << i_y << std::endl;
   if (l_bin < 0)
-  {
-    if (l_bin < -m_delta)
-      return l_bin + getDisplacement(i_x, i_y);
-    else
-      return -m_delta + getDisplacement(i_x, i_y);
-  }
-  // max(bin, delta) + d
-  if (l_bin > m_delta)
-    return l_bin + getDisplacement(i_x, i_y);
+    return std::min(l_bin, -m_delta) + getDisplacement(i_x, i_y);
   else
-    return m_delta + getDisplacement(i_x, i_y);
+    return std::max(l_bin, m_delta) + getDisplacement(i_x, i_y);
 }
 
 tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getDisplacement(t_real i_x,
                                                                          t_real i_y) const
 {
-  t_idx l_x = 0;
-  t_idx l_y = 0;
+  // calculate closest x and y
+  double l_x = round((i_x - m_offsetDisplX) / m_stepDisplX);
+  double l_y = round((i_y - m_offsetDisplY) / m_stepDisplY);
+
   // check if in bounds
-  if (i_x < m_displacementX[0] || i_x > m_displacementX[m_ndX - 1] || i_y < m_displacementY[0] || i_y > m_displacementY[m_ndY - 1])
+  if (l_x < 0 || l_x >= m_ndX || l_y < 0 || l_y >= m_ndY)
     return 0;
 
-  // find closest x and y
-  for (t_idx l_ix = 0; l_ix < m_ndX; l_ix++)
-  {
-    if (m_displacementX[l_ix] > i_x)
-    {
-      if (i_x - m_displacementX[l_ix - 1] < m_displacementX[l_ix] - i_x)
-        l_x = l_ix - 1;
-      else
-        l_x = l_ix;
-      break;
-    }
-  }
-  for (t_idx l_iy = 0; l_iy < m_ndY; l_iy++)
-  {
-    if (m_displacementY[l_iy] > i_y)
-    {
-      if (i_y - m_displacementY[l_iy - 1] < m_displacementY[l_iy] - i_y)
-        l_y = l_iy - 1;
-      else
-        l_y = l_iy;
-      break;
-    }
-  }
+  // convert to t_idx
+  t_idx l_x_idx = l_x;
+  t_idx l_y_idx = l_y;
 
   // return displacement
-  return m_displacement[l_y * m_ndX + l_x];
+  return m_displacement[l_y_idx * m_ndX + l_x_idx];
 }
 
 tsunami_lab::t_real tsunami_lab::setups::TsunamiEvent2d::getBathymetryBin(t_real i_x, t_real i_y) const
 {
-  t_idx l_x = 0;
-  t_idx l_y = 0;
 
-  // find closest x and y
-  if (i_x <= m_bathymetryX[0])
+  // calculate closest x and y
+  double l_x = round((i_x - m_offsetBathX) / m_stepBathX);
+  double l_y = round((i_y - m_offsetBathY) / m_stepBathY);
+
+  // check if in bounds
+  if (l_x < 0)
     l_x = 0;
-  else if (i_x >= m_bathymetryX[m_nbX - 1])
+  if (l_x >= m_nbX)
     l_x = m_nbX - 1;
-  else
-  {
-    for (t_idx l_ix = 1; l_ix < m_nbX; l_ix++)
-    {
-      if (m_bathymetryX[l_ix] > i_x)
-      {
-        if (i_x - m_bathymetryX[l_ix - 1] < m_bathymetryX[l_ix] - i_x)
-          l_x = l_ix - 1;
-        else
-          l_x = l_ix;
-        break;
-      }
-    }
-  }
-
-  if (i_y <= m_bathymetryY[0])
+  if (l_y < 0)
     l_y = 0;
-  else if (i_y >= m_bathymetryY[m_nbY - 1])
+  if (l_y >= m_nbY)
     l_y = m_nbY - 1;
-  else
-  {
-    for (t_idx l_iy = 1; l_iy < m_nbY; l_iy++)
-    {
-      if (m_bathymetryY[l_iy] > i_y)
-      {
-        if (i_y - m_bathymetryY[l_iy - 1] < m_bathymetryY[l_iy] - i_y)
-          l_y = l_iy - 1;
-        else
-          l_y = l_iy;
-        break;
-      }
-    }
-  }
+
+  // convert to t_idx
+  t_idx l_x_idx = l_x;
+  t_idx l_y_idx = l_y;
 
   // return bathymetry
-  return m_bathymetry[l_y * m_nbX + l_x];
+  return m_bathymetry[l_y_idx * m_nbX + l_x_idx];
 }

@@ -115,7 +115,7 @@ The computational demands for the simulations are approximated by the following 
 | Timesteps        | 24566            | 24617            | 45572            |
 +------------------+------------------+------------------+------------------+
 | Cellupdates      | 0.4 * 10^12      | 1.6 * 10^12      | 12.8 * 10^12     |
-+------------------+------------------+------------------+------------------
++------------------+------------------+------------------+------------------+
 
 We see the simulation is significantly faster than the Chile Event due to the smaller size.
 
@@ -167,7 +167,7 @@ We see the breakdown barely propagated outwards and seemingly didn't affect the 
 6.2.2 Check simulation results in the town of Sõma
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Historic Data for Sõma is available by the `NOAA Database<https://www.ngdc.noaa.gov/hazel/view/hazards/tsunami/runup-more-info/19241>`_.
+Historic Data for Sõma is available by the `NOAA Database <https://www.ngdc.noaa.gov/hazel/view/hazards/tsunami/runup-more-info/19241>`_.
 
 The NOAA Database lists a travel time of 9 minutes for the first wave to reach Sõma, which is significantly faster than our simulation.
 We don't know what the NOAA's criteria is for the travel minutes so the difference might be due to that.
@@ -182,8 +182,7 @@ With the provided formula the wavespeed would be :math:`\sqrt{9.80665 * 255.6141
 Sõma lies :math:`\sqrt{54.6^2 + 127.6^2} = 138.8km` away from the epicenter.
 So the wave takes :math:`\frac{138.8km}{50 \frac{m}{s}} = 2776s \approx 46min` to reach Sõma.
 
-In our simulation we placed a station at (-55km, -123km) and measured h, hu and hv.
-We used the coordinates to ensure us actually landing in the water in our simulation and not on a landmass.
+In our simulation we placed a station at (-54600m, -127600m) and measured h, hu and hv.
 
 .. figure:: _static/6_Soma_h.png
   :width: 700

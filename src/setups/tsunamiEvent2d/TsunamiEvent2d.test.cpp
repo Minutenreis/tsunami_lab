@@ -69,10 +69,10 @@ TEST_CASE("Test the two-dimensional tsunamiEvent setup.", "[TsunamiEvent2d]")
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(6.9, 1.1);
   REQUIRE(l_bathymetryValue == Approx(-16));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(7.1, 1.1);
-  REQUIRE(l_bathymetryValue == Approx(-20));
+  REQUIRE(l_bathymetryValue == Approx(-16));
 
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(2.9, 2);
-  REQUIRE(l_bathymetryValue == Approx(-20));
+  REQUIRE(l_bathymetryValue == Approx(-15));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(3.1, 2);
   REQUIRE(l_bathymetryValue == Approx(-15));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(4, 2);
@@ -84,10 +84,10 @@ TEST_CASE("Test the two-dimensional tsunamiEvent setup.", "[TsunamiEvent2d]")
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(6.9, 2);
   REQUIRE(l_bathymetryValue == Approx(-11));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(7.1, 2);
-  REQUIRE(l_bathymetryValue == Approx(-20));
+  REQUIRE(l_bathymetryValue == Approx(-11));
 
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(2.9, 2.9);
-  REQUIRE(l_bathymetryValue == Approx(-20));
+  REQUIRE(l_bathymetryValue == Approx(-10));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(3.1, 2.9);
   REQUIRE(l_bathymetryValue == Approx(-10));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(4, 2.9);
@@ -99,7 +99,7 @@ TEST_CASE("Test the two-dimensional tsunamiEvent setup.", "[TsunamiEvent2d]")
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(6.9, 2.9);
   REQUIRE(l_bathymetryValue == Approx(-6));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(7.1, 2.9);
-  REQUIRE(l_bathymetryValue == Approx(-20));
+  REQUIRE(l_bathymetryValue == Approx(-6));
   l_bathymetryValue = l_tsunamiEvent2d->getBathymetry(30, 30);
   REQUIRE(l_bathymetryValue == Approx(-20));
 

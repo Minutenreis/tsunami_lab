@@ -22,13 +22,6 @@ TEST_CASE("Test the CSV-writer for 1D settings.", "[CsvWrite1d]")
   tsunami_lab::t_real l_h[7] = {0, 1, 2, 3, 4, 5, 6};
   tsunami_lab::t_real l_hu[7] = {6, 5, 4, 3, 2, 1, 0};
 
-  // delete old stations
-  if (std::filesystem::exists("solutions"))
-  {
-    std::filesystem::remove_all("solutions");
-  }
-  std::filesystem::create_directory("solutions");
-
   tsunami_lab::io::Csv *l_csv = new tsunami_lab::io::Csv();
 
   l_csv->init(0.5,
@@ -39,7 +32,9 @@ TEST_CASE("Test the CSV-writer for 1D settings.", "[CsvWrite1d]")
               0,
               0,
               0,
-              nullptr);
+              0,
+              nullptr,
+              false);
 
   std::stringstream l_stream0;
   l_csv->write(l_h,
@@ -82,13 +77,6 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
                                   2, 6, 10, 14,
                                   3, 7, 11, 15};
 
-  // delete old stations
-  if (std::filesystem::exists("solutions"))
-  {
-    std::filesystem::remove_all("solutions");
-  }
-  std::filesystem::create_directory("solutions");
-
   tsunami_lab::io::Csv *l_csv = new tsunami_lab::io::Csv();
 
   l_csv->init(10,
@@ -99,7 +87,9 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
               1,
               0,
               0,
-              nullptr);
+              0,
+              nullptr,
+              false);
 
   l_csv->write(l_h,
                l_hu,
@@ -129,6 +119,9 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
     }
 
   delete l_csv;
+
+  // clean up
+  std::filesystem::remove_all("solutions");
 }
 
 TEST_CASE("Test the CSV-reader with a 4 column file.", "[CsvRead4Columns]")
