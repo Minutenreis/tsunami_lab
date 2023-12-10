@@ -50,12 +50,6 @@ private:
     //! cell size to be averaged.
     t_idx m_k;
 
-    //! netCdf file id.
-    int m_ncidp = -1;
-
-    //! netCdf dimension ids.
-    int m_varXId, m_varYId, m_varTimeId, m_varHId, m_varHuId, m_varHvId, m_varBId;
-
     /**
      * @brief Prune Ghost Cells of Data
      *
@@ -64,7 +58,7 @@ private:
      * @param i_nOut output time step
      * @param i_hasTime true if data has time
      */
-    void putVaraWithGhostcells(t_real const *i_data, int i_var, t_idx i_nOut, bool i_hasTime);
+    void putVaraWithGhostcells(t_real const *i_data, int l_ncidp, int i_var, t_idx i_nOut, bool i_hasTime);
 
     /**
      * @brief Converts saved boundary int to enum

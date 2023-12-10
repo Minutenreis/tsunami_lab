@@ -20,7 +20,7 @@ void tsunami_lab::io::NetCdf::ncCheck(int i_status, char const *i_file, int i_li
     }
 }
 
-void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int i_var, t_idx i_nOut, bool i_hasTime)
+void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_ncidp, int i_var, t_idx i_nOut, bool i_hasTime)
 {
     t_idx l_time = i_hasTime ? 0 : 1; // if it has no time, start array at 1st index
     t_idx start_p[3] = {i_nOut, 0, 0};
@@ -37,7 +37,7 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int i_
                 l_row[l_ix / m_k] += i_data[l_ix + m_ghostCellsX + (l_iy + m_ghostCellsY) * m_stride] / (m_k * m_k);
             }
         }
-        ncCheck(nc_put_vara_float(m_ncidp, i_var, start_p + l_time, count_p + l_time, l_row), __FILE__, __LINE__);
+        ncCheck(nc_put_vara_float(l_ncidp, i_var, start_p + l_time, count_p + l_time, l_row), __FILE__, __LINE__);
         delete[] l_row;
     }
 }
@@ -68,38 +68,42 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
     // if checkpoint is used, the file already exists with all static data
     if (!i_useCheckpoint)
     {
+        int l_ncidp = -1;
+
         // create netCdf file
-        ncCheck(nc_create("output.nc", NC_CLOBBER | NC_NETCDF4, &m_ncidp), __FILE__, __LINE__);
+        ncCheck(nc_create("output.nc", NC_CLOBBER | NC_NETCDF4, &l_ncidp), __FILE__, __LINE__);
 
         // define dimensions & variables
         int l_dimXId, l_dimYId, l_dimTimeId;
-        ncCheck(nc_def_dim(m_ncidp, "x", m_nx / m_k, &l_dimXId), __FILE__, __LINE__);
-        ncCheck(nc_def_dim(m_ncidp, "y", m_ny / m_k, &l_dimYId), __FILE__, __LINE__);
-        ncCheck(nc_def_dim(m_ncidp, "time", NC_UNLIMITED, &l_dimTimeId), __FILE__, __LINE__);
+        ncCheck(nc_def_dim(l_ncidp, "x", m_nx / m_k, &l_dimXId), __FILE__, __LINE__);
+        ncCheck(nc_def_dim(l_ncidp, "y", m_ny / m_k, &l_dimYId), __FILE__, __LINE__);
+        ncCheck(nc_def_dim(l_ncidp, "time", NC_UNLIMITED, &l_dimTimeId), __FILE__, __LINE__);
+
+        int l_varXId, l_varYId, l_varTimeId, l_varHId, l_varHuId, l_varHvId, l_varBId;
 
         int l_dimB[2] = {l_dimYId, l_dimXId};
         int l_dimQ[3] = {l_dimTimeId, l_dimYId, l_dimXId};
-        ncCheck(nc_def_var(m_ncidp, "x", NC_FLOAT, 1, &l_dimXId, &m_varXId), __FILE__, __LINE__);
-        ncCheck(nc_put_att_text(m_ncidp, l_dimXId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
-        ncCheck(nc_def_var(m_ncidp, "y", NC_FLOAT, 1, &l_dimYId, &m_varYId), __FILE__, __LINE__);
-        ncCheck(nc_put_att_text(m_ncidp, l_dimYId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
-        ncCheck(nc_def_var(m_ncidp, "time", NC_FLOAT, 1, &l_dimTimeId, &m_varTimeId), __FILE__, __LINE__);
-        ncCheck(nc_put_att_text(m_ncidp, l_dimTimeId, "units", strlen("seconds since simulationstart"), "seconds since simulationstart"), __FILE__, __LINE__);
+        ncCheck(nc_def_var(l_ncidp, "x", NC_FLOAT, 1, &l_dimXId, &l_varXId), __FILE__, __LINE__);
+        ncCheck(nc_put_att_text(l_ncidp, l_dimXId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
+        ncCheck(nc_def_var(l_ncidp, "y", NC_FLOAT, 1, &l_dimYId, &l_varYId), __FILE__, __LINE__);
+        ncCheck(nc_put_att_text(l_ncidp, l_dimYId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
+        ncCheck(nc_def_var(l_ncidp, "time", NC_FLOAT, 1, &l_dimTimeId, &l_varTimeId), __FILE__, __LINE__);
+        ncCheck(nc_put_att_text(l_ncidp, l_dimTimeId, "units", strlen("seconds since simulationstart"), "seconds since simulationstart"), __FILE__, __LINE__);
 
-        ncCheck(nc_def_var(m_ncidp, "height", NC_FLOAT, 3, l_dimQ, &m_varHId), __FILE__, __LINE__);
-        ncCheck(nc_put_att_text(m_ncidp, m_varHId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
-        ncCheck(nc_def_var(m_ncidp, "momentum_x", NC_FLOAT, 3, l_dimQ, &m_varHuId), __FILE__, __LINE__);
-        ncCheck(nc_put_att_text(m_ncidp, m_varHuId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
+        ncCheck(nc_def_var(l_ncidp, "height", NC_FLOAT, 3, l_dimQ, &l_varHId), __FILE__, __LINE__);
+        ncCheck(nc_put_att_text(l_ncidp, l_varHId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
+        ncCheck(nc_def_var(l_ncidp, "momentum_x", NC_FLOAT, 3, l_dimQ, &l_varHuId), __FILE__, __LINE__);
+        ncCheck(nc_put_att_text(l_ncidp, l_varHuId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
         if (m_ny > 1)
         {
-            ncCheck(nc_def_var(m_ncidp, "momentum_y", NC_FLOAT, 3, l_dimQ, &m_varHvId), __FILE__, __LINE__);
-            ncCheck(nc_put_att_text(m_ncidp, m_varHvId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
+            ncCheck(nc_def_var(l_ncidp, "momentum_y", NC_FLOAT, 3, l_dimQ, &l_varHvId), __FILE__, __LINE__);
+            ncCheck(nc_put_att_text(l_ncidp, l_varHvId, "units", strlen("newton second"), "newton second"), __FILE__, __LINE__);
         }
-        ncCheck(nc_def_var(m_ncidp, "bathymetry", NC_FLOAT, 2, l_dimB, &m_varBId), __FILE__, __LINE__);
-        ncCheck(nc_put_att_text(m_ncidp, m_varBId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
+        ncCheck(nc_def_var(l_ncidp, "bathymetry", NC_FLOAT, 2, l_dimB, &l_varBId), __FILE__, __LINE__);
+        ncCheck(nc_put_att_text(l_ncidp, l_varBId, "units", strlen("meter"), "meter"), __FILE__, __LINE__);
 
         // write data
-        ncCheck(nc_enddef(m_ncidp), __FILE__, __LINE__);
+        ncCheck(nc_enddef(l_ncidp), __FILE__, __LINE__);
 
         // generate x and y dimensions
         t_real *l_x = new t_real[m_nx / m_k];
@@ -112,14 +116,14 @@ void tsunami_lab::io::NetCdf::init(t_real i_dxy,
         {
             l_y[l_iy] = m_offsetY + ((float)l_iy + 0.5) * (float)m_k * m_dxy;
         }
-        ncCheck(nc_put_var_float(m_ncidp, m_varXId, l_x), __FILE__, __LINE__);
-        ncCheck(nc_put_var_float(m_ncidp, m_varYId, l_y), __FILE__, __LINE__);
+        ncCheck(nc_put_var_float(l_ncidp, l_varXId, l_x), __FILE__, __LINE__);
+        ncCheck(nc_put_var_float(l_ncidp, l_varYId, l_y), __FILE__, __LINE__);
 
         // write bathymetry
-        putVaraWithGhostcells(i_b, m_varBId, 0, false);
+        putVaraWithGhostcells(i_b, l_ncidp, l_varBId, 0, false);
         delete[] l_x;
         delete[] l_y;
-        ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
+        ncCheck(nc_close(l_ncidp), __FILE__, __LINE__);
     }
 }
 
@@ -129,21 +133,29 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
                                     t_real i_time,
                                     t_idx i_nOut)
 {
-    ncCheck(nc_open("output.nc", NC_WRITE, &m_ncidp), __FILE__, __LINE__);
-    if (m_ncidp == -1)
+    int l_ncidp = -1;
+    ncCheck(nc_open("output.nc", NC_WRITE, &l_ncidp), __FILE__, __LINE__);
+    if (l_ncidp == -1)
     {
         std::cerr << "NetCdf Error: File not initialized!" << std::endl;
         exit(EXIT_FAILURE);
     }
+    // get variable ID's
+    int l_varHId, l_varHuId, l_varHvId, l_varTimeId;
+    ncCheck(nc_inq_varid(l_ncidp, "height", &l_varHId), __FILE__, __LINE__);
+    ncCheck(nc_inq_varid(l_ncidp, "momentum_x", &l_varHuId), __FILE__, __LINE__);
+    ncCheck(nc_inq_varid(l_ncidp, "momentum_y", &l_varHvId), __FILE__, __LINE__);
+    ncCheck(nc_inq_varid(l_ncidp, "time", &l_varTimeId), __FILE__, __LINE__);
+
     // write data
-    putVaraWithGhostcells(i_h, m_varHId, i_nOut, true);
-    putVaraWithGhostcells(i_hu, m_varHuId, i_nOut, true);
+    putVaraWithGhostcells(i_h, l_ncidp, l_varHId, i_nOut, true);
+    putVaraWithGhostcells(i_hu, l_ncidp, l_varHuId, i_nOut, true);
     // write momentum_y only if ny > 1 (2D)
     if (m_ny > 1)
-        putVaraWithGhostcells(i_hv, m_varHvId, i_nOut, true);
+        putVaraWithGhostcells(i_hv, l_ncidp, l_varHvId, i_nOut, true);
     // write time
-    ncCheck(nc_put_var1_float(m_ncidp, m_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
-    ncCheck(nc_close(m_ncidp), __FILE__, __LINE__);
+    ncCheck(nc_put_var1_float(l_ncidp, l_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
+    ncCheck(nc_close(l_ncidp), __FILE__, __LINE__);
 }
 
 void tsunami_lab::io::NetCdf::read(char *i_filePath,
