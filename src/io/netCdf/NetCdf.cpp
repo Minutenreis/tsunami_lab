@@ -144,7 +144,6 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
     int l_varHId, l_varHuId, l_varHvId, l_varTimeId;
     ncCheck(nc_inq_varid(l_ncidp, "height", &l_varHId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "momentum_x", &l_varHuId), __FILE__, __LINE__);
-    ncCheck(nc_inq_varid(l_ncidp, "momentum_y", &l_varHvId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "time", &l_varTimeId), __FILE__, __LINE__);
 
     // write data
@@ -152,7 +151,10 @@ void tsunami_lab::io::NetCdf::write(t_real const *i_h,
     putVaraWithGhostcells(i_hu, l_ncidp, l_varHuId, i_nOut, true);
     // write momentum_y only if ny > 1 (2D)
     if (m_ny > 1)
+    {
+        ncCheck(nc_inq_varid(l_ncidp, "momentum_y", &l_varHvId), __FILE__, __LINE__);
         putVaraWithGhostcells(i_hv, l_ncidp, l_varHvId, i_nOut, true);
+    }
     // write time
     ncCheck(nc_put_var1_float(l_ncidp, l_varTimeId, &i_nOut, &i_time), __FILE__, __LINE__);
     ncCheck(nc_close(l_ncidp), __FILE__, __LINE__);
