@@ -72,9 +72,6 @@ else: # assume icpc
   env.Append( CXXFLAGS = ['--c++17',
                          '-Wall',
                          '-Wextra',
-                         '-Wremarks',
-                         '-Wchecks',
-                         '-w3'
                          '-g',
                          '-Werror'])
 
