@@ -53,6 +53,7 @@ env.Append( CXXFLAGS = [ '-std=c++17',
                          '-Wall',
                          '-Wextra',
                          '-Wpedantic',
+                         '-g',
                          '-Werror' ] )
 
 # set optimization mode
