@@ -18,5 +18,6 @@ python3.8 -m pip install --user distro
 # Enter your executable commands here
 # Execute the compiled program
 date
+cd /beegfs/gi24ken/tsunami_lab
 scons
 ./build/tsunami_lab -t 10 -u "Tsunami2d tohoku_gebco20_ucsb3_50m_displ.nc tohoku_gebco20_ucsb3_50m_bath.nc 600" -f 100 -o netcdf -k 5 50
