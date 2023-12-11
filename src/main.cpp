@@ -63,6 +63,8 @@ void printTime(std::chrono::nanoseconds i_duration, std::string i_message)
     std::cout << std::chrono::duration_cast<std::chrono::seconds>(i_duration).count() % 60 << "s ";
   if (i_duration > std::chrono::milliseconds(1))
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(i_duration).count() % 1000 << "ms ";
+  if (i_duration > std::chrono::microseconds(1))
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(i_duration).count() % 1000 << "us ";
   std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(i_duration).count() % 1000 << "ns" << std::endl;
 }
 
