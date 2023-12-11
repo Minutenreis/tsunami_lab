@@ -61,19 +61,12 @@ else:
 Help( vars.GenerateHelpText( env ) )
 
 # add default flags
-if (cxxCompiler == 'g++'):
-  env.Append( CXXFLAGS = [ '-std=c++17',
+env.Append( CXXFLAGS = [ '-std=c++17',
                          '-Wall',
                          '-Wextra',
                          '-Wpedantic',
                          '-g',
                          '-Werror' ] )
-else: # assume icpc
-  env.Append( CXXFLAGS = ['--c++17',
-                         '-Wall',
-                         '-Wextra',
-                         '-g',
-                         '-Werror'])
 
 # set optimization mode
 if 'debug' in env['mode']:
