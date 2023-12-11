@@ -15,6 +15,7 @@
    5_LargeData
    6_TsunamiSimulations
    7_Checkpointing
+   8_Optimization
    doxygen
 
 Tsunami-Simulation User Documentation

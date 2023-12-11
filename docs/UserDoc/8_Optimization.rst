@@ -1,0 +1,73 @@
+Tsunami Report 8 Optimization
+================================
+
+Links
+-----
+
+`Github Repo <https://github.com/Minutenreis/tsunami_lab>`_
+
+`User Doc <https://tsunami-lab.readthedocs.io/en/latest/>`_
+
+Individual Contributions
+------------------------
+
+Justus Dreßler: all members contributed equally
+
+Thorsten Kröhl: all members contributed equally
+
+Julius Halank: all members contributed equally
+
+
+8.1 ARA
+-------------
+
+8.1.1 Upload and Compile Code on Cluster
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.1.2 Run different scenarious and batch jobs
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.1.3 Compare time consumption to your local pc and add a timer for each steps
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.2 Compiler
+-------------
+
+8.2.1 Add support for generic compilers to your build script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.2.2 Recompile your code using recent versions of the GNU and Intel compilers
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.2.3 Compile your code using both compilers and try different optimization switches
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.2.4 Make yourself familiar with optimization reports and add an option for them in your build script
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.3 Instrumentation and Performance Counters
+--------------------------------------------
+
+8.3.1 Analyze your code with VTune
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.3.2 Run the same analysis through the command line tool in a batch job
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.3.3 Use the GUI to visualize the results
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.3.4 "Which parts are compute-intensive? Did you expect this?"
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.3.5 Think about how you could improve the performance of your code
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+8.3.6 (optional) Instrument your code manually using Score-P. Use Cube for the visualization of your measurements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+
+8.2
