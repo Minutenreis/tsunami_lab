@@ -48,7 +48,7 @@ if 'centos' == distro.id():
     print('running on Ara, using gcc-11.2.0')
     env.Replace(CXX="/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++")
   else:    
-    print('running on Ara, using gcc-11.2.0')
+    print('running on Ara, using icpc-19.1.2.254')
     env.Replace(CXX="/cluster/intel/parallel_studio_xe_2020.2.108/compilers_and_libraries_2020/linux/bin/intel64/icpc")
 else:
   if cxxCompiler == 'g++':
@@ -72,8 +72,11 @@ env.Append( CXXFLAGS = [ '-std=c++17',
 if 'debug' in env['mode']:
   env.Append( CXXFLAGS = [ '-g',
                            '-O0' ] )
+  print( 'using optimization flag: -O0 -g' )
 else:
-  env.Append( CXXFLAGS = [ '-O3' ] )
+  cxxflag = '-O3'
+  env.Append( CXXFLAGS = [ cxxflag ] )
+  print( 'using optimization flag: ' + cxxflag )
 
 # add sanitizers
 if 'san' in  env['mode']:
