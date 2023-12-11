@@ -33,9 +33,14 @@ if vars.UnknownVariables():
   
 # create environment
 env = Environment( variables = vars )
+# check for libs
+conf = Configure(env)
+if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
+  print('Did not find netcdf.h, exiting!')
+  exit(1)
 
 # set compiler
-cxxCompiler = ARGUMENTS.get('CXX', "g++")
+cxxCompiler = ARGUMENTS.get('comp', "g++")
 
 # workaround to find the right g++ version on Ara
 if 'centos' == distro.id():
@@ -46,14 +51,11 @@ if 'centos' == distro.id():
     print('running on Ara, using gcc-11.2.0')
     env.Replace(CXX="/cluster/intel/parallel_studio_xe_2020.2.108/compilers_and_libraries_2020/linux/bin/intel64/icpc")
 else:
-  # set compiler
-  env.Replace( CXX = cxxCompiler )
+  if cxxCompiler == 'g++':
+    pass
+  else:
+    env.Replace(CXX="icpc")
 
-# check for libs
-conf = Configure(env)
-if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
-  print('Did not find netcdf.h, exiting!')
-  exit(1)
 
 # generate help message
 Help( vars.GenerateHelpText( env ) )
