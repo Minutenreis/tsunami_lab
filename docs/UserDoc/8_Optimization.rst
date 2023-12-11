@@ -27,6 +27,19 @@ Julius Halank: all members contributed equally
 8.1.2 Run different scenarious and batch jobs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+All configurations were run with `./build/tsunami_lab -i -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000`.
+(Tohoku, 4000m Cellsize, no FileIO)
+
+
++-----------------------+---------------+-----------------------------+
+| Configuration         | Time          | Time per Cell and Iteration |
++=======================+===============+=============================+
+| g++ -O3 -g            | 40s 9ms 269ns | 51ns                        |
++-----------------------+---------------+-----------------------------+
+| g++ -O2 -g            | 43s 47ms 868ns | 55ns                  |
++-----------------------+---------------+-----------------------------+
+| g++ -O1 -g            | 56s 632ms 521ns | 55ns                        |
+
 8.1.3 Compare time consumption to your local pc and add a timer for each steps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

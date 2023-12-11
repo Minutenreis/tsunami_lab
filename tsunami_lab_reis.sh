@@ -20,4 +20,4 @@ python3.8 -m pip install --user distro
 date
 cd /beegfs/gi24ken/tsunami_lab
 scons
-./build/tsunami_lab -t 10 -u "Tsunami2d tohoku_gebco20_ucsb3_50m_displ.nc tohoku_gebco20_ucsb3_50m_bath.nc 600" -f 100 -o netcdf -k 5 50
+./build/tsunami_lab -i -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000
