@@ -30,7 +30,7 @@ Julius Halank: all members contributed equally
 All configurations were run with `./build/tsunami_lab -i -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000`.
 (Tohoku, 4000m Cellsize, no FileIO)
 
-
+Ara: Skylake Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz
 +-----------------------+---------------------------+-----------------------------+
 | Configuration         | Time                      | Time per Cell and Iteration |
 +=======================+===========================+=============================+
@@ -44,7 +44,11 @@ All configurations were run with `./build/tsunami_lab -i -t 10 -u "Tsunami2d out
 +-----------------------+---------------------------+-----------------------------+
 | g++ -O0 -g            | 2min 14s 272ms 322us 32ns | 173ns                       |
 +-----------------------+---------------------------+-----------------------------+
-| ipcp -Ofast -g        | 37s 530ms 435us 801ns     | 48ns                       |
+| ipcp -Ofast -g        | 37s 530ms 435us 801ns     | 48ns todo: is this ipcp     |
++-----------------------+---------------------------+-----------------------------+
+| ipcp -O3 -g           | 37s 530ms 435us 801ns     | 48ns                        |
+
+Home-PC Justus Dreßler: Coffee Lake Intel(R) Core(TM) i5-8600K CPU @ 3.60GHz
 
 8.1.3 Compare time consumption to your local pc and add a timer for each steps
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
