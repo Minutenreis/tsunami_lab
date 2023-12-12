@@ -39,20 +39,20 @@ Methodology: We ran the program 3 times and took the average of the 3 runs.
 
 Ara: Skylake Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz
 
-..
-    todo: redo all tests with above methodology (also make it run icpc)
 +---------------------------------------------------+-----------------------------+
 | Configuration                                     | Time per Cell and Iteration |
 +===================================================+=============================+
-| g++ -Ofast -g                                     | 48ns                        |
+| g++ -Ofast -g -march=native -mtune=native         | 43.3ns                      |
 +---------------------------------------------------+-----------------------------+
-| g++ -O3 -g                                        | 51ns                        |
+| g++ -Ofast -g                                     | 48.3ns                      |
 +---------------------------------------------------+-----------------------------+
-| g++ -O2 -g                                        | 54ns                        |
+| g++ -O3 -g                                        | 51.0ns                      |
 +---------------------------------------------------+-----------------------------+
-| g++ -O1 -g                                        | 73ns                        |
+| g++ -O2 -g                                        | 54.3ns                      |
 +---------------------------------------------------+-----------------------------+
-| g++ -O0 -g                                        | 173ns                       |
+| g++ -O1 -g                                        | 73.0ns                      |
++---------------------------------------------------+-----------------------------+
+| g++ -O0 -g                                        | 172.3ns                     |
 +---------------------------------------------------+-----------------------------+
 | ipcp -Ofast -g                                    |                             |
 +---------------------------------------------------+-----------------------------+
@@ -102,10 +102,7 @@ The code shouldn't be touched in the runtime (disabled fileIO) but it may result
 | ipcp -O0 -g                                         | 208.3ns                     |
 +-----------------------------------------------------+-----------------------------+
 
-..
-    todo test ara
-
-Ara seems to be roughly 5-10% faster than Justus Dreßler's home PC i5-8600K.
+Ara seems to be roughly 10% slower than Justus Dreßler's home PC i5-8600K (without background programs running).
 
 8.2 Compiler
 -------------
