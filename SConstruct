@@ -56,27 +56,32 @@ else:
   else:
     env.Replace(CXX="icpc")
 
-
 # generate help message
 Help( vars.GenerateHelpText( env ) )
 
 # add default flags
 env.Append( CXXFLAGS = [ '-std=c++17',
-                         '-Wall',
-                         '-Wextra',
-                         '-Wpedantic',
-                         '-g',
-                         '-Werror' ] )
-
+                           '-Wall',
+                           '-Wextra',
+                           '-g',
+                           '-march=native',
+                           '-mtune=native',
+                           '-Werror',])
+if( 'g++' == cxxCompiler ):
+  env.Append( CXXFLAGS = [ '-Wpedantic' ] )
+else:
+  env.Append( CXXFLAGS = ['-diag-disable=10441',
+                           '-wd823'])
+  
 # set optimization mode
 if 'debug' in env['mode']:
   env.Append( CXXFLAGS = [ '-g',
                            '-O0' ] )
   print( 'using optimization flag: -O0 -g' )
 else:
-  cxxflag = '-O3'
-  env.Append( CXXFLAGS = [ cxxflag ] )
-  print( 'using optimization flag: ' + cxxflag )
+  cxxOptimization = ARGUMENTS.get('cxxO', "-O3")
+  env.Append( CXXFLAGS = [ cxxOptimization ] )
+  print( 'using optimization flag: ' + cxxOptimization )
 
 # add sanitizers
 if 'san' in  env['mode']:

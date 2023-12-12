@@ -11,7 +11,7 @@
 # Load any necessary modules (if needed)
 # module load mymodule
 module load tools/python/3.8
-#module load compiler/gcc/11.2.0
+module load compiler/gcc/11.2.0
 module load compiler/intel/2020-Update2
 python3.8 -m pip install --user scons
 python3.8 -m pip install --user distro
