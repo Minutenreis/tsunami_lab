@@ -69,31 +69,33 @@ Methodology: We ran the program 3 times and took the average of the 3 runs.
 
 Ara: Skylake Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz
 
-+---------------------------------------------------+-----------------------------+
-| Configuration                                     | Time per Cell and Iteration |
-+===================================================+=============================+
-| g++ -Ofast -g -march=native -mtune=native         | 43.3ns                      |
-+---------------------------------------------------+-----------------------------+
-| g++ -Ofast -g                                     | 48.3ns                      |
-+---------------------------------------------------+-----------------------------+
-| g++ -O3 -g                                        | 51.0ns                      |
-+---------------------------------------------------+-----------------------------+
-| g++ -O2 -g                                        | 54.3ns                      |
-+---------------------------------------------------+-----------------------------+
-| g++ -O1 -g                                        | 73.0ns                      |
-+---------------------------------------------------+-----------------------------+
-| g++ -O0 -g                                        | 172.3ns                     |
-+---------------------------------------------------+-----------------------------+
-| ipcp -Ofast -g                                    |                             |
-+---------------------------------------------------+-----------------------------+
-| ipcp -O3 -g                                       |                             |
-+---------------------------------------------------+-----------------------------+
-| ipcp -O2 -g                                       |                             |
-+---------------------------------------------------+-----------------------------+
-| ipcp -O1 -g                                       |                             |
-+---------------------------------------------------+-----------------------------+
-| ipcp -O0 -g                                       |                             |
-+---------------------------------------------------+-----------------------------+
++---------------------------------------------------------------+-----------------------------+
+| Configuration                                                 | Time per Cell and Iteration |
++===============================================================+=============================+
+| g++ -Ofast -g -march=native -mtune=native after optimizations | 32.0ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -Ofast -g -march=native -mtune=native                     | 43.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -Ofast -g                                                 | 48.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O3 -g                                                    | 51.0ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O2 -g                                                    | 54.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O1 -g                                                    | 73.0ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O0 -g                                                    | 172.3ns                     |
++---------------------------------------------------------------+-----------------------------+
+| icpc -Ofast -g                                                |                             |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O3 -g                                                   |                             |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O2 -g                                                   |                             |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O1 -g                                                   |                             |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O0 -g                                                   |                             |
++---------------------------------------------------------------+-----------------------------+
 
 Home-PC Justus Dreßler: Coffee Lake Intel(R) Core(TM) i5-8600K CPU @ 3.60GHz
 Disclaimer: We commented out code involving :code:`std::filesystem::directory_iterator` because icpc seems to not handle its library.
@@ -105,19 +107,19 @@ The code shouldn't be touched in the runtime (disabled fileIO) but it may result
 +=====================================================+=============================+
 | g++ -Ofast -g -march=native -mtune=native           | 39.3ns                      |
 +-----------------------------------------------------+-----------------------------+
-| ipcp -Ofast -g -march=native -mtune=coffeelake      | 41.3ns                      |
+| icpc -Ofast -g -march=native -mtune=coffeelake      | 41.3ns                      |
 +-----------------------------------------------------+-----------------------------+
-| ipcp -Ofast -g -march=native -mtune=coffeelake -ipo | 41.7ns                      |
+| icpc -Ofast -g -march=native -mtune=coffeelake -ipo | 41.7ns                      |
 +-----------------------------------------------------+-----------------------------+
 | g++ -O3 -g -march=native -mtune=native              | 43.3ns                      |
 +-----------------------------------------------------+-----------------------------+
 | g++ -Ofast -g                                       | 44.3ns                      |
 +-----------------------------------------------------+-----------------------------+
-| ipcp -O3 -g                                         | 44.7ns                      |
+| icpc -O3 -g                                         | 44.7ns                      |
 +-----------------------------------------------------+-----------------------------+
-| ipcp -Ofast -g                                      | 45.0ns                      |
+| icpc -Ofast -g                                      | 45.0ns                      |
 +-----------------------------------------------------+-----------------------------+
-| ipcp -O2 -g                                         | 47.3ns                      |
+| icpc -O2 -g                                         | 47.3ns                      |
 +-----------------------------------------------------+-----------------------------+
 | g++ -O3 -g                                          | 47.3ns                      |
 +-----------------------------------------------------+-----------------------------+
@@ -125,11 +127,11 @@ The code shouldn't be touched in the runtime (disabled fileIO) but it may result
 +-----------------------------------------------------+-----------------------------+
 | g++ -O1 -g                                          | 66.3ns                      |
 +-----------------------------------------------------+-----------------------------+
-| ipcp -O1 -g                                         | 72.7ns                      |
+| icpc -O1 -g                                         | 72.7ns                      |
 +-----------------------------------------------------+-----------------------------+
 | g++ -O0 -g                                          | 153.0ns                     |
 +-----------------------------------------------------+-----------------------------+
-| ipcp -O0 -g                                         | 208.3ns                     |
+| icpc -O0 -g                                         | 208.3ns                     |
 +-----------------------------------------------------+-----------------------------+
 
 Ara seems to be roughly 10% slower than Justus Dreßler's home PC i5-8600K (without background programs running).
@@ -199,8 +201,8 @@ We used :code:`g++ Version 11.2.0` and :code:`icpc Version 19.1.2` on Ara and :c
 See `8.1.3 Compare time consumption to your local pc and add a timer for each steps`_ for the results.
 
 The results for each compiler are as expected (higher optimization level = faster code).
-The :code:`-ipo` flag for ipcp didn't seem to have any effect on the runtime.
-If we compare both compilers between each other ipcp seemed genereally slightly faster than g++ except on the highest optimization level.
+The :code:`-ipo` flag for icpc didn't seem to have any effect on the runtime.
+If we compare both compilers between each other icpc seemed genereally slightly faster than g++ except on the highest optimization level.
 With :code:`-Ofast -g -march=native -mtune=native` :code:`g++` beat out :code:`icpc` by a solid 5%.
 :code:`g++` also won in the compatibility of the code, as :code:`icpc` for some reason couldn't link to :code:`std::filesystem::directory_iterator` and we had to comment out the code involving it.
 This is probably caused by :code:`icpc` using :code:`g++`'s standard library and not shipping with its own.
