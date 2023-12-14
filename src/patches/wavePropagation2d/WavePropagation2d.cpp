@@ -16,15 +16,14 @@ tsunami_lab::patches::WavePropagation2d::WavePropagation2d(t_idx i_nCellsx,
                                                            t_boundary i_boundaryLeft,
                                                            t_boundary i_boundaryRight,
                                                            t_boundary i_boundaryBottom,
-                                                           t_boundary i_boundaryTop)
+                                                           t_boundary i_boundaryTop) : m_nCellsx(i_nCellsx),
+                                                                                       m_nCellsy(i_nCellsy),
+                                                                                       m_useFWave(i_useFWave),
+                                                                                       m_boundaryLeft(i_boundaryLeft),
+                                                                                       m_boundaryRight(i_boundaryRight),
+                                                                                       m_boundaryBottom(i_boundaryBottom),
+                                                                                       m_boundaryTop(i_boundaryTop)
 {
-  m_nCellsx = i_nCellsx;
-  m_nCellsy = i_nCellsy;
-  m_useFWave = i_useFWave;
-  m_boundaryLeft = i_boundaryLeft;
-  m_boundaryRight = i_boundaryRight;
-  m_boundaryBottom = i_boundaryBottom;
-  m_boundaryTop = i_boundaryTop;
 
   // allocate memory including a single ghost cell on each side (zero initialised)
   for (unsigned short l_st = 0; l_st < 2; l_st++)
@@ -63,17 +62,18 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   t_real *l_hNew = m_h[m_step];
   t_real *l_huOld = m_hu[m_step];
 
-  // init new cell quantities
-  for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
-    for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
+// init new cell quantities
+#pragma GCC ivdep
+  for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
+    for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
       l_hNew[getCoord(l_cx, l_cy)] = l_hOld[getCoord(l_cx, l_cy)];
       l_huOld[getCoord(l_cx, l_cy)] = l_huNew[getCoord(l_cx, l_cy)]; // the real old data is in the hu_new
     }
 
   // iterate over edges and update with Riemann solutions in x direction
-  for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
-    for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+  for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+    for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
     {
       // determine left and right cell-id
       t_idx l_ceL = getCoord(l_ex, l_ey);
@@ -121,16 +121,17 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   t_real *l_hvNew = m_hv[m_step];
 
   // init new cell quantities
-  for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
-    for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
+#pragma GCC ivdep
+  for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
+    for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
       l_hNew[getCoord(l_cx, l_cy)] = l_hOld[getCoord(l_cx, l_cy)];
       l_hvOld[getCoord(l_cx, l_cy)] = l_hvNew[getCoord(l_cx, l_cy)]; // we didn't update the first time so the old data is in the new
     }
 
   // iterate over edges and update with Riemann solutions in y direction
-  for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
-    for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+  for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+    for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
     {
       // determine top and bottom cell-id
       t_idx l_ceB = getCoord(l_ex, l_ey);
@@ -180,6 +181,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
   {
   case t_boundary::OPEN:
   {
+#pragma GCC ivdep
     for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
     {
       l_h[getCoord(0, l_y)] = l_h[getCoord(1, l_y)];
@@ -190,6 +192,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
   }
   case t_boundary::WALL:
   {
+#pragma GCC ivdep
     for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
     {
       l_h[getCoord(0, l_y)] = 0;
@@ -205,6 +208,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
   {
   case t_boundary::OPEN:
   {
+#pragma GCC ivdep
     for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
     {
       l_h[getCoord(m_nCellsx + 1, l_y)] = l_h[getCoord(m_nCellsx, l_y)];
@@ -215,6 +219,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
   }
   case t_boundary::WALL:
   {
+#pragma GCC ivdep
     for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
     {
       l_h[getCoord(m_nCellsx + 1, l_y)] = 0;
@@ -237,6 +242,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
   {
   case t_boundary::OPEN:
   {
+#pragma GCC ivdep
     for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
     {
       l_h[getCoord(l_x, 0)] = l_h[getCoord(l_x, 1)];
@@ -247,6 +253,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
   }
   case t_boundary::WALL:
   {
+#pragma GCC ivdep
     for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
     {
       l_h[getCoord(l_x, 0)] = 0;
@@ -262,6 +269,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
   {
   case t_boundary::OPEN:
   {
+#pragma GCC ivdep
     for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
     {
       l_h[getCoord(l_x, m_nCellsy + 1)] = l_h[getCoord(l_x, m_nCellsy)];
@@ -272,6 +280,7 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
   }
   case t_boundary::WALL:
   {
+#pragma GCC ivdep
     for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
     {
       l_h[getCoord(l_x, m_nCellsy + 1)] = 0;

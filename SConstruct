@@ -54,7 +54,7 @@ else:
   if cxxCompiler == 'g++':
     pass
   else:
-    env.Replace(CXX="icpc")
+    env.Replace(CXX="/opt/intel/oneapi/compiler/2023.2.2/linux/bin/intel64/icpc")
 
 # generate help message
 Help( vars.GenerateHelpText( env ) )
@@ -72,6 +72,10 @@ if( 'g++' == cxxCompiler ):
 else:
   env.Append( CXXFLAGS = ['-diag-disable=10441',
                            '-wd823'])
+  optReport = ARGUMENTS.get('optReport', "false")
+  if optReport!='false': 
+    env.Append( CXXFLAGS = ['-qopt-report=5'])
+  
   
 # set optimization mode
 if 'debug' in env['mode']:
