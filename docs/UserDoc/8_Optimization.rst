@@ -72,7 +72,7 @@ Ara: Skylake Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz
 +---------------------------------------------------------------+-----------------------------+
 | Configuration                                                 | Time per Cell and Iteration |
 +===============================================================+=============================+
-| g++ -Ofast -g -march=native -mtune=native after optimizations | 32.0ns                      |
+| g++ -Ofast -g -march=native -mtune=native after optimizations | 28.0ns                      |
 +---------------------------------------------------------------+-----------------------------+
 | g++ -Ofast -g -march=native -mtune=native                     | 43.3ns                      |
 +---------------------------------------------------------------+-----------------------------+
@@ -86,53 +86,46 @@ Ara: Skylake Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz
 +---------------------------------------------------------------+-----------------------------+
 | g++ -O0 -g                                                    | 172.3ns                     |
 +---------------------------------------------------------------+-----------------------------+
-| icpc -Ofast -g                                                |                             |
-+---------------------------------------------------------------+-----------------------------+
-| icpc -O3 -g                                                   |                             |
-+---------------------------------------------------------------+-----------------------------+
-| icpc -O2 -g                                                   |                             |
-+---------------------------------------------------------------+-----------------------------+
-| icpc -O1 -g                                                   |                             |
-+---------------------------------------------------------------+-----------------------------+
-| icpc -O0 -g                                                   |                             |
-+---------------------------------------------------------------+-----------------------------+
+
 
 Home-PC Justus Dreßler: Coffee Lake Intel(R) Core(TM) i5-8600K CPU @ 3.60GHz
 Disclaimer: We commented out code involving :code:`std::filesystem::directory_iterator` because icpc seems to not handle its library.
 The code shouldn't be touched in the runtime (disabled fileIO) but it may result in a smaller binary.
 
 
-+-----------------------------------------------------+-----------------------------+
-| Configuration                                       | Time per Cell and Iteration |
-+=====================================================+=============================+
-| g++ -Ofast -g -march=native -mtune=native           | 39.3ns                      |
-+-----------------------------------------------------+-----------------------------+
-| icpc -Ofast -g -march=native -mtune=coffeelake      | 41.3ns                      |
-+-----------------------------------------------------+-----------------------------+
-| icpc -Ofast -g -march=native -mtune=coffeelake -ipo | 41.7ns                      |
-+-----------------------------------------------------+-----------------------------+
-| g++ -O3 -g -march=native -mtune=native              | 43.3ns                      |
-+-----------------------------------------------------+-----------------------------+
-| g++ -Ofast -g                                       | 44.3ns                      |
-+-----------------------------------------------------+-----------------------------+
-| icpc -O3 -g                                         | 44.7ns                      |
-+-----------------------------------------------------+-----------------------------+
-| icpc -Ofast -g                                      | 45.0ns                      |
-+-----------------------------------------------------+-----------------------------+
-| icpc -O2 -g                                         | 47.3ns                      |
-+-----------------------------------------------------+-----------------------------+
-| g++ -O3 -g                                          | 47.3ns                      |
-+-----------------------------------------------------+-----------------------------+
-| g++ -O2 -g                                          | 49.0ns                      |
-+-----------------------------------------------------+-----------------------------+
-| g++ -O1 -g                                          | 66.3ns                      |
-+-----------------------------------------------------+-----------------------------+
-| icpc -O1 -g                                         | 72.7ns                      |
-+-----------------------------------------------------+-----------------------------+
-| g++ -O0 -g                                          | 153.0ns                     |
-+-----------------------------------------------------+-----------------------------+
-| icpc -O0 -g                                         | 208.3ns                     |
-+-----------------------------------------------------+-----------------------------+
++---------------------------------------------------------------+-----------------------------+
+| Configuration                                                 | Time per Cell and Iteration |
++===============================================================+=============================+
+| g++ -Ofast -g -march=native -mtune=native after optimizations | 25.0ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -Ofast -g -march=native -mtune=native                     | 39.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| icpc -Ofast -g -march=native -mtune=coffeelake                | 41.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| icpc -Ofast -g -march=native -mtune=coffeelake -ipo           | 41.7ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O3 -g -march=native -mtune=native                        | 43.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -Ofast -g                                                 | 44.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O3 -g                                                   | 44.7ns                      |
++---------------------------------------------------------------+-----------------------------+
+| icpc -Ofast -g                                                | 45.0ns                      |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O2 -g                                                   | 47.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O3 -g                                                    | 47.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O2 -g                                                    | 49.0ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O1 -g                                                    | 66.3ns                      |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O1 -g                                                   | 72.7ns                      |
++---------------------------------------------------------------+-----------------------------+
+| g++ -O0 -g                                                    | 153.0ns                     |
++---------------------------------------------------------------+-----------------------------+
+| icpc -O0 -g                                                   | 208.3ns                     |
++---------------------------------------------------------------+-----------------------------+
 
 Ara seems to be roughly 10% slower than Justus Dreßler's home PC i5-8600K (without background programs running).
 
@@ -330,26 +323,248 @@ We are currently unsure why it assumes the arrays have unaligned access.
 8.3 Instrumentation and Performance Counters
 --------------------------------------------
 
-8.3.1 Analyze your code with VTune
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+8.3.1-8.3.3 Analyze your code with VTune
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-8.3.2 Run the same analysis through the command line tool in a batch job
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The GUI produced the following commands for :code:`vtune`:
 
-8.3.3 Use the GUI to visualize the results
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. code:: shell
+
+  # for threading
+  /cluster/intel/vtune_profiler_2020.2.0.610396/bin64/vtune -collect threading -app-working-dir /beegfs/gi24ken/tsunami_lab -- /beegfs/gi24ken/tsunami_lab/build/tsunami_lab -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000
+  # for hotspots
+  /cluster/intel/vtune_profiler_2020.2.0.610396/bin64/vtune -collect hotspots -app-working-dir /beegfs/gi24ken/tsunami_lab -- /beegfs/gi24ken/tsunami_lab/build/tsunami_lab -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000
+
+
+We ran the command in a batch job with the following script (once for hotspots and once for threading):
+
+.. code-block:: shell
+
+  #!/bin/bash
+  #SBATCH --job-name=tsunami_lab_reis
+  #SBATCH --output=tsunami_lab_reis.output
+  #SBATCH --error=tsunami_lab_reis.err
+  #SBATCH --partition=s_hadoop,s_standard
+  #SBATCH --nodes=1
+  #SBATCH --ntasks=1
+  #SBATCH --time=11:00:00
+  #SBATCH --cpus-per-task=72
+
+  # Load any necessary modules (if needed)
+  # module load mymodule
+  module load tools/python/3.8
+  module load compiler/gcc/11.2.0
+  module load compiler/intel/2020-Update2
+  python3.8 -m pip install --user scons
+  python3.8 -m pip install --user distro
+
+  # Enter your executable commands here
+  # Execute the compiled program
+  date
+  cd /beegfs/gi24ken/tsunami_lab
+  scons comp=g++ cxxO=-Ofast
+  # for hotspots
+  /cluster/intel/vtune_profiler_2020.2.0.610396/bin64/vtune -collect hotspots -app-working-dir /beegfs/gi24ken/tsunami_lab -- /beegfs/gi24ken/tsunami_lab/build/tsunami_lab -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000
+
+We then downloaded the results and analysed it locally.
 
 8.3.4 "Which parts are compute-intensive? Did you expect this?"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+.. figure:: _static/8_VTune_Hotspots.png
+  :width: 700
+
+  Hotspot analysis of VTune
+
+This overall follows the expectation that the calculation part of the simulation would be the most compute-intensive.
+The FileIO seemed to be a minor factor before when we only had more primitive :code:`std::chrono` based Wall time tests, so its not surprising its a minor factor here either.
+A bit surprising is that :code:`nc_get_var_float` took more time than :code:`nc_put_var_float`, but this is probably just because we used a relatively small resolution (4000m Cellsize) for our testrun.
+
+.. figure:: _static/8_VTune_Threads.png
+  :width: 700
+
+  Threading analysis of VTune
+
+This is displaying expected outputs: We don't use multithreading so we only use 1 Thread.
+Since that thread has to wait for the FileIO its utilization is slightly below 100% at 96.2%.
+This does show that there could be significant gains from multithreading though (especially since the :code:`WavePropagation2d::timeStep()` function should be relatively easily parallized and is our main time consumer).
+
 8.3.5 Think about how you could improve the performance of your code
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-8.3.6 (optional) Instrument your code manually using Score-P. Use Cube for the visualization of your measurements
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The main performance increases have to originate in :code:`WavePropagation2d::timeStep()` and :code:`FWave::netUpdates()`.
+We found a few things that could be improved in both:
 
+In :code:`WavePropagation2d::timeStep()` we could increase our cache rate heavily by changing the order of the loops:
 
+.. code-block:: cpp
 
+  // iterate over edges and update with Riemann solutions in x direction
+  for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
+    for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
 
+to 
 
-8.2
+.. code-block:: cpp
+
+  // iterate over edges and update with Riemann solutions in x direction
+  for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+    for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
+
+This is helping heavily since the array is stored in row-major order and we are iterating over the rows in the inner loop.
+This leads to significantly more cache hits since neighbouring cells are accessed sequentially instead of jumping around by :code:`m_nCellsx + 2`.
+We also added some :code:`#pragma GCC ivdep` to the copying loops to hint the compiler that there are no dependencies between the arrays, it didn't lead to observable speedup though.
+
+This lead to a performance increase from 43.3 ns to 32.0 ns per cell and iteration.
+
+In :code:`FWave::netUpdates()` we could decrease the number of control flows by replacing conditional statements with the use of temporary arrays:
+
+.. code-block:: cpp
+
+  void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL,
+                                             t_real i_hR,
+                                             t_real i_huL,
+                                             t_real i_huR,
+                                             t_real i_bL,
+                                             t_real i_bR,
+                                             t_real o_netUpdateL[2],
+                                             t_real o_netUpdateR[2])
+  {
+    bool l_updateL = true;
+    bool l_updateR = true;
+    // if both dry do nothing
+    if (i_hL <= 0 && i_hR <= 0)
+    {
+        o_netUpdateL[0] = 0;
+        o_netUpdateL[1] = 0;
+        o_netUpdateR[0] = 0;
+        o_netUpdateR[1] = 0;
+        return;
+    } // if only left side is dry, apply reflecting boundary condition
+    else if (i_hL <= 0)
+    {
+        i_hL = i_hR;
+        i_huL = -i_huR;
+        i_bL = i_bR;
+        l_updateL = false;
+    } // if only right side is dry, apply reflecting boundary condition
+    else if (i_hR <= 0)
+    {
+        i_hR = i_hL;
+        i_huR = -i_huL;
+        i_bR = i_bL;
+        l_updateR = false;
+    }
+
+    /* compute l_waveL and l_waveR */
+    
+    // set net-updates depending on wave speeds
+    for (unsigned short l_qt = 0; l_qt < 2; l_qt++)
+    {
+        // init
+        o_netUpdateL[l_qt] = 0;
+        o_netUpdateR[l_qt] = 0;
+
+        // 1st wave
+        if (l_sL < 0 && l_updateL)
+        {
+            o_netUpdateL[l_qt] += l_waveL[l_qt];
+        }
+        else if (l_sL >= 0 && l_updateR)
+        {
+            o_netUpdateR[l_qt] += l_waveL[l_qt];
+        }
+
+        // 2nd wave
+        if (l_sR > 0 && l_updateR)
+        {
+            o_netUpdateR[l_qt] += l_waveR[l_qt];
+        }
+        else if (l_sR <= 0 && l_updateL)
+        {
+            o_netUpdateL[l_qt] += l_waveR[l_qt];
+        }
+    }
+  }
+
+to
+
+.. code-block:: cpp
+
+  void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL,
+                                             t_real i_hR,
+                                             t_real i_huL,
+                                             t_real i_huR,
+                                             t_real i_bL,
+                                             t_real i_bR,
+                                             t_real o_netUpdateL[2],
+                                             t_real o_netUpdateR[2])
+    {
+    // initialize net-updates
+    o_netUpdateL[0] = 0;
+    o_netUpdateL[1] = 0;
+    o_netUpdateR[0] = 0;
+    o_netUpdateR[1] = 0;
+
+    // if only left side is dry, apply reflecting boundary condition
+    if (i_hL <= 0)
+    {
+        // if both dry do nothing
+        if (i_hR <= 0)
+        {
+            return;
+        }
+        i_hL = i_hR;
+        i_huL = -i_huR;
+        i_bL = i_bR;
+        // unhook o_netUpdateL from data
+        t_real temp[2] = {};
+        o_netUpdateL = temp;
+    } // if only right side is dry, apply reflecting boundary condition
+    else if (i_hR <= 0)
+    {
+        i_hR = i_hL;
+        i_huR = -i_huL;
+        i_bR = i_bL;
+        // unhook o_netUpdateR from data
+        t_real temp[2] = {};
+        o_netUpdateR = temp;
+    }
+
+    /* compute l_waveL and l_waveR */
+
+    // set net-updates depending on wave speeds
+    for (unsigned short l_qt = 0; l_qt < 2; l_qt++)
+    {
+        // 1st wave
+        if (l_sL < 0)
+        {
+            o_netUpdateL[l_qt] += l_waveL[l_qt];
+        }
+        else if (l_sL >= 0)
+        {
+            o_netUpdateR[l_qt] += l_waveL[l_qt];
+        }
+
+        // 2nd wave
+        if (l_sR > 0)
+        {
+            o_netUpdateR[l_qt] += l_waveR[l_qt];
+        }
+        else if (l_sR <= 0)
+        {
+            o_netUpdateL[l_qt] += l_waveR[l_qt];
+        }
+    }
+  }
+
+We moved the :code:`o_netUpdate` initialization to the top.
+This allowed us to just "unhook" the pointers from the :code:`o_netUpdate` arrays if we don't want to write on them (and replacing them with temporary ghost arrays).
+Now we can write on both :code:`o_netUpdate`'s regardless of whether one of them shouldn't be updated since we then just write to ghost arrays.
+This simplifies the most commmon case of both sides being wet since we save ourselves two booleans, 1 if and 7 to 11 conditional evaluations.
+It poses no additional overhead if both sides are dry.
+It poses a minor overhead if only one side is dry since we have to create a ghost array in that case.
+
+This lead to a performance increase from 32.0 ns to 28.0 ns per cell and iteration.
+
+So in total we managed to decrease the runtime from 43.3 ns to 28.0 ns per cell and iteration, which is roughly 55% improvement in performance / a 35% reduction in runtime.
