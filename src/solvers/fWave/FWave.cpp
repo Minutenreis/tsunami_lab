@@ -103,30 +103,35 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL,
                                              t_real o_netUpdateL[2],
                                              t_real o_netUpdateR[2])
 {
-    bool l_updateL = true;
-    bool l_updateR = true;
-    // if both dry do nothing
-    if (i_hL <= 0 && i_hR <= 0)
+    // initialize net-updates
+    o_netUpdateL[0] = 0;
+    o_netUpdateL[1] = 0;
+    o_netUpdateR[0] = 0;
+    o_netUpdateR[1] = 0;
+
+    // if only left side is dry, apply reflecting boundary condition
+    if (i_hL <= 0)
     {
-        o_netUpdateL[0] = 0;
-        o_netUpdateL[1] = 0;
-        o_netUpdateR[0] = 0;
-        o_netUpdateR[1] = 0;
-        return;
-    } // if only left side is dry, apply reflecting boundary condition
-    else if (i_hL <= 0)
-    {
+        // if both dry do nothing
+        if (i_hR <= 0)
+        {
+            return;
+        }
         i_hL = i_hR;
         i_huL = -i_huR;
         i_bL = i_bR;
-        l_updateL = false;
+        // unhook o_netUpdateL from data
+        t_real temp[2] = {};
+        o_netUpdateL = temp;
     } // if only right side is dry, apply reflecting boundary condition
     else if (i_hR <= 0)
     {
         i_hR = i_hL;
         i_huR = -i_huL;
         i_bR = i_bL;
-        l_updateR = false;
+        // unhook o_netUpdateR from data
+        t_real temp[2] = {};
+        o_netUpdateR = temp;
     }
 
     // compute particle velocities
@@ -172,26 +177,22 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL,
     // set net-updates depending on wave speeds
     for (unsigned short l_qt = 0; l_qt < 2; l_qt++)
     {
-        // init
-        o_netUpdateL[l_qt] = 0;
-        o_netUpdateR[l_qt] = 0;
-
         // 1st wave
-        if (l_sL < 0 && l_updateL)
+        if (l_sL < 0)
         {
             o_netUpdateL[l_qt] += l_waveL[l_qt];
         }
-        else if (l_sL >= 0 && l_updateR)
+        else if (l_sL >= 0)
         {
             o_netUpdateR[l_qt] += l_waveL[l_qt];
         }
 
         // 2nd wave
-        if (l_sR > 0 && l_updateR)
+        if (l_sR > 0)
         {
             o_netUpdateR[l_qt] += l_waveR[l_qt];
         }
-        else if (l_sR <= 0 && l_updateL)
+        else if (l_sR <= 0)
         {
             o_netUpdateL[l_qt] += l_waveR[l_qt];
         }

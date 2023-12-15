@@ -33,34 +33,59 @@ if vars.UnknownVariables():
   
 # create environment
 env = Environment( variables = vars )
-
-# workaround to find the right g++ version on Ara
-if 'centos' == distro.id():
-  print('running on Ara, using gcc-11.2.0')
-  env.Replace(CXX="/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++")
-
 # check for libs
 conf = Configure(env)
 if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
   print('Did not find netcdf.h, exiting!')
   exit(1)
 
+# set compiler
+cxxCompiler = ARGUMENTS.get('comp', "g++")
+
+# workaround to find the right g++ version on Ara
+if 'centos' == distro.id():
+  if cxxCompiler == 'g++':
+    print('running on Ara, using gcc-11.2.0')
+    env.Replace(CXX="/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++")
+  else:    
+    print('running on Ara, using icpc-19.1.2.254')
+    env.Replace(CXX="/cluster/intel/parallel_studio_xe_2020.2.108/compilers_and_libraries_2020/linux/bin/intel64/icpc")
+else:
+  if cxxCompiler == 'g++':
+    pass
+  else:
+    env.Replace(CXX="/opt/intel/oneapi/compiler/2023.2.2/linux/bin/intel64/icpc")
+
 # generate help message
 Help( vars.GenerateHelpText( env ) )
 
 # add default flags
 env.Append( CXXFLAGS = [ '-std=c++17',
-                         '-Wall',
-                         '-Wextra',
-                         '-Wpedantic',
-                         '-Werror' ] )
-
+                           '-Wall',
+                           '-Wextra',
+                           '-g',
+                           '-march=native',
+                           '-mtune=native',
+                           '-Werror',])
+if( 'g++' == cxxCompiler ):
+  env.Append( CXXFLAGS = [ '-Wpedantic' ] )
+else:
+  env.Append( CXXFLAGS = ['-diag-disable=10441',
+                           '-wd823'])
+  optReport = ARGUMENTS.get('optReport', "false")
+  if optReport!='false': 
+    env.Append( CXXFLAGS = ['-qopt-report=5'])
+  
+  
 # set optimization mode
 if 'debug' in env['mode']:
   env.Append( CXXFLAGS = [ '-g',
                            '-O0' ] )
+  print( 'using optimization flag: -O0 -g' )
 else:
-  env.Append( CXXFLAGS = [ '-O3' ] )
+  cxxOptimization = ARGUMENTS.get('cxxO', "-O3")
+  env.Append( CXXFLAGS = [ cxxOptimization ] )
+  print( 'using optimization flag: ' + cxxOptimization )
 
 # add sanitizers
 if 'san' in  env['mode']:

@@ -12,11 +12,13 @@
 # module load mymodule
 module load tools/python/3.8
 module load compiler/gcc/11.2.0
+module load compiler/intel/2020-Update2
 python3.8 -m pip install --user scons
 python3.8 -m pip install --user distro
 
 # Enter your executable commands here
 # Execute the compiled program
 date
-scons
-./build/tsunami_lab -t 10 -u "Tsunami2d tohoku_gebco20_ucsb3_50m_displ.nc tohoku_gebco20_ucsb3_50m_bath.nc 600" -f 100 -o netcdf -k 5 50
+cd /beegfs/gi24ken/tsunami_lab
+scons comp=g++ cxxO=-Ofast
+/cluster/intel/vtune_profiler_2020.2.0.610396/bin64/vtune -collect threading -app-working-dir /beegfs/gi24ken/tsunami_lab -- /beegfs/gi24ken/tsunami_lab/build/tsunami_lab -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000

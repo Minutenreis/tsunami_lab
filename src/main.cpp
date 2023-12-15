@@ -61,7 +61,11 @@ void printTime(std::chrono::nanoseconds i_duration, std::string i_message)
     std::cout << std::chrono::duration_cast<std::chrono::minutes>(i_duration).count() % 60 << "min ";
   if (i_duration > std::chrono::seconds(1))
     std::cout << std::chrono::duration_cast<std::chrono::seconds>(i_duration).count() % 60 << "s ";
-  std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(i_duration).count() % 1000 << "ms" << std::endl;
+  if (i_duration > std::chrono::milliseconds(1))
+    std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(i_duration).count() % 1000 << "ms ";
+  if (i_duration > std::chrono::microseconds(1))
+    std::cout << std::chrono::duration_cast<std::chrono::microseconds>(i_duration).count() % 1000 << "us ";
+  std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(i_duration).count() % 1000 << "ns" << std::endl;
 }
 
 int main(int i_argc,
@@ -83,7 +87,7 @@ int main(int i_argc,
   {
     // removed invalid number of arguments message for -h option
     std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] [-t maxtime] [-k size] n_cells_x" << std::endl;
+    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] [-t maxtime] [-k size] [-i] n_cells_x" << std::endl;
     std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
     return EXIT_FAILURE;
   }
@@ -124,6 +128,7 @@ int main(int i_argc,
   int l_maxHours = 24;
   bool l_useCheckpoint = false;
   bool l_useNetCdf = true;
+  bool l_useFileIO = true;
 
   std::cout << "runtime configuration" << std::endl;
 
@@ -229,7 +234,7 @@ int main(int i_argc,
   else
   {
 
-    while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:")) != -1)
+    while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:i")) != -1)
     {
       switch (opt)
       {
@@ -460,6 +465,12 @@ int main(int i_argc,
         }
         break;
       }
+      // benchmarking no fileIO
+      case 'i':
+      {
+        l_useFileIO = false;
+        break;
+      }
       // unknown option
       case '?':
       {
@@ -597,18 +608,9 @@ int main(int i_argc,
   // iterate over time
 
   // init IO
-  l_writer->init(l_dxy,
-                 l_nx,
-                 l_ny,
-                 l_waveProp->getStride(),
-                 l_waveProp->getGhostCellsX(),
-                 l_waveProp->getGhostCellsY(),
-                 l_xOffset,
-                 l_yOffset,
-                 l_k,
-                 l_waveProp->getBathymetry(),
-                 l_useCheckpoint);
-  l_stations->init(l_dxy,
+  if (l_useFileIO)
+  {
+    l_writer->init(l_dxy,
                    l_nx,
                    l_ny,
                    l_waveProp->getStride(),
@@ -616,8 +618,20 @@ int main(int i_argc,
                    l_waveProp->getGhostCellsY(),
                    l_xOffset,
                    l_yOffset,
+                   l_k,
                    l_waveProp->getBathymetry(),
                    l_useCheckpoint);
+    l_stations->init(l_dxy,
+                     l_nx,
+                     l_ny,
+                     l_waveProp->getStride(),
+                     l_waveProp->getGhostCellsX(),
+                     l_waveProp->getGhostCellsY(),
+                     l_xOffset,
+                     l_yOffset,
+                     l_waveProp->getBathymetry(),
+                     l_useCheckpoint);
+  }
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
   std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
@@ -633,12 +647,13 @@ int main(int i_argc,
                 << l_simTime << " / " << l_timeStep << std::endl;
 
       auto l_writeStart = std::chrono::high_resolution_clock::now();
-      l_writer->write(
-          l_waveProp->getHeight(),
-          l_waveProp->getMomentumX(),
-          l_waveProp->getMomentumY(),
-          l_simTime,
-          l_nOut);
+      if (l_useFileIO)
+        l_writer->write(
+            l_waveProp->getHeight(),
+            l_waveProp->getMomentumX(),
+            l_waveProp->getMomentumY(),
+            l_simTime,
+            l_nOut);
       l_nOut++;
 
       auto l_WriteEnd = std::chrono::high_resolution_clock::now();
@@ -652,7 +667,7 @@ int main(int i_argc,
         break;
       }
       // write checkpoint every hour (only 2D, netCdf)
-      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
+      else if (l_useFileIO && l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
       {
         std::cout << "  writing checkpoint" << std::endl;
         tsunami_lab::io::NetCdf::writeCheckpoint(l_nx,
@@ -700,7 +715,7 @@ int main(int i_argc,
       }
     }
 
-    if (l_simTime > l_nFreqStation * l_stations->getT())
+    if (l_useFileIO && l_simTime > l_nFreqStation * l_stations->getT())
     {
       l_stations->write(l_simTime,
                         l_waveProp->getHeight(),
@@ -722,9 +737,11 @@ int main(int i_argc,
   auto l_duration_setup = l_timeSetup - l_start;
   printTime(l_duration_setup, "setup time");
   auto l_duration_loop = l_end - l_timeSetup;
-  printTime(l_duration_loop - l_duration_write - l_duration_checkpoint, "calc time ");
+  auto l_duration_calc = l_duration_loop - l_duration_write - l_duration_checkpoint;
+  printTime(l_duration_calc, "calc time ");
   printTime(l_duration_write, "write time");
   printTime(l_duration_checkpoint, "checkpoint time");
+  printTime(l_duration_calc / (l_timeStep * l_nx * l_ny), "calc time per cell and iteration");
 
   // free memory
   std::cout << "freeing memory" << std::endl;

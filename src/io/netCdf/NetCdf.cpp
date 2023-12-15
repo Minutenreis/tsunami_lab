@@ -26,6 +26,7 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
     t_idx start_p[3] = {i_nOut, 0, 0};
     t_idx count_p[3] = {1, 1, m_nx / m_k};
     t_idx l_sizeX = (m_nx / m_k) * m_k; // m_nx/k*k (integer division) => ignores the overstanding cells at the right border
+    t_real l_kSquaredInv = 1.0 / (m_k * m_k);
     for (start_p[1] = 0; start_p[1] < m_ny / m_k; ++start_p[1])
     {
         // zero initialised array for averaged data
@@ -34,7 +35,7 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
         {
             for (t_idx l_ix = 0; l_ix < l_sizeX; ++l_ix)
             {
-                l_row[l_ix / m_k] += i_data[l_ix + m_ghostCellsX + (l_iy + m_ghostCellsY) * m_stride] / (m_k * m_k);
+                l_row[l_ix / m_k] += i_data[l_ix + m_ghostCellsX + (l_iy + m_ghostCellsY) * m_stride] * l_kSquaredInv;
             }
         }
         ncCheck(nc_put_vara_float(l_ncidp, i_var, start_p + l_time, count_p + l_time, l_row), __FILE__, __LINE__);

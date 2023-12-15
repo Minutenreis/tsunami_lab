@@ -26,25 +26,25 @@ private:
   unsigned short m_step = 0;
 
   //! number of cells discretizing the computational domain in x direction
-  t_idx m_nCellsx = 0;
+  const t_idx m_nCellsx = 0;
 
   //! number of cells discretizing the computational domain in y direction
-  t_idx m_nCellsy = 0;
+  const t_idx m_nCellsy = 0;
 
   //! bool if FWave solver is used
-  bool m_useFWave = true;
+  const bool m_useFWave = true;
 
   //! left boundary
-  t_boundary m_boundaryLeft = t_boundary::OPEN;
+  const t_boundary m_boundaryLeft = t_boundary::OPEN;
 
   //! right boundary
-  t_boundary m_boundaryRight = t_boundary::OPEN;
+  const t_boundary m_boundaryRight = t_boundary::OPEN;
 
   //! bottom boundary
-  t_boundary m_boundaryBottom = t_boundary::OPEN;
+  const t_boundary m_boundaryBottom = t_boundary::OPEN;
 
   //! top boundary
-  t_boundary m_boundaryTop = t_boundary::OPEN;
+  const t_boundary m_boundaryTop = t_boundary::OPEN;
 
   //! water heights for the current and next time step for all cells
   //! access array like m_h[m_step][i_x  + i_y  * (m_nCells + 2)]
