@@ -248,7 +248,7 @@ The optimization reports of :code:`icpc -O3 -g` show that the :code:`FWave::netU
   -> EXTERN: (163,23) ?1memset
   -> EXTERN: (164,23) ?1memset
 
-*Optimization Report of :code:`FWave::netUpdates()`*
+Optimization Report of :code:`FWave::netUpdates()`
 
 .. code:: cpp
 

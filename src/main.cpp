@@ -741,8 +741,6 @@ int main(int i_argc,
   printTime(l_duration_calc, "calc time ");
   printTime(l_duration_write, "write time");
   printTime(l_duration_checkpoint, "checkpoint time");
-  printTime(l_duration_calc / l_timeStep, "calc time per time step");
-  printTime(l_duration_calc / (l_nx * l_ny), "calc time per cell");
   printTime(l_duration_calc / (l_timeStep * l_nx * l_ny), "calc time per cell and iteration");
 
   // free memory
