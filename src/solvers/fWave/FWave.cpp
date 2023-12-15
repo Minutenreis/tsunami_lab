@@ -108,6 +108,7 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL,
     o_netUpdateL[1] = 0;
     o_netUpdateR[0] = 0;
     o_netUpdateR[1] = 0;
+    t_real temp[2] = {};
 
     // if only left side is dry, apply reflecting boundary condition
     if (i_hL <= 0)
@@ -121,7 +122,6 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL,
         i_huL = -i_huR;
         i_bL = i_bR;
         // unhook o_netUpdateL from data
-        t_real temp[2] = {};
         o_netUpdateL = temp;
     } // if only right side is dry, apply reflecting boundary condition
     else if (i_hR <= 0)
@@ -130,7 +130,6 @@ void tsunami_lab::solvers::FWave::netUpdates(t_real i_hL,
         i_huR = -i_huL;
         i_bR = i_bL;
         // unhook o_netUpdateR from data
-        t_real temp[2] = {};
         o_netUpdateR = temp;
     }
 
