@@ -505,6 +505,7 @@ to
     o_netUpdateL[1] = 0;
     o_netUpdateR[0] = 0;
     o_netUpdateR[1] = 0;
+    t_real temp[2] = {};
 
     // if only left side is dry, apply reflecting boundary condition
     if (i_hL <= 0)
@@ -518,7 +519,6 @@ to
         i_huL = -i_huR;
         i_bL = i_bR;
         // unhook o_netUpdateL from data
-        t_real temp[2] = {};
         o_netUpdateL = temp;
     } // if only right side is dry, apply reflecting boundary condition
     else if (i_hR <= 0)
@@ -527,7 +527,6 @@ to
         i_huR = -i_huL;
         i_bR = i_bL;
         // unhook o_netUpdateR from data
-        t_real temp[2] = {};
         o_netUpdateR = temp;
     }
 
@@ -561,9 +560,9 @@ to
 We moved the :code:`o_netUpdate` initialization to the top.
 This allowed us to just "unhook" the pointers from the :code:`o_netUpdate` arrays if we don't want to write on them (and replacing them with temporary ghost arrays).
 Now we can write on both :code:`o_netUpdate`'s regardless of whether one of them shouldn't be updated since we then just write to ghost arrays.
-This simplifies the most commmon case of both sides being wet since we save ourselves two booleans, 1 if and 7 to 11 conditional evaluations.
-It poses no additional overhead if both sides are dry.
-It poses a minor overhead if only one side is dry since we have to create a ghost array in that case.
+This simplifies the most commmon case of both sides being wet since we save ourselves two booleans, 1 if and 7 to 11 conditional evaluations for the price of 1 two element array.
+It poses a minor overhead if both sides are dry since we create an extra local array.
+And it should also simplify the wet dry interface since we have the same benefits regarding the booleans and conditionals, though we add up to 2 `+=` operations.
 
 This lead to a performance increase from 32.0 ns to 28.0 ns per cell and iteration.
 
