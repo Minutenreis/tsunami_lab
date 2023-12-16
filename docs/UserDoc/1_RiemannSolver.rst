@@ -1,5 +1,5 @@
-Tsunami Report 1 Riemann Solver
-===============================
+1 Riemann Solver
+================
 
 Links
 -----

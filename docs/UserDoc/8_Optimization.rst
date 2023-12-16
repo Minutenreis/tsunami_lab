@@ -1,5 +1,5 @@
-Tsunami Report 8 Optimization
-================================
+8 Optimization
+=================
 
 Links
 -----
@@ -395,7 +395,7 @@ This does show that there could be significant gains from multithreading though 
 The main performance increases have to originate in :code:`WavePropagation2d::timeStep()` and :code:`FWave::netUpdates()`.
 We found a few things that could be improved in both:
 
-In :code:`WavePropagation2d::timeStep()` we could increase our cache rate heavily by changing the order of the loops:
+In :code:`WavePropagation2d::timeStep()` we could increase our cache hitrate heavily by changing the order of the loops:
 
 .. code-block:: cpp
 
@@ -416,6 +416,9 @@ This leads to significantly more cache hits since neighbouring cells are accesse
 We also added some :code:`#pragma GCC ivdep` to the copying loops to hint the compiler that there are no dependencies between the arrays, it didn't lead to observable speedup though.
 
 This lead to a performance increase from 43.3 ns to 32.0 ns per cell and iteration.
+
+We also removed the :code:`m_step` as we noticed we only really need 2 temporary arrays for timestep but can keep all the data in the original arrays without any performance impact.
+This should save roughly 14% of the RAM usage (as we only use 6 arrays instead of 7 of the 2D data).
 
 In :code:`FWave::netUpdates()` we could decrease the number of control flows by replacing conditional statements with the use of temporary arrays:
 

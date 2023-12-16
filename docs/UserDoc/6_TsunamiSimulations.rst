@@ -1,5 +1,5 @@
-Tsunami Report 6 Tsunami Simulations
-=============================================
+6 Tsunami Simulations
+==============================
 
 Links
 -----
