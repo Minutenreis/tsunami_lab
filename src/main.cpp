@@ -73,36 +73,12 @@ int main(int i_argc,
 {
   auto l_start = std::chrono::high_resolution_clock::now();
   // number of cells in x- and y-direction
-  tsunami_lab::t_idx l_nx = 0;
-  tsunami_lab::t_idx l_ny = 1;
 
   std::cout << "####################################" << std::endl;
   std::cout << "### Tsunami Lab                  ###" << std::endl;
   std::cout << "###                              ###" << std::endl;
   std::cout << "### https://scalable.uni-jena.de ###" << std::endl;
   std::cout << "####################################" << std::endl;
-
-  // missing n_cells_x or getting -key as last argument (f.E. -h)
-  if ((i_argc < 2) || (i_argv[i_argc - 1] == 0) || (i_argv[i_argc - 1][0] == '-'))
-  {
-    // removed invalid number of arguments message for -h option
-    std::cerr << "usage:" << std::endl;
-    std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] [-t maxtime] [-k size] [-i] n_cells_x" << std::endl;
-    std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  // set cell size
-  l_nx = atoi(i_argv[i_argc - 1]);
-  if (l_nx < 1)
-  {
-    std::cerr << "invalid number of cells" << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  // get command line arguments
-  opterr = 0; // disable error messages of getopt
-  int opt;
 
   // defaults
   bool l_useFwave = true;
@@ -124,6 +100,8 @@ int main(int i_argc,
   tsunami_lab::t_idx l_timeStep = 0;
   tsunami_lab::t_idx l_nOut = 0;
   tsunami_lab::t_idx l_nFreqStation = 0;
+  tsunami_lab::t_idx l_nx = 1;
+  tsunami_lab::t_idx l_ny = 1;
   tsunami_lab::t_real l_simTime = 0;
   int l_maxHours = 24;
   bool l_useCheckpoint = false;
@@ -233,6 +211,27 @@ int main(int i_argc,
   }
   else
   {
+    // missing n_cells_x or getting -key as last argument (f.E. -h)
+    if ((i_argc < 2) || (i_argv[i_argc - 1] == 0) || (i_argv[i_argc - 1][0] == '-'))
+    {
+      // removed invalid number of arguments message for -h option
+      std::cerr << "usage:" << std::endl;
+      std::cerr << "  ./build/tsunami_lab [-s solver] [-u setup] [-b boundary] [-r stations] [-o outputType] [-f frames] [-t maxtime] [-k size] [-i] n_cells_x" << std::endl;
+      std::cerr << "  more info at https://tsunami-lab.readthedocs.io/en/latest/" << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    // set cell size
+    l_nx = atoi(i_argv[i_argc - 1]);
+    if (l_nx < 1)
+    {
+      std::cerr << "invalid number of cells" << std::endl;
+      return EXIT_FAILURE;
+    }
+
+    // get command line arguments
+    opterr = 0; // disable error messages of getopt
+    int opt;
 
     while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:i")) != -1)
     {

@@ -23,7 +23,7 @@ class tsunami_lab::patches::WavePropagation2d : public WavePropagation
 {
 private:
   //! current step which indicates the active values in the arrays below
-  unsigned short m_step = 0;
+  // unsigned short m_step = 0;
 
   //! number of cells discretizing the computational domain in x direction
   const t_idx m_nCellsx = 0;
@@ -48,15 +48,21 @@ private:
 
   //! water heights for the current and next time step for all cells
   //! access array like m_h[m_step][i_x  + i_y  * (m_nCells + 2)]
-  t_real *m_h[2] = {nullptr, nullptr};
+  t_real *m_h = nullptr;
 
   //! momenta for the current and next time step for all cells in x-direction
   //! access array like m_hu[m_step][i_x + i_y  * (m_nCells + 2)]
-  t_real *m_hu[2] = {nullptr, nullptr};
+  t_real *m_hu = nullptr;
 
   //! momenta for the current and next time step for all cells in y-direction
   //! access array like m_hv[m_step][i_x  + i_y  * (m_nCells + 2)]
-  t_real *m_hv[2] = {nullptr, nullptr};
+  t_real *m_hv = nullptr;
+
+  //! temp array for height
+  t_real *m_hTemp = nullptr;
+
+  //! temp array for momentum
+  t_real *m_huvTemp = nullptr;
 
   //! bathymetry for the current and next time step for all cells
   //! access array like m_h[m_step][i_x + i_y  * (m_nCells + 2)]
@@ -150,7 +156,7 @@ public:
    */
   t_real const *getHeight()
   {
-    return m_h[m_step];
+    return m_h;
   }
 
   /**
@@ -160,7 +166,7 @@ public:
    **/
   t_real const *getMomentumX()
   {
-    return m_hu[m_step];
+    return m_hu;
   }
 
   /**
@@ -168,7 +174,7 @@ public:
    **/
   t_real const *getMomentumY()
   {
-    return m_hv[m_step];
+    return m_hv;
   }
 
   /**
@@ -191,7 +197,7 @@ public:
                  t_idx i_iy,
                  t_real i_h)
   {
-    m_h[m_step][getCoord(i_ix + 1, i_iy + 1)] = i_h;
+    m_h[getCoord(i_ix + 1, i_iy + 1)] = i_h;
   }
 
   /**
@@ -204,7 +210,7 @@ public:
                     t_idx i_iy,
                     t_real i_hu)
   {
-    m_hu[m_step][getCoord(i_ix + 1, i_iy + 1)] = i_hu;
+    m_hu[getCoord(i_ix + 1, i_iy + 1)] = i_hu;
   }
 
   /**
@@ -214,7 +220,7 @@ public:
                     t_idx i_iy,
                     t_real i_hv)
   {
-    m_hv[m_step][getCoord(i_ix + 1, i_iy + 1)] = i_hv;
+    m_hv[getCoord(i_ix + 1, i_iy + 1)] = i_hv;
   };
 
   /**
