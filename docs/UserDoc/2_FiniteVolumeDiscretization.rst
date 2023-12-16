@@ -1,5 +1,5 @@
-Tsunami Report 2 Finite Volume Discretization
-=============================================
+2 Finite Volume Discretization
+==============================
 
 Links
 -----

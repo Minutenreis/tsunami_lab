@@ -1,5 +1,5 @@
-Tsunami Report 4 Two-Dimensional Solver
-=============================================
+4 Two-Dimensional Solver
+==============================
 
 Links
 -----

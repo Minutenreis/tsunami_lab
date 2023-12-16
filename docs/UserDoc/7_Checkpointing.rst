@@ -1,5 +1,5 @@
-Tsunami Report 7 Checkpointing and Coarse Output
-=============================================
+7 Checkpointing and Coarse Output
+==============================
 
 Links
 -----

@@ -18,8 +18,8 @@
    8_Optimization
    doxygen
 
-Tsunami-Simulation User Documentation
-=====================================
+User Documentation
+==================
 
 Installing and Running
 ----------------------
