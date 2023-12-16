@@ -36,12 +36,13 @@ TEST_CASE("Test the CSV-writer for 1D settings.", "[CsvWrite1d]")
               nullptr,
               false);
 
-  std::stringstream l_stream0;
+  std::cout.setstate(std::ios_base::failbit);
   l_csv->write(l_h,
                l_hu,
                nullptr,
                0,
                0);
+  std::cout.clear();
 
   REQUIRE(std::filesystem::exists("solutions/solution_0.csv"));
   rapidcsv::Document testDoc;
@@ -91,11 +92,13 @@ TEST_CASE("Test the CSV-writer for 2D settings.", "[CsvWrite2d]")
               nullptr,
               false);
 
+  std::cout.setstate(std::ios_base::failbit);
   l_csv->write(l_h,
                l_hu,
                l_hv,
                0,
                0);
+  std::cout.clear();
 
   REQUIRE(std::filesystem::exists("solutions/solution_0.csv"));
 
