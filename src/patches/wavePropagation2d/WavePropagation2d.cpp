@@ -54,7 +54,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
 {
   setGhostCellsX();
 // init new cell quantities
-#pragma GCC ivdep
+#pragma omp parallel for simd
   for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
     for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
@@ -106,7 +106,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   setGhostCellsY();
 
   // init new cell quantities
-#pragma GCC ivdep
+#pragma omp parallel for simd
   for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
     for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
