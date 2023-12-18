@@ -68,10 +68,14 @@ env.Append( CXXFLAGS = [ '-std=c++17',
                            '-mtune=native',
                            '-Werror',])
 if( 'g++' == cxxCompiler ):
-  env.Append( CXXFLAGS = [ '-Wpedantic' ] )
+  env.Append( CXXFLAGS = [ '-Wpedantic',
+                           '-fopenmp'] )
+  env.Append( LINKFLAGS = [ '-fopenmp'] )
 else:
   env.Append( CXXFLAGS = ['-diag-disable=10441',
-                           '-wd823'])
+                           '-wd823',
+                           '-qopenmp'] )
+  env.Append( LINKFLAGS = [ '-qopenmp'] )
   optReport = ARGUMENTS.get('optReport', "false")
   if optReport!='false': 
     env.Append( CXXFLAGS = ['-qopt-report=5'])
