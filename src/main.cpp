@@ -742,7 +742,7 @@ int main(int i_argc,
   printTime(l_duration_calc, "calc time ");
   printTime(l_duration_write, "write time");
   printTime(l_duration_checkpoint, "checkpoint time");
-  printTime(l_duration_calc / (l_timeStep * l_nx * l_ny), "calc time per cell and iteration");
+  std::cout << "calc time per cell and iteration: " << (double)std::chrono::duration_cast<std::chrono::nanoseconds>(l_duration_calc).count() / (double)(l_timeStep * l_nx * l_ny) << "ns" << std::endl;
 
   // free memory
   std::cout << "freeing memory" << std::endl;

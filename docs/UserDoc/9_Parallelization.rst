@@ -18,8 +18,8 @@ Thorsten Kröhl: all members contributed equally
 Julius Halank: all members contributed equally
 
 
-9.1 Parallize Solver with OpenMP
---------------------------------
+9.1&9.3 Parallize Solver with OpenMP
+------------------------------------
 
 We parallized our solver with OpenMP Pragmas. We added them in the following parts of :code:`WavePropagation2d`:
 
@@ -83,3 +83,37 @@ We swapped the order of the second loop back so we could parallize the outer loo
 We also found a significant performance drop when we parallized the inner loop.
 Its probably caused by the massive overhead of creating and destroying threads for each outer loop iteration.
 Parallizing the inner loop raised our time per cell and iteration from 5ns to over 50ns (worse than the not parallized code that runs at roughly 28ns).
+
+9.2 Runtime Parallel Solver
+---------------------------
+
++------------------------------------+--------------------+
+| Threads                            | Time per Iteration |
++====================================+====================+
+| 1                                  | 32ns               |
++------------------------------------+--------------------+
+| 2                                  | 22ns               |
++------------------------------------+--------------------+
+| 4                                  | 12ns               |
++------------------------------------+--------------------+
+| 8                                  | 7ns                |
++------------------------------------+--------------------+
+| 18                                 | 4ns                |
++------------------------------------+--------------------+
+| 19                                 | 3ns                |
++------------------------------------+--------------------+
+| 24                                 | 3ns                |
++------------------------------------+--------------------+
+| 32                                 | 3ns                |
++------------------------------------+--------------------+
+| 33                                 | 4ns                |
++------------------------------------+--------------------+
+| 36                                 | 3ns                |
++------------------------------------+--------------------+
+| 37                                 | 3ns                |
++------------------------------------+--------------------+
+| 48                                 | 3ns                |
++------------------------------------+--------------------+
+| 72                                 | 4ns                |
++------------------------------------+--------------------+
+
