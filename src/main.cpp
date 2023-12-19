@@ -32,6 +32,7 @@
 #include <filesystem>
 #include <chrono>
 #include <vector>
+#include <omp.h>
 
 // converts a string to a boundary condition (tsunami_lab::t_boundary)
 void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
@@ -640,7 +641,7 @@ int main(int i_argc,
 
   while (l_simTime < l_endTime)
   {
-    if (l_timeStep % l_nTimeStepsPerFrame == 0)
+    if (l_useFileIO && l_timeStep % l_nTimeStepsPerFrame == 0)
     {
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;
@@ -666,7 +667,7 @@ int main(int i_argc,
         break;
       }
       // write checkpoint every hour (only 2D, netCdf)
-      else if (l_useFileIO && l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
+      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
       {
         std::cout << "  writing checkpoint" << std::endl;
         tsunami_lab::io::NetCdf::writeCheckpoint(l_nx,
@@ -731,6 +732,7 @@ int main(int i_argc,
 
   std::cout << "finished time loop" << std::endl;
   auto l_end = std::chrono::high_resolution_clock::now();
+  std::cout << "  Number of Threads: " << omp_get_max_threads() << std::endl;
   auto l_duration_total = l_end - l_start;
   printTime(l_duration_total, "total time");
   auto l_duration_setup = l_timeSetup - l_start;

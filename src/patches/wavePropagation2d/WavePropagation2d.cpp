@@ -59,7 +59,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
     for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
       m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
-      m_huvTemp[getCoord(l_cx, l_cy)] = m_hu[getCoord(l_cx, l_cy)]; // the real old data is in the hu_new
+      m_huvTemp[getCoord(l_cx, l_cy)] = m_hu[getCoord(l_cx, l_cy)];
     }
 
 // iterate over edges and update with Riemann solutions in x direction
@@ -111,7 +111,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
     for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
       m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
-      m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)]; // we didn't update the first time so the old data is in the new
+      m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)];
     }
 
     // iterate over edges and update with Riemann solutions in y direction

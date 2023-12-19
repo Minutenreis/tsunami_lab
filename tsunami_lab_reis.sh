@@ -21,4 +21,14 @@ python3.8 -m pip install --user distro
 date
 cd /beegfs/gi24ken/tsunami_lab
 scons comp=g++ cxxO=-Ofast
-/cluster/intel/vtune_profiler_2020.2.0.610396/bin64/vtune -collect threading -app-working-dir /beegfs/gi24ken/tsunami_lab -- /beegfs/gi24ken/tsunami_lab/build/tsunami_lab -t 10 -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000
+OMP_NUM_THREADS=1 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=2 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=4 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=8 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=18 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=19 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=24 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=32 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=33 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=48 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
+OMP_NUM_THREADS=72 ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
