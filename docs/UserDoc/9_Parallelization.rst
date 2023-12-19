@@ -87,6 +87,8 @@ Parallizing the inner loop raised our time per cell and iteration from 5ns to ov
 9.2 Runtime Parallel Solver
 ---------------------------
 
+To make the solutions comparable to `8 Optimization`_ we also used :code:`./build/tsunami_lab -i -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000` as config.
+
 +------------------------------------+--------------------+----------+
 | Threads                            | Time per Iteration | Speedup  |
 +====================================+====================+==========+
@@ -113,3 +115,14 @@ Parallizing the inner loop raised our time per cell and iteration from 5ns to ov
 | 72                                 | 4.6691ns           | 6.89     |
 +------------------------------------+--------------------+----------+
 
+.. figure:: _static/9_speedup.png
+    :width: 700
+
+    Speedup of the parallel solver over number of threads averaged over 3 runs.
+
+It seems to rise approximately linear until 16 threads and then only very slowly rises over the remaining threads.
+Using all threads imposed an interesting drastic drop in performance, probably because the last thread was also responsible for other programs and unbalances our workload.
+Our maximum seems to be at 34 Threads so 2 threads short of 1 thread per core.
+
+9.4 Scheduling and Pinning Strategies
+-------------------------------------

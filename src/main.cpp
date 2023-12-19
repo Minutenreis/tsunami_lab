@@ -110,6 +110,7 @@ int main(int i_argc,
   bool l_useFileIO = true;
 
   std::cout << "runtime configuration" << std::endl;
+  std::cout << "  Number of Threads: " << omp_get_max_threads() << std::endl;
 
   if (std::filesystem::exists("checkpoints") && std::filesystem::is_directory("checkpoints") && !std::filesystem::is_empty("checkpoints"))
   {
@@ -732,7 +733,6 @@ int main(int i_argc,
 
   std::cout << "finished time loop" << std::endl;
   auto l_end = std::chrono::high_resolution_clock::now();
-  std::cout << "  Number of Threads: " << omp_get_max_threads() << std::endl;
   auto l_duration_total = l_end - l_start;
   printTime(l_duration_total, "total time");
   auto l_duration_setup = l_timeSetup - l_start;

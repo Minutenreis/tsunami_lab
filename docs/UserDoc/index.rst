@@ -16,6 +16,7 @@
    6_TsunamiSimulations
    7_Checkpointing
    8_Optimization
+   9_Parallelization
    doxygen
 
 User Documentation
