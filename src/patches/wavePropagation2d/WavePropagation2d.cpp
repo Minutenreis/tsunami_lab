@@ -54,8 +54,9 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
 {
   setGhostCellsX();
 // init new cell quantities
-#pragma omp parallel for simd
+#pragma omp parallel for schedule(guided)
   for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
+#pragma omp simd
     for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
       m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
@@ -63,7 +64,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
     }
 
 // iterate over edges and update with Riemann solutions in x direction
-#pragma omp parallel for
+#pragma omp parallel for schedule(guided)
   for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
     for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
     {
@@ -106,8 +107,9 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   setGhostCellsY();
 
 // init new cell quantities
-#pragma omp parallel for simd
+#pragma omp parallel for schedule(guided)
   for (t_idx l_cy = 1; l_cy < m_nCellsy + 1; l_cy++)
+#pragma omp simd
     for (t_idx l_cx = 1; l_cx < m_nCellsx + 1; l_cx++)
     {
       m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
@@ -115,7 +117,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
     }
 
 // iterate over edges and update with Riemann solutions in y direction
-#pragma omp parallel for
+#pragma omp parallel for schedule(guided)
   for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
     for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
     {
