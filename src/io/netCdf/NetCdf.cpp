@@ -33,7 +33,7 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
         t_real *l_row = new t_real[m_nx / m_k]{};
         for (t_idx l_iy = start_p[1] * m_k; l_iy < (start_p[1] + 1) * m_k; ++l_iy)
         {
-#pragma omp parallel for schedule(static, m_k)
+#pragma omp parallel for schedule(dynamic, m_k)
             for (t_idx l_ix = 0; l_ix < l_sizeX; ++l_ix)
             {
                 l_row[l_ix / m_k] += i_data[l_ix + m_ghostCellsX + (l_iy + m_ghostCellsY) * m_stride];

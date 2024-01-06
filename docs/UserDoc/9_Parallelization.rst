@@ -18,7 +18,7 @@ Thorsten Kröhl: all members contributed equally
 Julius Halank: all members contributed equally
 
 
-9.1&9.3 Parallize Solver with OpenMP
+9.1 & 9.3 Parallize Solver with OpenMP
 ------------------------------------
 
 We parallized our solver with OpenMP Pragmas. We added them in the following parts of :code:`WavePropagation2d`:
