@@ -58,7 +58,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   {
 #pragma omp for nowait
     for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
-      // #pragma omp simd
+#pragma omp simd
       for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
       {
         m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
@@ -114,7 +114,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
   {
 #pragma omp for nowait
     for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
-      // #pragma omp simd
+#pragma omp simd
       for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
       {
         m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
