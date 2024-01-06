@@ -66,7 +66,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
       }
 
 // iterate over edges and update with Riemann solutions in x direction
-#pragma omp for
+#pragma omp for nowait
     for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
       for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
       {
@@ -122,7 +122,7 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
       }
 
 // iterate over edges and update with Riemann solutions in y direction
-#pragma omp for
+#pragma omp for nowait
     for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
       for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
       {
