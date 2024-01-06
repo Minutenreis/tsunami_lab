@@ -24,5 +24,6 @@ scons comp=g++ cxxO=-Ofast
 for i in {1..72}
 do
     export OMP_NUM_THREADS=$i
+    export OMP_PLACES=numa_domains
     ./build/tsunami_lab -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" -i 4000
 done
