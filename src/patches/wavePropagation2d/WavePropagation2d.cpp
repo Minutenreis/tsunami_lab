@@ -54,114 +54,106 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
 {
   setGhostCellsX();
 // init new cell quantities
-#pragma omp parallel
-  {
-#pragma omp for nowait
-    for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
-#pragma omp simd
-      for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
-      {
-        m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
-        m_huvTemp[getCoord(l_cx, l_cy)] = m_hu[getCoord(l_cx, l_cy)];
-      }
+#pragma omp parallel for simd
+  for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
+    for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
+    {
+      m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
+      m_huvTemp[getCoord(l_cx, l_cy)] = m_hu[getCoord(l_cx, l_cy)];
+    }
 
 // iterate over edges and update with Riemann solutions in x direction
-#pragma omp for nowait
-    for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
-      for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
+#pragma omp parallel for
+  for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+    for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
+    {
+      // determine left and right cell-id
+      t_idx l_ceL = getCoord(l_ex, l_ey);
+      t_idx l_ceR = getCoord(l_ex + 1, l_ey);
+
+      // compute net-updates
+      t_real l_netUpdates[2][2];
+
+      if (m_useFWave)
       {
-        // determine left and right cell-id
-        t_idx l_ceL = getCoord(l_ex, l_ey);
-        t_idx l_ceR = getCoord(l_ex + 1, l_ey);
-
-        // compute net-updates
-        t_real l_netUpdates[2][2];
-
-        if (m_useFWave)
-        {
-          solvers::FWave::netUpdates(m_hTemp[l_ceL],
-                                     m_hTemp[l_ceR],
-                                     m_huvTemp[l_ceL],
-                                     m_huvTemp[l_ceR],
-                                     m_b[l_ceL],
-                                     m_b[l_ceR],
-                                     l_netUpdates[0],
-                                     l_netUpdates[1]);
-        }
-        else
-        {
-          solvers::Roe::netUpdates(m_hTemp[l_ceL],
+        solvers::FWave::netUpdates(m_hTemp[l_ceL],
                                    m_hTemp[l_ceR],
                                    m_huvTemp[l_ceL],
                                    m_huvTemp[l_ceR],
+                                   m_b[l_ceL],
+                                   m_b[l_ceR],
                                    l_netUpdates[0],
                                    l_netUpdates[1]);
-        }
-
-        // update the cells' quantities
-        m_h[l_ceL] -= i_scaling * l_netUpdates[0][0];
-        m_hu[l_ceL] -= i_scaling * l_netUpdates[0][1];
-
-        m_h[l_ceR] -= i_scaling * l_netUpdates[1][0];
-        m_hu[l_ceR] -= i_scaling * l_netUpdates[1][1];
       }
-  }
+      else
+      {
+        solvers::Roe::netUpdates(m_hTemp[l_ceL],
+                                 m_hTemp[l_ceR],
+                                 m_huvTemp[l_ceL],
+                                 m_huvTemp[l_ceR],
+                                 l_netUpdates[0],
+                                 l_netUpdates[1]);
+      }
+
+      // update the cells' quantities
+      m_h[l_ceL] -= i_scaling * l_netUpdates[0][0];
+      m_hu[l_ceL] -= i_scaling * l_netUpdates[0][1];
+
+      m_h[l_ceR] -= i_scaling * l_netUpdates[1][0];
+      m_hu[l_ceR] -= i_scaling * l_netUpdates[1][1];
+    }
 
   setGhostCellsY();
 
 // init new cell quantities
-#pragma omp parallel
-  {
-#pragma omp for nowait
-    for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
-#pragma omp simd
-      for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
-      {
-        m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
-        m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)];
-      }
+#pragma omp parallel for simd
+  for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
+    for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
+    {
+      m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
+      m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)];
+    }
 
 // iterate over edges and update with Riemann solutions in y direction
-#pragma omp for nowait
-    for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
-      for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+#pragma omp parallel for
+  for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
+    for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+    {
+      // determine top and bottom cell-id
+      t_idx l_ceB = getCoord(l_ex, l_ey);
+      t_idx l_ceT = getCoord(l_ex, l_ey + 1);
+
+      // compute net-updates
+      t_real l_netUpdates[2][2];
+
+      if (m_useFWave)
       {
-        // determine top and bottom cell-id
-        t_idx l_ceB = getCoord(l_ex, l_ey);
-        t_idx l_ceT = getCoord(l_ex, l_ey + 1);
-
-        // compute net-updates
-        t_real l_netUpdates[2][2];
-
-        if (m_useFWave)
-        {
-          solvers::FWave::netUpdates(m_hTemp[l_ceB],
-                                     m_hTemp[l_ceT],
-                                     m_huvTemp[l_ceB],
-                                     m_huvTemp[l_ceT],
-                                     m_b[l_ceB],
-                                     m_b[l_ceT],
-                                     l_netUpdates[0],
-                                     l_netUpdates[1]);
-        }
-        else
-        {
-          solvers::Roe::netUpdates(m_hTemp[l_ceB],
+        solvers::FWave::netUpdates(m_hTemp[l_ceB],
                                    m_hTemp[l_ceT],
                                    m_huvTemp[l_ceB],
                                    m_huvTemp[l_ceT],
+                                   m_b[l_ceB],
+                                   m_b[l_ceT],
                                    l_netUpdates[0],
                                    l_netUpdates[1]);
-        }
-
-        // update the cells' quantities
-        m_h[l_ceB] -= i_scaling * l_netUpdates[0][0];
-        m_hv[l_ceB] -= i_scaling * l_netUpdates[0][1];
-
-        m_h[l_ceT] -= i_scaling * l_netUpdates[1][0];
-        m_hv[l_ceT] -= i_scaling * l_netUpdates[1][1];
       }
-  }
+      else
+      {
+        solvers::Roe::netUpdates(m_hTemp[l_ceB],
+                                 m_hTemp[l_ceT],
+                                 m_huvTemp[l_ceB],
+                                 m_huvTemp[l_ceT],
+                                 l_netUpdates[0],
+                                 l_netUpdates[1]);
+      }
+
+      // update the cells' quantities
+      m_h[l_ceB] -= i_scaling * l_netUpdates[0][0];
+      m_hv[l_ceB] -= i_scaling * l_netUpdates[0][1];
+
+      m_h[l_ceT] -= i_scaling * l_netUpdates[1][0];
+      m_hv[l_ceT] -= i_scaling * l_netUpdates[1][1];
+    }
 }
 
 void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()

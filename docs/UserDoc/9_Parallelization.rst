@@ -19,7 +19,7 @@ Julius Halank: all members contributed equally
 
 
 9.1 & 9.3 Parallize Solver with OpenMP
-------------------------------------
+--------------------------------------
 
 We parallized our solver with OpenMP Pragmas. We added them in the following parts of :code:`WavePropagation2d`:
 
@@ -84,8 +84,8 @@ We also found a significant performance drop when we parallized the inner loop.
 Its probably caused by the massive overhead of creating and destroying threads for each outer loop iteration.
 Parallizing the inner loop raised our time per cell and iteration from 5ns to over 50ns (worse than the not parallized code that runs at roughly 28ns).
 
-9.2 Runtime Parallel Solver
----------------------------
+9.2 & 9.4 Runtime Parallel Solver with various Scheduling Strategies
+--------------------------------------------------------------------
 
 To make the solutions comparable to `8 Optimization`_ we also used :code:`./build/tsunami_lab -i -u "Tsunami2d output/tohoku_gebco20_usgs_250m_displ.nc output/tohoku_gebco20_usgs_250m_bath.nc 18000" 4000` as config.
 
@@ -118,15 +118,29 @@ To make the solutions comparable to `8 Optimization`_ we also used :code:`./buil
 .. figure:: _static/9_speedup.png
     :width: 700
 
-    Speedup of the parallel solver over number of threads averaged over 3 runs.
+    Speedup of the parallel solver over number of threads averaged over 3 runs. |br|
+    Static: static scheduling |br|
+    Dynamic: dynamic scheduling |br|
+    Guided: guided scheduling |br|
+    StaticNuma: static scheduling with :code:`OMP_PLACES=numa_domains` |br|
+    Numa: static scheduling with :code:`OMP_PLACES=numa_domains` and NUMA-aware array initialization
 
 The static solver seems to rise in performance approximately linear until 16 threads and then only very slowly rises over the remaining threads.
 Using all threads imposed an interesting drastic drop in performance, probably because the last thread was also responsible for other programs and unbalances our workload.
 Our maximum seems to be at 34 Threads so 2 threads short of 1 thread per core.
+Enabling NUMA pinning seemed to make no difference.
+NUMA aware array initialization seemed to make no difference other than significantly decreasing the performance with all threads enabled.
 
 The dynamic solver interestingly decreases in performance on 2 threads and then rises slowly with each added thread. 
 It is significantly slower than the static solver though (losing approximately 1/3 of the performance), so we won't further consider using this for the time being.
 
+The guided solver starts off with a similar performance to the static solver but then lowers itself to the dynamic solver.
+This could be caused by our comparitively small workload and the guided scheduler not being able to find a good chunk size for our workload.
+It would need further testing at significantly larger workloads to be able to make a statement about its performance.
 
-9.4 Scheduling and Pinning Strategies
--------------------------------------
+In our opinion the default :code:`#pragma omp parallel for` with static scheduling is the best choice for our workload.
+All other schedulers seem to be either slower or not significantly faster than the static scheduler, but more prone to implementation errors.
+
+.. |br| raw:: html
+
+      <br>
