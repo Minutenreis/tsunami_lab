@@ -1,5 +1,10 @@
+import sys
 
-with open("tsunami_lab_reis.output", "r") as file:
+if (len(sys.argv) >= 2):
+    path = sys.argv[1]
+else:
+    path = "tsunami_lab_reis.output"
+with open(path, "r") as file:
     data = file.readlines()
 
 # Get the time data of the measurements

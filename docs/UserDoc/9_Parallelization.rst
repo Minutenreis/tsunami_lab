@@ -120,9 +120,13 @@ To make the solutions comparable to `8 Optimization`_ we also used :code:`./buil
 
     Speedup of the parallel solver over number of threads averaged over 3 runs.
 
-It seems to rise approximately linear until 16 threads and then only very slowly rises over the remaining threads.
+The static solver seems to rise in performance approximately linear until 16 threads and then only very slowly rises over the remaining threads.
 Using all threads imposed an interesting drastic drop in performance, probably because the last thread was also responsible for other programs and unbalances our workload.
 Our maximum seems to be at 34 Threads so 2 threads short of 1 thread per core.
+
+The dynamic solver interestingly decreases in performance on 2 threads and then rises slowly with each added thread. 
+It is significantly slower than the static solver though (losing approximately 1/3 of the performance), so we won't further consider using this for the time being.
+
 
 9.4 Scheduling and Pinning Strategies
 -------------------------------------
