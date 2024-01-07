@@ -25,6 +25,23 @@ This project plan aims to implement Nvidia CUDA technology within a tight four-w
 timeframe to accelerate our tsunami simulations. The plan outlines realistic goals, milestones,
 work packages, and a schedule to efficiently execute the CUDA integration process.
 
+What is CUDA?
+^^^^^^^^^^^^^
+
+`CUDA <https://blogs.nvidia.com/blog/what-is-cuda-2/>`_ is NVidias programming API for their GPUs.
+GPU's are highly parallelized and can therefore be used to accelerate certain tasks.
+Our workload is very well suited for this kind of acceleration, as we have to perform the same calculations on a large amount of data.
+CUDA comes with a lot of tools to help with the development process, such as a profiler, which we will use to optimize our code.
+We will implement the C++ version of CUDA, which is called `CUDA C++ <https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html>`_.
+
+.. figure:: https://docs.nvidia.com/cuda/cuda-c-programming-guide/_images/gpu-devotes-more-transistors-to-data-processing.png
+
+  CPU vs GPU architecture
+
+.. figure:: https://blogs.nvidia.com/wp-content/uploads/2012/09/gorpycuda3.png
+
+  Extending C code with CUDA
+
 Goals
 ^^^^^
 1. Acceleration: Implement CUDA to significantly accelerate tsunami simulations by a factor of at least 2 compared to multithreaded CPU processing.
@@ -37,7 +54,8 @@ Goals
 Milestones with work packages and estimated time
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Preparation Package (Week 1):**
+MS-1 Preparation Package (Week 1) :
+###################################
 
 *Literature Review:*
   * Conduct a brief literature review to gain fundamental knowledge about CUDA
@@ -46,7 +64,8 @@ Milestones with work packages and estimated time
   * Create small test programs to understand the basic concepts of CUDA
   * Document results and experiences for the team
 
-**Framework Analysis and Modification Package (Week 1-2):**
+MS-2 Framework Analysis and Modification Package (Week 2) :
+###########################################################
 
 *Identification of Key Areas:*
   * Analyze the existing Tsunami simulation framework to identify key areas for CUDA integration
@@ -56,7 +75,8 @@ Milestones with work packages and estimated time
   * Initiate the development of initial CUDA kernels for identified simulation components
   * Document changes and initial kernel developments
 
-**CUDA Implementation Package (Week 2-3):**
+MS-3 CUDA Implementation Package (Week 3) :
+###########################################
 
 *Development of CUDA Kernels:*
   * Develop CUDA kernels for individual simulation components based on identified key areas
@@ -65,7 +85,8 @@ Milestones with work packages and estimated time
   * Conduct initial tests to identify performance improvements resulting from CUDA implementation
   * Analyze test results and document observed enhancements
 
-**Optimization and Testing Package (Week 3-4):**
+MS-4 Optimization and Testing Package (Week 4) :
+################################################
 
 *Optimization of CUDA Code:*
   * Optimize the developed CUDA code to enhance efficiency
