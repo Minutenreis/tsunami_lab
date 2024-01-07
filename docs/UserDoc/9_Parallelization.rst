@@ -122,14 +122,12 @@ To make the solutions comparable to `8 Optimization`_ we also used :code:`./buil
     Static: static scheduling |br|
     Dynamic: dynamic scheduling |br|
     Guided: guided scheduling |br|
-    StaticNuma: static scheduling with :code:`OMP_PLACES=numa_domains` |br|
-    Numa: static scheduling with :code:`OMP_PLACES=numa_domains` and NUMA-aware array initialization
+    StaticNuma: static scheduling with :code:`OMP_PLACES=numa_domains`
 
 The static solver seems to rise in performance approximately linear until 16 threads and then only very slowly rises over the remaining threads.
 Using all threads imposed an interesting drastic drop in performance, probably because the last thread was also responsible for other programs and unbalances our workload.
 Our maximum seems to be at 34 Threads so 2 threads short of 1 thread per core.
 Enabling NUMA pinning seemed to make no difference.
-NUMA aware array initialization seemed to make no difference other than significantly decreasing the performance with all threads enabled.
 
 The dynamic solver interestingly decreases in performance on 2 threads and then rises slowly with each added thread. 
 It is significantly slower than the static solver though (losing approximately 1/3 of the performance), so we won't further consider using this for the time being.
@@ -140,6 +138,52 @@ It would need further testing at significantly larger workloads to be able to ma
 
 In our opinion the default :code:`#pragma omp parallel for` with static scheduling is the best choice for our workload.
 All other schedulers seem to be either slower or not significantly faster than the static scheduler, but more prone to implementation errors.
+
+We ensure NUMA aware initialization by using static scheduling with the same iteration variables for the first 3 loops.
+We for now did not keep that awareness for the fourth loop, because that would add dependencies in the update loop and we would have to use :code:`#pragma omp atomic`.
+We did not want to get that performance hit for now (and currently it runs on maximum 1 node so the remote memory access is not that bad).
+We should hit the correct memory locations for 87.5% of the cells (first 3 loops completely and 4th loop should hit about half the time).
+
+
+.. code:: cpp
+
+  // init new cell quantities
+  #pragma omp parallel for simd
+    for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
+      for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
+      {
+        m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
+        m_huvTemp[getCoord(l_cx, l_cy)] = m_hu[getCoord(l_cx, l_cy)];
+      }
+
+  // iterate over edges and update with Riemann solutions in x direction
+  #pragma omp parallel for
+    for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+      for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
+      {
+        /* Calc Updates */
+      }
+
+    setGhostCellsY();
+
+  // init new cell quantities
+  #pragma omp parallel for simd
+    for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
+      for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
+      {
+        m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
+        m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)];
+      }
+
+  // iterate over edges and update with Riemann solutions in y direction
+  #pragma omp parallel for
+    for (t_idx l_ex = 0; l_ex < m_nCellsx + 1; l_ex++)
+      for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
+      {
+        /* Calc Updates */
+      }
+
+*Code for Numa Aware Initialization*
 
 .. |br| raw:: html
 
