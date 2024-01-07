@@ -22,12 +22,12 @@ Project Plan for CUDA Implementation
 
 Introduction:
 This project plan aims to implement Nvidia CUDA technology within a tight four-week
-timeframe to accelerate Tsunami simulations. The plan outlines realistic goals, milestones,
+timeframe to accelerate our tsunami simulations. The plan outlines realistic goals, milestones,
 work packages, and a schedule to efficiently execute the CUDA integration process.
 
 Goals
 ^^^^^
-1. Acceleration: Implement CUDA to significantly accelerate Tsunami simulations by a factor of at least 2 compared to multithreaded CPU processing.
+1. Acceleration: Implement CUDA to significantly accelerate tsunami simulations by a factor of at least 2 compared to multithreaded CPU processing.
     
     .. figure:: _static/performance.png 
 
