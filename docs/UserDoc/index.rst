@@ -16,6 +16,8 @@
    6_TsunamiSimulations
    7_Checkpointing
    8_Optimization
+   9_Parallelization
+   10_CUDA
    doxygen
 
 User Documentation

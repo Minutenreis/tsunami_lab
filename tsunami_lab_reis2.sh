@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH --job-name=tsunami_lab_reis
-#SBATCH --output=tsunami_lab_reis.output
-#SBATCH --error=tsunami_lab_reis.err
+#SBATCH --job-name=tsunami_lab_reis2
+#SBATCH --output=tsunami_lab_reis2.output
+#SBATCH --error=tsunami_lab_reis2.err
 #SBATCH --partition=s_hadoop,s_standard
 #SBATCH --nodes=1
 #SBATCH --ntasks=1

@@ -32,6 +32,7 @@
 #include <filesystem>
 #include <chrono>
 #include <vector>
+#include <omp.h>
 
 // converts a string to a boundary condition (tsunami_lab::t_boundary)
 void getBoundary(std::string i_name, tsunami_lab::t_boundary *o_boundary)
@@ -109,6 +110,7 @@ int main(int i_argc,
   bool l_useFileIO = true;
 
   std::cout << "runtime configuration" << std::endl;
+  std::cout << "  Number of Threads: " << omp_get_max_threads() << std::endl;
 
   if (std::filesystem::exists("checkpoints") && std::filesystem::is_directory("checkpoints") && !std::filesystem::is_empty("checkpoints"))
   {
@@ -640,7 +642,7 @@ int main(int i_argc,
 
   while (l_simTime < l_endTime)
   {
-    if (l_timeStep % l_nTimeStepsPerFrame == 0)
+    if (l_useFileIO && l_timeStep % l_nTimeStepsPerFrame == 0)
     {
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;
@@ -666,7 +668,7 @@ int main(int i_argc,
         break;
       }
       // write checkpoint every hour (only 2D, netCdf)
-      else if (l_useFileIO && l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
+      else if (l_ny > 1 && l_useNetCdf && l_elapsed >= std::chrono::hours(l_nOutCheckpoint))
       {
         std::cout << "  writing checkpoint" << std::endl;
         tsunami_lab::io::NetCdf::writeCheckpoint(l_nx,
@@ -740,7 +742,7 @@ int main(int i_argc,
   printTime(l_duration_calc, "calc time ");
   printTime(l_duration_write, "write time");
   printTime(l_duration_checkpoint, "checkpoint time");
-  printTime(l_duration_calc / (l_timeStep * l_nx * l_ny), "calc time per cell and iteration");
+  std::cout << "calc time per cell and iteration: " << (double)std::chrono::duration_cast<std::chrono::nanoseconds>(l_duration_calc).count() / (double)(l_timeStep * l_nx * l_ny) << "ns" << std::endl;
 
   // free memory
   std::cout << "freeing memory" << std::endl;
