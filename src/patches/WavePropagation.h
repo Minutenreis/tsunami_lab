@@ -124,6 +124,12 @@ public:
   virtual void setBathymetry(t_idx i_ix,
                              t_idx i_iy,
                              t_real i_b) = 0;
+
+  /**
+   * @brief Initializes the ghost cells.
+   *
+   */
+  virtual void initGhostCells() = 0;
 };
 
 #endif

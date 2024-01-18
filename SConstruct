@@ -6,6 +6,7 @@
 ##
 import SCons
 import distro
+import nvcc
 
 print( '####################################' )
 print( '### Tsunami Lab                  ###' )
@@ -33,6 +34,9 @@ if vars.UnknownVariables():
   
 # create environment
 env = Environment( variables = vars )
+
+nvcc.generate(env)
+
 # check for libs
 conf = Configure(env)
 if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
@@ -63,6 +67,7 @@ Help( vars.GenerateHelpText( env ) )
 env.Append( CXXFLAGS = [ '-std=c++17',
                            '-Wall',
                            '-Wextra',
+                           '-lcuda',
                            '-g',
                            '-march=native',
                            '-mtune=native',

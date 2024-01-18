@@ -188,6 +188,11 @@ public:
   {
     m_b[i_ix + 1] = i_b;
   }
+
+  /**
+   * @brief Initializes the ghost cells.
+   */
+  void initGhostCells(){};
 };
 
 #endif

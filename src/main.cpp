@@ -186,6 +186,8 @@ int main(int i_argc,
                                   l_b[l_cx + l_cy * l_nx]);
       }
 
+    l_waveProp->initGhostCells();
+
     // delete all newer station outputs
     if (std::filesystem::exists("stations"))
     {

@@ -160,7 +160,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
 {
   t_real *l_h = m_h;
   t_real *l_hu = m_hu;
-  t_real *l_b = m_b;
 
   // set left boundary
   switch (m_boundaryLeft)
@@ -172,7 +171,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
     {
       l_h[getCoord(0, l_y)] = l_h[getCoord(1, l_y)];
       l_hu[getCoord(0, l_y)] = l_hu[getCoord(1, l_y)];
-      l_b[getCoord(0, l_y)] = l_b[getCoord(1, l_y)];
     }
     break;
   }
@@ -183,7 +181,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
     {
       l_h[getCoord(0, l_y)] = 0;
       l_hu[getCoord(0, l_y)] = 0;
-      l_b[getCoord(0, l_y)] = 20;
     }
     break;
   }
@@ -199,7 +196,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
     {
       l_h[getCoord(m_nCellsx + 1, l_y)] = l_h[getCoord(m_nCellsx, l_y)];
       l_hu[getCoord(m_nCellsx + 1, l_y)] = l_hu[getCoord(m_nCellsx, l_y)];
-      l_b[getCoord(m_nCellsx + 1, l_y)] = l_b[getCoord(m_nCellsx, l_y)];
     }
     break;
   }
@@ -210,7 +206,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsX()
     {
       l_h[getCoord(m_nCellsx + 1, l_y)] = 0;
       l_hu[getCoord(m_nCellsx + 1, l_y)] = 0;
-      l_b[getCoord(m_nCellsx + 1, l_y)] = 20;
     }
     break;
   }
@@ -221,7 +216,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
 {
   t_real *l_h = m_h;
   t_real *l_hv = m_hv;
-  t_real *l_b = m_b;
 
   // set bottom boundary
   switch (m_boundaryBottom)
@@ -233,7 +227,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
     {
       l_h[getCoord(l_x, 0)] = l_h[getCoord(l_x, 1)];
       l_hv[getCoord(l_x, 0)] = l_hv[getCoord(l_x, 1)];
-      l_b[getCoord(l_x, 0)] = l_b[getCoord(l_x, 1)];
     }
     break;
   }
@@ -244,7 +237,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
     {
       l_h[getCoord(l_x, 0)] = 0;
       l_hv[getCoord(l_x, 0)] = 0;
-      l_b[getCoord(l_x, 0)] = 20;
     }
     break;
   }
@@ -260,7 +252,6 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
     {
       l_h[getCoord(l_x, m_nCellsy + 1)] = l_h[getCoord(l_x, m_nCellsy)];
       l_hv[getCoord(l_x, m_nCellsy + 1)] = l_hv[getCoord(l_x, m_nCellsy)];
-      l_b[getCoord(l_x, m_nCellsy + 1)] = l_b[getCoord(l_x, m_nCellsy)];
     }
     break;
   }
@@ -271,6 +262,102 @@ void tsunami_lab::patches::WavePropagation2d::setGhostCellsY()
     {
       l_h[getCoord(l_x, m_nCellsy + 1)] = 0;
       l_hv[getCoord(l_x, m_nCellsy + 1)] = 0;
+    }
+    break;
+  }
+  }
+}
+
+void tsunami_lab::patches::WavePropagation2d::initGhostCells()
+{
+  t_real *l_b = m_b;
+
+  // set left boundary
+  switch (m_boundaryLeft)
+  {
+  case t_boundary::OPEN:
+  {
+#pragma GCC ivdep
+    for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
+    {
+      l_b[getCoord(0, l_y)] = l_b[getCoord(1, l_y)];
+    }
+    break;
+  }
+  case t_boundary::WALL:
+  {
+#pragma GCC ivdep
+    for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
+    {
+      l_b[getCoord(0, l_y)] = 20;
+    }
+    break;
+  }
+  }
+
+  // set right boundary
+  switch (m_boundaryRight)
+  {
+  case t_boundary::OPEN:
+  {
+#pragma GCC ivdep
+    for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
+    {
+      l_b[getCoord(m_nCellsx + 1, l_y)] = l_b[getCoord(m_nCellsx, l_y)];
+    }
+    break;
+  }
+  case t_boundary::WALL:
+  {
+#pragma GCC ivdep
+    for (t_idx l_y = 1; l_y < m_nCellsy + 1; l_y++)
+    {
+      l_b[getCoord(m_nCellsx + 1, l_y)] = 20;
+    }
+    break;
+  }
+  }
+
+  // set bottom boundary
+  switch (m_boundaryBottom)
+  {
+  case t_boundary::OPEN:
+  {
+#pragma GCC ivdep
+    for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
+    {
+      l_b[getCoord(l_x, 0)] = l_b[getCoord(l_x, 1)];
+    }
+    break;
+  }
+  case t_boundary::WALL:
+  {
+#pragma GCC ivdep
+    for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
+    {
+      l_b[getCoord(l_x, 0)] = 20;
+    }
+    break;
+  }
+  }
+
+  // set top boundary
+  switch (m_boundaryTop)
+  {
+  case t_boundary::OPEN:
+  {
+#pragma GCC ivdep
+    for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
+    {
+      l_b[getCoord(l_x, m_nCellsy + 1)] = l_b[getCoord(l_x, m_nCellsy)];
+    }
+    break;
+  }
+  case t_boundary::WALL:
+  {
+#pragma GCC ivdep
+    for (t_idx l_x = 1; l_x < m_nCellsx + 1; l_x++)
+    {
       l_b[getCoord(l_x, m_nCellsy + 1)] = 20;
     }
     break;
