@@ -46,7 +46,9 @@ tsunami_lab::t_idx tsunami_lab::patches::WavePropagationCUDA::getCoord(t_idx i_x
 
 void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
 {
-    setGhostCellsX<<<m_nCellsy+2, m_nCellsx+2>>>(m_h, m_hu, m_nCellsx);
+    dim3 l_blockSize(32, 32);
+    dim3 l_numBlock((m_nCellsx+2)/l_blockSize.x, (m_nCellsy+2)/l_blockSize.y);
+    setGhostCellsX<<<l_numBlock,l_blockSize>>>(m_h, m_hu, m_nCellsx);
     cudaDeviceSynchronize();
 
 // init new cell quantities
@@ -87,7 +89,7 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
             m_hu[l_ceR] -= i_scaling * l_netUpdates[1][1];
         }
     
-    setGhostCellsY<<<m_nCellsx+2, m_nCellsy+2>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
+    setGhostCellsY<<<l_numBlock,l_blockSize>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
     cudaDeviceSynchronize();
 
     // init new cell quantities
@@ -129,7 +131,6 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
         }
 }
 
-// __global__ void tsunami_lab::patches::WavePropagationCUDA::setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx)
 __global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx)
 {
     tsunami_lab::t_idx l_x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -137,13 +138,13 @@ __global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
 
     if (l_x == 0)
     {
-        io_h[i_nx * l_y] = io_h[1 + i_nx * l_y];
-        io_hu[i_nx * l_y] = io_hu[1 + i_nx * l_y];
+        io_h[(i_nx+2) * l_y] = io_h[1 + (i_nx+2) * l_y];
+        io_hu[(i_nx+2) * l_y] = io_hu[1 + (i_nx+2) * l_y];
     }
-    else if (l_x == i_nx - 1)
+    else if (l_x == i_nx + 1)
     {
-        io_h[l_x + i_nx * l_y] = io_h[l_x - 1 + i_nx * l_y];
-        io_hu[l_x + i_nx * l_y] = io_hu[l_x - 1 + i_nx * l_y];
+        io_h[l_x + (i_nx+2) * l_y] = io_h[l_x - 1 + (i_nx+2) * l_y];
+        io_hu[l_x + (i_nx+2) * l_y] = io_hu[l_x - 1 + (i_nx+2) * l_y];
     }
 }
 
@@ -155,19 +156,22 @@ __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
 
     if (l_y == 0)
     {
-        io_h[l_x] = io_h[l_x + i_nx];
-        io_hv[l_x] = io_hv[l_x + i_nx];
+        io_h[l_x] = io_h[l_x + (i_nx+2)];
+        io_hv[l_x] = io_hv[l_x + (i_nx+2)];
     }
-    else if (l_y == i_ny - 1)
+    else if (l_y == i_ny + 1)
     {
-        io_h[l_x + i_nx * l_y] = io_h[l_x + i_nx * (l_y - 1)];
-        io_hv[l_x + i_nx * l_y] = io_hv[l_x + i_nx * (l_y - 1)];
+        io_h[l_x + (i_nx+2) * l_y] = io_h[l_x + (i_nx+2) * (l_y - 1)];
+        io_hv[l_x + (i_nx+2) * l_y] = io_hv[l_x + (i_nx+2) * (l_y - 1)];
     }
 }
 
 void tsunami_lab::patches::WavePropagationCUDA::initGhostCells()
 {
-    initGhostCellsCuda<<<m_nCellsx+2, m_nCellsy+2>>>(m_b, m_nCellsx, m_nCellsy);
+    dim3 l_blockSize(32, 32);
+    dim3 l_numBlock((m_nCellsx+2)/l_blockSize.x, (m_nCellsy+2)/l_blockSize.y);
+    initGhostCellsCuda<<<l_numBlock,l_blockSize>>>(m_b, m_nCellsx, m_nCellsy);
+    cudaDeviceSynchronize();
 }
 
 // __global__ void tsunami_lab::patches::WavePropagationCUDA::initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny)
@@ -178,18 +182,18 @@ __global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx
 
     if (l_x == 0)
     {
-        io_b[l_x + blockDim.x * l_y] = io_b[l_x + 1 + blockDim.x * l_y];
+        io_b[l_x + (i_nx+2) * l_y] = io_b[l_x + 1 + (i_nx+2) * l_y];
     }
-    else if (l_x == blockDim.x - 1)
+    else if (l_x == i_nx + 1)
     {
-        io_b[l_x + blockDim.x * l_y] = io_b[l_x - 1 + blockDim.x * l_y];
+        io_b[l_x + (i_nx+2) * l_y] = io_b[l_x - 1 + (i_nx+2) * l_y];
     }
     else if (l_y == 0)
     {
-        io_b[l_x] = io_b[l_x + i_nx];
+        io_b[l_x] = io_b[l_x + (i_nx+2)];
     }
-    else if (l_y == i_ny - 1)
+    else if (l_y == i_ny + 1)
     {
-        io_b[l_x + i_nx * l_y] = io_b[l_x + i_nx * (l_y - 1)];
+        io_b[l_x + (i_nx+2) * l_y] = io_b[l_x + (i_nx+2) * (l_y - 1)];
     }
 }

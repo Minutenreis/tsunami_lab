@@ -600,6 +600,8 @@ int main(int i_argc,
     }
   }
 
+  l_waveProp->initGhostCells();
+
   // derive maximum wave speed in setup; the momentum is ignored
   tsunami_lab::t_real l_speedMax = std::sqrt(9.81 * l_hMax);
 
