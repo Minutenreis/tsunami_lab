@@ -14,6 +14,8 @@
 __global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx);
 __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
 __global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
+__global__ void copyData(tsunami_lab::t_real* m_hTemp, tsunami_lab::t_real* m_h, tsunami_lab::t_real* m_huvTemp, tsunami_lab::t_real* m_hu, tsunami_lab::t_idx m_nCellsx, tsunami_lab::t_idx m_nCellsy);
+__device__ static tsunami_lab::t_idx getCoordCuda(tsunami_lab::t_idx i_x, tsunami_lab::t_idx i_y, tsunami_lab::t_idx m_nCellsx);
 
 tsunami_lab::patches::WavePropagationCUDA::WavePropagationCUDA(t_idx i_nCellsx,
                                                                t_idx i_nCellsy) : m_nCellsx(i_nCellsx),
@@ -90,16 +92,17 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
         }
     
     setGhostCellsY<<<l_numBlock,l_blockSize>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
+    copyData<<<l_numBlock,l_blockSize>>>(m_hTemp, m_h, m_huvTemp, m_hv, m_nCellsx, m_nCellsy);
     cudaDeviceSynchronize();
 
     // init new cell quantities
-#pragma omp parallel for simd
-    for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
-        for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
-        {
-            m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
-            m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)];
-        }
+//#pragma omp parallel for simd
+//    for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
+//        for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
+//        {
+//            m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
+//            m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)];
+//        }
 
 // iterate over edges and update with Riemann solutions in y direction
 #pragma omp parallel for
@@ -166,6 +169,22 @@ __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
     }
 }
 
+__device__ tsunami_lab::t_idx getCoordCuda(tsunami_lab::t_idx i_x, tsunami_lab::t_idx i_y, tsunami_lab::t_idx m_nCellsx)
+{
+    return i_x + i_y * (m_nCellsx + 2);
+}
+
+__global__ void copyData(float* m_hTemp, float* m_h, float* m_huvTemp, float* m_hv, unsigned long m_nCellsx, unsigned long m_nCellsy)
+{
+    int l_cx = blockIdx.x * blockDim.x + threadIdx.x;
+    int l_cy = blockIdx.y * blockDim.y + threadIdx.y;
+
+    if (l_cx < m_nCellsx + 1 && l_cy < m_nCellsy + 1) {
+        int index = getCoordCuda(l_cx, l_cy, m_nCellsx);
+        m_hTemp[index] = m_h[index];
+        m_huvTemp[index] = m_hv[index];
+    }
+}
 void tsunami_lab::patches::WavePropagationCUDA::initGhostCells()
 {
     dim3 l_blockSize(32, 32);
