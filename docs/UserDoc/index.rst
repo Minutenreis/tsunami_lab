@@ -18,6 +18,7 @@
    8_Optimization
    9_Parallelization
    10_CUDA
+   10_1_CUDA
    doxygen
 
 User Documentation
