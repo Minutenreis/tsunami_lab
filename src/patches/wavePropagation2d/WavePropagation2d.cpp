@@ -9,6 +9,7 @@
 #include "WavePropagation2d.h"
 #include "../../solvers/roe/Roe.h"
 #include "../../solvers/fWave/FWave.h"
+#include <algorithm>
 
 tsunami_lab::patches::WavePropagation2d::WavePropagation2d(t_idx i_nCellsx,
                                                            t_idx i_nCellsy,
@@ -53,14 +54,9 @@ tsunami_lab::t_idx tsunami_lab::patches::WavePropagation2d::getCoord(t_idx i_x, 
 void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
 {
   setGhostCellsX();
-// init new cell quantities
-#pragma omp parallel for simd
-  for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
-    for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
-    {
-      m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
-      m_huvTemp[getCoord(l_cx, l_cy)] = m_hu[getCoord(l_cx, l_cy)];
-    }
+  // init new cell quantities
+  std::copy(m_h, m_h + (m_nCellsx + 2) * (m_nCellsy + 2), m_hTemp);
+  std::copy(m_hu, m_hu + (m_nCellsx + 2) * (m_nCellsy + 2), m_huvTemp);
 
 // iterate over edges and update with Riemann solutions in x direction
 #pragma omp parallel for
@@ -105,14 +101,9 @@ void tsunami_lab::patches::WavePropagation2d::timeStep(t_real i_scaling)
 
   setGhostCellsY();
 
-// init new cell quantities
-#pragma omp parallel for simd
-  for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
-    for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)
-    {
-      m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
-      m_huvTemp[getCoord(l_cx, l_cy)] = m_hv[getCoord(l_cx, l_cy)];
-    }
+  // init new cell quantities
+  std::copy(m_h, m_h + (m_nCellsx + 2) * (m_nCellsy + 2), m_hTemp);
+  std::copy(m_hv, m_hv + (m_nCellsx + 2) * (m_nCellsy + 2), m_huvTemp);
 
 // iterate over edges and update with Riemann solutions in y direction
 #pragma omp parallel for

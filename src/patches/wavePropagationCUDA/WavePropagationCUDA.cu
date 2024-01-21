@@ -9,6 +9,7 @@
 #include "WavePropagationCUDA.h"
 #include "../../solvers/roe/Roe.h"
 #include "../../solvers/fWave/FWave.h"
+#include <cuda.h>
 
 __global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx);
 __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
@@ -55,7 +56,7 @@ tsunami_lab::t_idx tsunami_lab::patches::WavePropagationCUDA::getCoord(t_idx i_x
 
 void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
 {
-    setGhostCellsX<<<m_nCellsx, m_nCellsy>>>(m_h, m_hu, m_nCellsx);
+    setGhostCellsX<<<m_nCellsx+2, m_nCellsy+2>>>(m_h, m_hu, m_nCellsx);
 
 // init new cell quantities
 #pragma omp parallel for simd
@@ -95,7 +96,7 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
             m_hu[l_ceR] -= i_scaling * l_netUpdates[1][1];
         }
 
-    setGhostCellsY<<<m_nCellsx, m_nCellsy>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
+    setGhostCellsY<<<m_nCellsx+2, m_nCellsy+2>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
 
 // init new cell quantities
 #pragma omp parallel for simd
@@ -174,7 +175,7 @@ __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
 
 void tsunami_lab::patches::WavePropagationCUDA::initGhostCells()
 {
-    initGhostCellsCuda<<<m_nCellsx, m_nCellsy>>>(m_b, m_nCellsx, m_nCellsy);
+    initGhostCellsCuda<<<m_nCellsx+2, m_nCellsy+2>>>(m_b, m_nCellsx, m_nCellsy);
 }
 
 // __global__ void tsunami_lab::patches::WavePropagationCUDA::initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny)
