@@ -95,19 +95,9 @@ public:
      *
      * @param i_nCellsx number of cells in x direction.
      * @param i_nCellsy number of cells in y direction.
-     * @param i_useFWave bool: true if FWave solver should be used, false if Roe solver should be used.
-     * @param i_boundaryLeft left boundary condition.
-     * @param i_boundaryRight right boundary condition.
-     * @param i_boundaryBottom bottom boundary condition.
-     * @param i_boundaryTop top boundary condition.
      **/
     WavePropagationCUDA(t_idx i_nCellsx,
-                        t_idx i_nCellsy,
-                        bool i_useFWave,
-                        t_boundary i_boundaryLeft,
-                        t_boundary i_boundaryRight,
-                        t_boundary i_boundaryBottom,
-                        t_boundary i_boundaryTop);
+                        t_idx i_nCellsy);
 
     /**
      * Destructor which frees all allocated memory.

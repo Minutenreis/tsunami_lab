@@ -16,21 +16,11 @@ __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
 __global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
 
 tsunami_lab::patches::WavePropagationCUDA::WavePropagationCUDA(t_idx i_nCellsx,
-                                                               t_idx i_nCellsy,
-                                                               bool,
-                                                               t_boundary i_boundaryLeft,
-                                                               t_boundary i_boundaryRight,
-                                                               t_boundary i_boundaryBottom,
-                                                               t_boundary i_boundaryTop) : m_nCellsx(i_nCellsx),
-                                                                                           m_nCellsy(i_nCellsy),
-                                                                                           m_boundaryLeft(i_boundaryLeft),
-                                                                                           m_boundaryRight(i_boundaryRight),
-                                                                                           m_boundaryBottom(i_boundaryBottom),
-                                                                                           m_boundaryTop(i_boundaryTop)
+                                                               t_idx i_nCellsy) : m_nCellsx(i_nCellsx),
+                                                                                  m_nCellsy(i_nCellsy)
 {
-
     // allocate memory including a single ghost cell on each side (zero initialised)
-    t_idx l_size = (m_nCellsx + 2) * (m_nCellsy + 2) * sizeof(t_real);
+    t_idx l_size = (m_nCellsx + 2) * (m_nCellsy + 2) * sizeof(float);
     cudaMallocManaged(&m_h, l_size);
     cudaMallocManaged(&m_hu, l_size);
     cudaMallocManaged(&m_hv, l_size);
@@ -56,7 +46,8 @@ tsunami_lab::t_idx tsunami_lab::patches::WavePropagationCUDA::getCoord(t_idx i_x
 
 void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
 {
-    setGhostCellsX<<<m_nCellsx+2, m_nCellsy+2>>>(m_h, m_hu, m_nCellsx);
+    setGhostCellsX<<<m_nCellsy+2, m_nCellsx+2>>>(m_h, m_hu, m_nCellsx);
+    cudaDeviceSynchronize();
 
 // init new cell quantities
 #pragma omp parallel for simd
@@ -66,7 +57,7 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
             m_hTemp[getCoord(l_cx, l_cy)] = m_h[getCoord(l_cx, l_cy)];
             m_huvTemp[getCoord(l_cx, l_cy)] = m_hu[getCoord(l_cx, l_cy)];
         }
-
+    
 // iterate over edges and update with Riemann solutions in x direction
 #pragma omp parallel for
     for (t_idx l_ey = 0; l_ey < m_nCellsy + 1; l_ey++)
@@ -95,10 +86,11 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
             m_h[l_ceR] -= i_scaling * l_netUpdates[1][0];
             m_hu[l_ceR] -= i_scaling * l_netUpdates[1][1];
         }
-
+    
     setGhostCellsY<<<m_nCellsx+2, m_nCellsy+2>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
+    cudaDeviceSynchronize();
 
-// init new cell quantities
+    // init new cell quantities
 #pragma omp parallel for simd
     for (t_idx l_cy = 0; l_cy < m_nCellsy + 1; l_cy++)
         for (t_idx l_cx = 0; l_cx < m_nCellsx + 1; l_cx++)

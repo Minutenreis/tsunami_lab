@@ -86,6 +86,9 @@ else:
   optReport = ARGUMENTS.get('optReport', "false")
   if optReport!='false': 
     env.Append( CXXFLAGS = ['-qopt-report=5'])
+    
+env.Append( NVCCFLAGS = [ '-O2', 
+                         "-arch=native"])
   
   
 # set optimization mode
