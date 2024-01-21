@@ -74,21 +74,6 @@ private:
      */
     t_idx getCoord(t_idx i_x, t_idx i_y);
 
-    // /**
-    //  * Sets the values of the ghost cells according to t_boundary set in the class for the X Sweep.
-    //  **/
-    // void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx);
-
-    // /**
-    //  * Sets the values of the ghost cells according to t_boundary set in the class for the Y Sweep.
-    //  **/
-    // void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
-
-    // /**
-    //  * @brief CUDA kernel for setting the outflow condition for bathymetry
-    //  */
-    // void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
-
 public:
     /**
      * Constructs the 1d wave propagation solver.

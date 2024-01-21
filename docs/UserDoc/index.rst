@@ -56,6 +56,7 @@ Command Line Parameters
 | :code:`[-t maxtime]` = maxTime of simulation, default is :code:`24`
 | :code:`[-k size]` = size of cells in output as faktor, default is :code:`1`
 | :code:`[-i]` = no fileIO (benchmarking)
+| :code:`[-c]` = use CUDA (only for 2d)
 
 :code:`stationsJson` Format:
 
