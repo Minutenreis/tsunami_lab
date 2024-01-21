@@ -28,6 +28,7 @@ and
 
 | So we wrote a little cuda programm that calculates the sum of two arrays to test if it works.
 | To compile it we used :code:`nvcc vectorAdd.cu  -o vectorAdd" 4000`
+|  
 
 .. code:: cpp
 
@@ -94,6 +95,7 @@ and
   }
 
 | The most interesting things about this small snippet is:
+|  
 | What are blocks and threads?
 | How do i calculate them?
 | And for what do i need the thread id?
@@ -103,6 +105,7 @@ and
 | The thread id is needed to calculate the index of the array that is calculated by the thread.
 |  
 | To visualize this we can use the following picture:
+|  
 
 .. figure:: _static/10_cuda_indexing.png
     :width: 700
