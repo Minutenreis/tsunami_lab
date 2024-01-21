@@ -26,8 +26,8 @@ and
 
 :code:`sudo apt install nvidia-cuda-toolkit`
 
-So we wrote a little cuda programm that calculates the sum of two arrays to test if it works.
-To compile it we used :code:`nvcc vectorAdd.cu  -o vectorAdd" 4000`
+| So we wrote a little cuda programm that calculates the sum of two arrays to test if it works.
+| To compile it we used :code:`nvcc vectorAdd.cu  -o vectorAdd" 4000`
 
 .. code:: cpp
 
@@ -97,21 +97,20 @@ To compile it we used :code:`nvcc vectorAdd.cu  -o vectorAdd" 4000`
 | What are blocks and threads?
 | How do i calculate them?
 | And for what do i need the thread id?
-
+|  
 | So the blocks are the number of parallel processes that are running at the same time.
 | The threads are the number of parallel processes that are running at the same time in one block.
 | The thread id is needed to calculate the index of the array that is calculated by the thread.
-
-To visualize this we can use the following picture:
+|  
+| To visualize this we can use the following picture:
 
 .. figure:: _static/10_cuda_indexing.png
     :width: 700
 
-
 Analysis and Modification for Cuda
 ----------------------------------
 
-While analyzing we noticed that we should be able to just use cude everyhwere where we used openmp.
+While analyzing we noticed that we should be able to use cuda everyhwere where we used openmp.
 So we just replaced the openmp pragmas and replaced the code in it with cuda kernels.
 
 First "victim" of our replacement where the functions that calculate ghostcell-updates.
@@ -165,11 +164,11 @@ Next we replaced the init new cell quantities with a cudaMemCpy instead of itera
 
   cudaMemcpy(m_hTemp, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
 
-works like a charm.
+Works like a charm.
 
 Now the whole netUpdates:
 
-Hmh. Second Tsunami?...
+Hmh. Second tsunami?...
 
 .. video:: _static/10_cuda_Atomic_Fail.mp4
    :width: 700
