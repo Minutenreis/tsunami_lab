@@ -238,14 +238,58 @@ and the simulation is working!
 .. video:: _static/10_cuda_atomic_working.mp4
    :width: 700
 
+It's quite slow though, at roughly 15-20 ns per cell and iteration.
+That would be a setback since its slower than the openmp version (~4-6ns).
 
-Short Performance Observation in Taskmanager
---------------------------------------------
+So we tried to optimize the memory a bit:
 
-.. figure:: _static/10_cuda_spiking_gpu.png
-    :width: 700
+.. code:: cpp
 
-Seems like a lot of spiking.
-Probably because of the atomicAdd() and cudaDeviceSynchronize() functions.
+    cudaMalloc(&m_h, l_size);
+    cudaMalloc(&m_hu, l_size);
+    cudaMalloc(&m_hv, l_size);
+    cudaMalloc(&m_hTemp, l_size);
+    cudaMalloc(&m_huvTemp, l_size);
+    cudaMalloc(&m_b, l_size);
+    cudaMemset(m_h, 0, l_size);
+    cudaMemset(m_hu, 0, l_size);
+    cudaMemset(m_hv, 0, l_size);
+    cudaMemset(m_hTemp, 0, l_size);
+    cudaMemset(m_huvTemp, 0, l_size);
+    cudaMemset(m_b, 0, l_size);
+
+    m_h_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+    m_hu_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+    m_hv_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+    m_b_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+
+Using cudaMalloc instead of cudaMallocManaged improves performance significantly.
+Though to use this we have to manually send memory back and forth between host and device.
+So we set the initial values on the host memory, copy it to the device together with initialising the bathymetry ghost cells and then copy it back before every write operation.
+
+And voila: A timestep without IO costs only 0.36ns per cell and iteration or roughly 0.87ns per cell and iteration with IO.
+Now the write time in NetCdf is the bottleneck.
+
+.. code:: shell
+
+    total time: 20s 846ms 543us 685ns
+    setup time: 1s 929ms 653us 534ns
+    calc time : 674ms 869us 867ns
+    write time: 18s 242ms 20us 284ns
+    checkpoint time: 0ns
+    calc time per cell and iteration: 0.873205ns
+
+at 4000m cell size the write time for checkpoints is roughly 27 times greater than the calculation time.
+And its not getting that much better with higher resolution, at 1000m cell size it currently takes 14.36s to calculate the updates, but 2m 51.45s to write them.
+So still 12 times longer write than calculation time.
+
+We will look into this for our final assignment and at other ways to speed things up / reintroduce feature parity with the openmp version.
 
 But this is for the next time :)
+
+Take a final proof of our cuda version:
+
+.. video:: _static/10_Tohoko_1000_CUDA.mp4
+   :width: 700
+
+*CUDA Version of Tohoku Simulation 100 frames 1000m cell size*
