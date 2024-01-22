@@ -668,6 +668,7 @@ int main(int i_argc,
                 << l_simTime << " / " << l_timeStep << std::endl;
 
       auto l_writeStart = std::chrono::high_resolution_clock::now();
+      l_waveProp->prepareDataAccess();
       if (l_useFileIO)
         l_writer->write(
             l_waveProp->getHeight(),
@@ -738,6 +739,7 @@ int main(int i_argc,
 
     if (l_useFileIO && l_simTime > l_nFreqStation * l_stations->getT())
     {
+      l_waveProp->prepareDataAccess();
       l_stations->write(l_simTime,
                         l_waveProp->getHeight(),
                         l_waveProp->getMomentumX(),

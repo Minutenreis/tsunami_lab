@@ -36,12 +36,23 @@ tsunami_lab::patches::WavePropagationCUDA::WavePropagationCUDA(t_idx i_nCellsx,
 {
     // allocate memory including a single ghost cell on each side (zero initialised)
     t_idx l_size = (m_nCellsx + 2) * (m_nCellsy + 2) * sizeof(float);
-    cudaMallocManaged(&m_h, l_size);
-    cudaMallocManaged(&m_hu, l_size);
-    cudaMallocManaged(&m_hv, l_size);
-    cudaMallocManaged(&m_hTemp, l_size);
-    cudaMallocManaged(&m_huvTemp, l_size);
-    cudaMallocManaged(&m_b, l_size);
+    cudaMalloc(&m_h, l_size);
+    cudaMalloc(&m_hu, l_size);
+    cudaMalloc(&m_hv, l_size);
+    cudaMalloc(&m_hTemp, l_size);
+    cudaMalloc(&m_huvTemp, l_size);
+    cudaMalloc(&m_b, l_size);
+    cudaMemset(m_h, 0, l_size);
+    cudaMemset(m_hu, 0, l_size);
+    cudaMemset(m_hv, 0, l_size);
+    cudaMemset(m_hTemp, 0, l_size);
+    cudaMemset(m_huvTemp, 0, l_size);
+    cudaMemset(m_b, 0, l_size);
+
+    m_h_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+    m_hu_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+    m_hv_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
+    m_b_host = new t_real[(m_nCellsx + 2) * (m_nCellsy + 2)];
 }
 
 tsunami_lab::patches::WavePropagationCUDA::~WavePropagationCUDA()
@@ -52,6 +63,10 @@ tsunami_lab::patches::WavePropagationCUDA::~WavePropagationCUDA()
     cudaFree(m_hTemp);
     cudaFree(m_huvTemp);
     cudaFree(m_b);
+    delete[] m_h_host;
+    delete[] m_hu_host;
+    delete[] m_hv_host;
+    delete[] m_b_host;
 }
 
 void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
@@ -60,20 +75,16 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
     dim3 l_numBlock((m_nCellsx+2-1)/l_blockSize.x+1, (m_nCellsy+2-1)/l_blockSize.y+1);
 
     setGhostCellsX<<<l_numBlock,l_blockSize>>>(m_h, m_hu, m_nCellsx, m_nCellsy);
-    cudaDeviceSynchronize();
 
     cudaMemcpy(m_hTemp, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
     cudaMemcpy(m_huvTemp, m_hu, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
     netUpdatesX<<<l_numBlock,l_blockSize>>>(m_h, m_hu, m_hTemp, m_huvTemp, m_b, m_nCellsx, m_nCellsy, i_scaling);
-    cudaDeviceSynchronize();
 
     setGhostCellsY<<<l_numBlock,l_blockSize>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
-    cudaDeviceSynchronize();
 
     cudaMemcpy(m_hTemp, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
     cudaMemcpy(m_huvTemp, m_hv, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
     netUpdatesY<<<l_numBlock,l_blockSize>>>(m_h, m_hv, m_hTemp, m_huvTemp, m_b, m_nCellsx, m_nCellsy, i_scaling);
-    cudaDeviceSynchronize();
 }
 
 __global__ void netUpdatesY(tsunami_lab::t_real *o_h, tsunami_lab::t_real *o_hv, tsunami_lab::t_real *i_hTemp,tsunami_lab::t_real *i_huvTemp, tsunami_lab::t_real *i_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_real i_scaling)
@@ -189,10 +200,25 @@ __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
 
 void tsunami_lab::patches::WavePropagationCUDA::initGhostCells()
 {
+    // copy host data to device
+    cudaMemcpy(m_h, m_h_host, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(m_hu, m_hu_host, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(m_hv, m_hv_host, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(m_b, m_b_host, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyHostToDevice);
+
+    // set ghost cells
     dim3 l_blockSize(16,16);
     dim3 l_numBlock((m_nCellsx+2-1)/l_blockSize.x+1, (m_nCellsy+2-1)/l_blockSize.y+1);
     initGhostCellsCuda<<<l_numBlock,l_blockSize>>>(m_b, m_nCellsx, m_nCellsy);
+}
+
+void tsunami_lab::patches::WavePropagationCUDA::prepareDataAccess()
+{
     cudaDeviceSynchronize();
+    cudaMemcpy(m_h_host, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(m_hu_host, m_hu, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(m_hv_host, m_hv, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(m_b_host, m_b, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
 }
 
 __global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny)

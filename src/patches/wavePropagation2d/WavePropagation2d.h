@@ -240,6 +240,11 @@ public:
    * @brief Initializes Bathymetry Ghost Cells
    */
   void initGhostCells();
+
+  /**
+   * @brief Prepares data access (does nothing on non CUDA)
+   */
+  void prepareDataAccess(){};
 };
 
 #endif

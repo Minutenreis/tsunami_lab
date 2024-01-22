@@ -46,14 +46,17 @@ private:
     //! water heights for the current and next time step for all cells
     //! access array like m_h[i_x  + i_y  * (m_nCells + 2)]
     t_real *m_h = nullptr;
+    t_real *m_h_host = nullptr;
 
     //! momenta for the current and next time step for all cells in x-direction
     //! access array like m_hu[i_x + i_y  * (m_nCells + 2)]
     t_real *m_hu = nullptr;
+    t_real *m_hu_host = nullptr;
 
     //! momenta for the current and next time step for all cells in y-direction
     //! access array like m_hv[i_x  + i_y  * (m_nCells + 2)]
     t_real *m_hv = nullptr;
+    t_real *m_hv_host = nullptr;
 
     //! temp array for height
     t_real *m_hTemp = nullptr;
@@ -64,6 +67,7 @@ private:
     //! bathymetry for the current and next time step for all cells
     //! access array like m_h[i_x + i_y  * (m_nCells + 2)]
     t_real *m_b = nullptr;
+    t_real *m_b_host = nullptr;
 
     /**
      * @brief get Coordinate from x and y index
@@ -133,7 +137,7 @@ public:
      */
     t_real const *getHeight()
     {
-        return m_h;
+        return m_h_host;
     }
 
     /**
@@ -143,7 +147,7 @@ public:
      **/
     t_real const *getMomentumX()
     {
-        return m_hu;
+        return m_hu_host;
     }
 
     /**
@@ -151,7 +155,7 @@ public:
      **/
     t_real const *getMomentumY()
     {
-        return m_hv;
+        return m_hv_host;
     }
 
     /**
@@ -161,7 +165,7 @@ public:
      */
     t_real const *getBathymetry()
     {
-        return m_b;
+        return m_b_host;
     }
 
     /**
@@ -174,7 +178,7 @@ public:
                    t_idx i_iy,
                    t_real i_h)
     {
-        m_h[getCoord(i_ix + 1, i_iy + 1)] = i_h;
+        m_h_host[getCoord(i_ix + 1, i_iy + 1)] = i_h;
     }
 
     /**
@@ -187,7 +191,7 @@ public:
                       t_idx i_iy,
                       t_real i_hu)
     {
-        m_hu[getCoord(i_ix + 1, i_iy + 1)] = i_hu;
+        m_hu_host[getCoord(i_ix + 1, i_iy + 1)] = i_hu;
     }
 
     /**
@@ -197,7 +201,7 @@ public:
                       t_idx i_iy,
                       t_real i_hv)
     {
-        m_hv[getCoord(i_ix + 1, i_iy + 1)] = i_hv;
+        m_hv_host[getCoord(i_ix + 1, i_iy + 1)] = i_hv;
     };
 
     /**
@@ -210,8 +214,13 @@ public:
                        t_idx i_iy,
                        t_real i_b)
     {
-        m_b[getCoord(i_ix + 1, i_iy + 1)] = i_b;
+        m_b_host[getCoord(i_ix + 1, i_iy + 1)] = i_b;
     }
+
+    /**
+     * @brief Prepares Data Access
+     */
+    void prepareDataAccess();
 
     /**
      * @brief Sets the bathymetry in Ghost Cells

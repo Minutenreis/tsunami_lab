@@ -193,6 +193,11 @@ public:
    * @brief Initializes the ghost cells.
    */
   void initGhostCells(){};
+
+  /**
+   * @brief Prepares data access (does nothing on non CUDA)
+   */
+  void prepareDataAccess(){};
 };
 
 #endif

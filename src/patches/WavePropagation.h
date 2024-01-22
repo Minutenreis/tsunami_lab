@@ -126,10 +126,15 @@ public:
                              t_real i_b) = 0;
 
   /**
-   * @brief Initializes the ghost cells.
+   * @brief Initializes the ghost cells. You can't use set Operations afterwards.
    *
    */
   virtual void initGhostCells() = 0;
+
+  /**
+   * @brief Prepares Data Access (you can use get Operations afterwards until the next time step)
+   */
+  virtual void prepareDataAccess() = 0;
 };
 
 #endif
