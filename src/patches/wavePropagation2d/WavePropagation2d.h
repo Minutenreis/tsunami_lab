@@ -47,15 +47,15 @@ private:
   const t_boundary m_boundaryTop = t_boundary::OPEN;
 
   //! water heights for the current and next time step for all cells
-  //! access array like m_h[m_step][i_x  + i_y  * (m_nCells + 2)]
+  //! access array like m_h[i_x  + i_y  * (m_nCells + 2)]
   t_real *m_h = nullptr;
 
   //! momenta for the current and next time step for all cells in x-direction
-  //! access array like m_hu[m_step][i_x + i_y  * (m_nCells + 2)]
+  //! access array like m_hu[i_x + i_y  * (m_nCells + 2)]
   t_real *m_hu = nullptr;
 
   //! momenta for the current and next time step for all cells in y-direction
-  //! access array like m_hv[m_step][i_x  + i_y  * (m_nCells + 2)]
+  //! access array like m_hv[i_x  + i_y  * (m_nCells + 2)]
   t_real *m_hv = nullptr;
 
   //! temp array for height
@@ -65,7 +65,7 @@ private:
   t_real *m_huvTemp = nullptr;
 
   //! bathymetry for the current and next time step for all cells
-  //! access array like m_h[m_step][i_x + i_y  * (m_nCells + 2)]
+  //! access array like m_h[i_x + i_y  * (m_nCells + 2)]
   t_real *m_b = nullptr;
 
   /**
@@ -235,6 +235,16 @@ public:
   {
     m_b[getCoord(i_ix + 1, i_iy + 1)] = i_b;
   }
+
+  /**
+   * @brief Initializes Bathymetry Ghost Cells
+   */
+  void initGhostCells();
+
+  /**
+   * @brief Prepares data access (does nothing on non CUDA)
+   */
+  void prepareDataAccess(){};
 };
 
 #endif

@@ -6,6 +6,7 @@
  **/
 #include "patches/wavePropagation1d/WavePropagation1d.h"
 #include "patches/wavePropagation2d/WavePropagation2d.h"
+#include "patches/wavePropagationCUDA/WavePropagationCUDA.h"
 #include "setups/damBreak1d/DamBreak1d.h"
 #include "setups/rareRare1d/RareRare1d.h"
 #include "setups/shockShock1d/ShockShock1d.h"
@@ -108,6 +109,7 @@ int main(int i_argc,
   bool l_useCheckpoint = false;
   bool l_useNetCdf = true;
   bool l_useFileIO = true;
+  bool l_useCuda = false;
 
   std::cout << "runtime configuration" << std::endl;
   std::cout << "  Number of Threads: " << omp_get_max_threads() << std::endl;
@@ -186,6 +188,8 @@ int main(int i_argc,
                                   l_b[l_cx + l_cy * l_nx]);
       }
 
+    l_waveProp->initGhostCells();
+
     // delete all newer station outputs
     if (std::filesystem::exists("stations"))
     {
@@ -235,7 +239,7 @@ int main(int i_argc,
     opterr = 0; // disable error messages of getopt
     int opt;
 
-    while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:i")) != -1)
+    while ((opt = getopt(i_argc, i_argv, "u:s:b:r:o:f:t:k:ic")) != -1)
     {
       switch (opt)
       {
@@ -472,6 +476,12 @@ int main(int i_argc,
         l_useFileIO = false;
         break;
       }
+      // use CUDA
+      case 'c':
+      {
+        l_useCuda = true;
+        break;
+      }
       // unknown option
       case '?':
       {
@@ -510,8 +520,16 @@ int main(int i_argc,
     }
     else
     {
-      l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
-      std::cout << "  using 2d solver" << std::endl;
+      if (!l_useCuda)
+      {
+        l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+        std::cout << "  using 2d solver" << std::endl;
+      }
+      else
+      {
+        l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny);
+        std::cout << "  using CUDA solver" << std::endl;
+      }
     }
   }
 
@@ -582,6 +600,8 @@ int main(int i_argc,
     }
   }
 
+  l_waveProp->initGhostCells();
+
   // derive maximum wave speed in setup; the momentum is ignored
   tsunami_lab::t_real l_speedMax = std::sqrt(9.81 * l_hMax);
 
@@ -648,6 +668,7 @@ int main(int i_argc,
                 << l_simTime << " / " << l_timeStep << std::endl;
 
       auto l_writeStart = std::chrono::high_resolution_clock::now();
+      l_waveProp->prepareDataAccess();
       if (l_useFileIO)
         l_writer->write(
             l_waveProp->getHeight(),
@@ -718,6 +739,7 @@ int main(int i_argc,
 
     if (l_useFileIO && l_simTime > l_nFreqStation * l_stations->getT())
     {
+      l_waveProp->prepareDataAccess();
       l_stations->write(l_simTime,
                         l_waveProp->getHeight(),
                         l_waveProp->getMomentumX(),

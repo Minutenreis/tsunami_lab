@@ -6,6 +6,8 @@
 ##
 import SCons
 import distro
+import nvcc
+import os
 
 print( '####################################' )
 print( '### Tsunami Lab                  ###' )
@@ -33,6 +35,10 @@ if vars.UnknownVariables():
   
 # create environment
 env = Environment( variables = vars )
+
+
+nvcc.generate(env)
+
 # check for libs
 conf = Configure(env)
 if not conf.CheckLibWithHeader('netcdf','netcdf.h','c++'):
@@ -63,6 +69,7 @@ Help( vars.GenerateHelpText( env ) )
 env.Append( CXXFLAGS = [ '-std=c++17',
                            '-Wall',
                            '-Wextra',
+                           '-lcuda',
                            '-g',
                            '-march=native',
                            '-mtune=native',
@@ -70,15 +77,18 @@ env.Append( CXXFLAGS = [ '-std=c++17',
 if( 'g++' == cxxCompiler ):
   env.Append( CXXFLAGS = [ '-Wpedantic',
                            '-fopenmp'] )
-  env.Append( LINKFLAGS = [ '-fopenmp'] )
+  env.Append( LINKFLAGS = [ '-fopenmp', '-lcudart'] )
 else:
   env.Append( CXXFLAGS = ['-diag-disable=10441',
                            '-wd823',
                            '-qopenmp'] )
-  env.Append( LINKFLAGS = [ '-qopenmp'] )
+  env.Append( LINKFLAGS = [ '-qopenmp', '-lcudart'] )
   optReport = ARGUMENTS.get('optReport', "false")
   if optReport!='false': 
     env.Append( CXXFLAGS = ['-qopt-report=5'])
+    
+env.Append( NVCCFLAGS = [ '-O2', 
+                         "-arch=native"])
   
   
 # set optimization mode
@@ -107,12 +117,21 @@ if 'san' in  env['mode']:
 env.Append( CXXFLAGS = [ '-isystem', 'submodules/Catch2/single_include' ] )
 env.Append( CXXFLAGS = [ '-isystem', 'submodules/json/single_include'] )
 
+# add CUDA
+env.Append( LIBPATH = ["/usr/local/cuda/lib64"] ) 
+env.Append(LIBS=['cudart'])
+
 # get source files
 VariantDir( variant_dir = 'build/src',
             src_dir     = 'src' )
 
 env.sources = []
 env.tests = []
+
+# CUDA source files
+cuda_sources = env.Glob('src/*.cu')
+cuda_objects = [env.Object(target='build/src/cuda_objects/%s' % os.path.basename(src), source=src) for src in cuda_sources]
+env.sources += cuda_objects
 
 Export('env')
 SConscript( 'build/src/SConscript' )
