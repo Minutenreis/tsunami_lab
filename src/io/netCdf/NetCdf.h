@@ -152,6 +152,7 @@ public:
      * @param o_nx number of cells in x-direction
      * @param o_ny number of cells in y-direction
      * @param o_useFWave flag if f-wave is used
+     * @param o_useCuda flag if cuda is used
      * @param o_boundaryL left boundary
      * @param o_boundaryR right boundary
      * @param o_boundaryB bottom boundary
@@ -178,6 +179,7 @@ public:
                                t_idx *o_nx,
                                t_idx *o_ny,
                                bool *o_useFWave,
+                               bool *o_useCuda,
                                tsunami_lab::t_boundary *o_boundaryL,
                                tsunami_lab::t_boundary *o_boundaryR,
                                tsunami_lab::t_boundary *o_boundaryB,
@@ -209,6 +211,7 @@ public:
      * @param i_ghostCellsX number of ghost cells in x-direction
      * @param i_ghostCellsY number of ghost cells in y-direction
      * @param i_useFWave flag if f-wave is used
+     * @param i_useCuda flag if cuda is used
      * @param i_boundaryL left boundary
      * @param i_boundaryR right boundary
      * @param i_boundaryB bottom boundary
@@ -237,6 +240,7 @@ public:
                                 t_idx i_ghostCellsX,
                                 t_idx i_ghostCellsY,
                                 bool i_useFWave,
+                                bool i_useCuda,
                                 tsunami_lab::t_boundary i_boundaryL,
                                 tsunami_lab::t_boundary i_boundaryR,
                                 tsunami_lab::t_boundary i_boundaryB,

@@ -140,6 +140,7 @@ int main(int i_argc,
                                             &l_nx,
                                             &l_ny,
                                             &l_useFwave,
+                                            &l_useCuda,
                                             &l_boundaryL,
                                             &l_boundaryR,
                                             &l_boundaryB,
@@ -164,7 +165,14 @@ int main(int i_argc,
 
     // always netCdf 2D output
     l_writer = new tsunami_lab::io::NetCdf();
-    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    if (!l_useCuda)
+    {
+      l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    }
+    else
+    {
+      l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny);
+    }
     l_stations = new tsunami_lab::io::Stations(l_stationFilePath);
 
     // set up solver
@@ -698,6 +706,7 @@ int main(int i_argc,
                                                  l_waveProp->getGhostCellsX(),
                                                  l_waveProp->getGhostCellsY(),
                                                  l_useFwave,
+                                                 l_useCuda,
                                                  l_boundaryL,
                                                  l_boundaryR,
                                                  l_boundaryB,

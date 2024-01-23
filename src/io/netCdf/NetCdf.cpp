@@ -208,6 +208,7 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
                                              t_idx *o_nx,
                                              t_idx *o_ny,
                                              bool *o_useFWave,
+                                             bool *o_useCuda,
                                              tsunami_lab::t_boundary *o_boundaryL,
                                              tsunami_lab::t_boundary *o_boundaryR,
                                              tsunami_lab::t_boundary *o_boundaryB,
@@ -247,11 +248,12 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     ncCheck(nc_inq_dimlen(l_ncidp, l_dimTextId, &l_textLength), __FILE__, __LINE__);
 
     // read dimensionless variables
-    int l_varUseFWaveId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
+    int l_varUseFWaveId, l_varUseCudaId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
     int l_varEndTimeId, l_varWidthId, l_varXOffsetId, l_varYOffsetId, l_varHMaxId;
     int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId, l_varNFreqStationId;
     int l_varSimTimeId, l_varMaxHoursId;
     ncCheck(nc_inq_varid(l_ncidp, "useFWave", &l_varUseFWaveId), __FILE__, __LINE__);
+    ncCheck(nc_inq_varid(l_ncidp, "useCuda", &l_varUseCudaId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "boundaryL", &l_varBoundaryLId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "boundaryR", &l_varBoundaryRId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "boundaryB", &l_varBoundaryBId), __FILE__, __LINE__);
@@ -278,9 +280,11 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     ncCheck(nc_inq_varid(l_ncidp, "momentum_y", &l_varHvId), __FILE__, __LINE__);
 
     // read dimensionless variables
-    int l_useFWaveInt, l_boundaryLInt, l_boundaryRInt, l_boundaryBInt, l_boundaryTInt;
+    int l_useFWaveInt, l_useCudaInt, l_boundaryLInt, l_boundaryRInt, l_boundaryBInt, l_boundaryTInt;
     ncCheck(nc_get_var_int(l_ncidp, l_varUseFWaveId, &l_useFWaveInt), __FILE__, __LINE__);
     *o_useFWave = l_useFWaveInt != 0;
+    ncCheck(nc_get_var_int(l_ncidp, l_varUseCudaId, &l_useCudaInt), __FILE__, __LINE__);
+    *o_useCuda = l_useCudaInt != 0;
     ncCheck(nc_get_var_int(l_ncidp, l_varBoundaryLId, &l_boundaryLInt), __FILE__, __LINE__);
     *o_boundaryL = intToTBoundary(l_boundaryLInt);
     ncCheck(nc_get_var_int(l_ncidp, l_varBoundaryRId, &l_boundaryRInt), __FILE__, __LINE__);
@@ -356,6 +360,7 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
                                               t_idx i_ghostCellsX,
                                               t_idx i_ghostCellsY,
                                               bool i_useFWave,
+                                              bool i_useCuda,
                                               tsunami_lab::t_boundary i_boundaryL,
                                               tsunami_lab::t_boundary i_boundaryR,
                                               tsunami_lab::t_boundary i_boundaryB,
@@ -401,12 +406,13 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     ncCheck(nc_def_dim(l_ncidp, "text", i_stationFilePath.length() + 1, &l_dimTextId), __FILE__, __LINE__);
 
     // define dimensionless variables
-    int l_varUseFWaveId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
+    int l_varUseFWaveId, l_varUseCudaId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
     int l_varEndTimeId, l_varWidthId, l_varXOffsetId, l_varYOffsetId, l_varHMaxId;
     int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId, l_varNFreqStationId;
     int l_varSimTimeId, l_varMaxHoursId;
 
     ncCheck(nc_def_var(l_ncidp, "useFWave", NC_INT, 0, nullptr, &l_varUseFWaveId), __FILE__, __LINE__);
+    ncCheck(nc_def_var(l_ncidp, "useCuda", NC_INT, 0, nullptr, &l_varUseCudaId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "boundaryL", NC_INT, 0, nullptr, &l_varBoundaryLId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "boundaryR", NC_INT, 0, nullptr, &l_varBoundaryRId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "boundaryB", NC_INT, 0, nullptr, &l_varBoundaryBId), __FILE__, __LINE__);
@@ -439,6 +445,8 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     // write dimensionless variables
     int l_useFWaveInt = i_useFWave ? 1 : 0;
     ncCheck(nc_put_var_int(l_ncidp, l_varUseFWaveId, &l_useFWaveInt), __FILE__, __LINE__);
+    int l_useCudaInt = i_useCuda ? 1 : 0;
+    ncCheck(nc_put_var_int(l_ncidp, l_varUseCudaId, &l_useCudaInt), __FILE__, __LINE__);
     int l_boundaryLInt = tBoundaryToInt(i_boundaryL);
     ncCheck(nc_put_var_int(l_ncidp, l_varBoundaryLId, &l_boundaryLInt), __FILE__, __LINE__);
     int l_boundaryRInt = tBoundaryToInt(i_boundaryR);
