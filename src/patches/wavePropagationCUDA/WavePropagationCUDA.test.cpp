@@ -31,7 +31,7 @@ TEST_CASE("Test the CUDA wave propagation solver x direction.", "[WavePropCUDAX]
      * Analogue to test of WavePropagation1d.test.cpp
      */
 
-    tsunami_lab::patches::WavePropagationCUDA m_waveProp(100, 100);
+    tsunami_lab::patches::WavePropagationCUDA m_waveProp(100, 100, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN);
 
     for (std::size_t l_cx = 0; l_cx < 50; l_cx++)
         for (std::size_t l_cy = 0; l_cy < 100; l_cy++)
@@ -65,9 +65,12 @@ TEST_CASE("Test the CUDA wave propagation solver x direction.", "[WavePropCUDAX]
                                      l_cy,
                                      0);
         }
+    m_waveProp.initGhostCells();
 
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cx = 0; l_cx < 49; l_cx++)
@@ -125,7 +128,7 @@ TEST_CASE("Test the CUDA wave propagation solver y direction.", "[WavePropCUDAY]
      * Analogue to test of WavePropagation1d.test.cpp
      */
 
-    tsunami_lab::patches::WavePropagationCUDA m_waveProp(100, 100);
+    tsunami_lab::patches::WavePropagationCUDA m_waveProp(100, 100, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN);
 
     for (std::size_t l_cy = 0; l_cy < 50; l_cy++)
         for (std::size_t l_cx = 0; l_cx < 100; l_cx++)
@@ -159,9 +162,12 @@ TEST_CASE("Test the CUDA wave propagation solver y direction.", "[WavePropCUDAY]
                                      l_cy,
                                      0);
         }
+    m_waveProp.initGhostCells();
 
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cy = 0; l_cy < 49; l_cy++)
@@ -219,7 +225,7 @@ TEST_CASE("Test the 2d wave propagation solver diagonally.", "[WavePropCUDADiag]
      * Analogue to test of WavePropagation1d.test.cpp
      */
 
-    tsunami_lab::patches::WavePropagationCUDA m_waveProp(100, 100);
+    tsunami_lab::patches::WavePropagationCUDA m_waveProp(100, 100, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN, tsunami_lab::t_boundary::OPEN);
 
     // allocate 50 x 50 cells with 10m height in a 100*100 grid
     for (std::size_t l_cx = 0; l_cx < 50; l_cx++)
@@ -272,9 +278,12 @@ TEST_CASE("Test the 2d wave propagation solver diagonally.", "[WavePropCUDADiag]
                                      l_cy,
                                      0);
         }
+    m_waveProp.initGhostCells();
 
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cx = 0; l_cx < 49; l_cx++)

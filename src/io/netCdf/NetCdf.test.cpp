@@ -209,6 +209,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                        l_ghostCellsY = 0;
 
     bool l_useFWave = true;
+    bool l_useCuda = false;
 
     tsunami_lab::t_boundary l_boundaryL = tsunami_lab::t_boundary::OPEN,
                             l_boundaryR = tsunami_lab::t_boundary::WALL,
@@ -251,6 +252,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                              l_ghostCellsX,
                                              l_ghostCellsY,
                                              l_useFWave,
+                                             l_useCuda,
                                              l_boundaryL,
                                              l_boundaryR,
                                              l_boundaryB,
@@ -290,6 +292,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
         l_nyR;
 
     bool l_useFWaveR;
+    bool l_useCudaR;
 
     tsunami_lab::t_boundary l_boundaryLR,
         l_boundaryRR,
@@ -322,6 +325,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                             &l_nxR,
                                             &l_nyR,
                                             &l_useFWaveR,
+                                            &l_useCudaR,
                                             &l_boundaryLR,
                                             &l_boundaryRR,
                                             &l_boundaryBR,
@@ -347,6 +351,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     REQUIRE(l_nxR == l_nx);
     REQUIRE(l_nyR == l_ny);
     REQUIRE(l_useFWaveR == l_useFWave);
+    REQUIRE(l_useCudaR == l_useCuda);
     REQUIRE(l_boundaryLR == l_boundaryL);
     REQUIRE(l_boundaryRR == l_boundaryR);
     REQUIRE(l_boundaryBR == l_boundaryB);

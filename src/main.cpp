@@ -171,7 +171,7 @@ int main(int i_argc,
     }
     else
     {
-      l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny);
+      l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
     }
     l_stations = new tsunami_lab::io::Stations(l_stationFilePath);
 
@@ -409,7 +409,10 @@ int main(int i_argc,
         std::string l_boundaryLName, l_boundaryRName, l_boundaryBName, l_boundaryTName;
         l_stream >> l_boundaryLName >> l_boundaryRName >> l_boundaryBName >> l_boundaryTName;
 
-        std::cout << "  using boundary conditions " << l_boundaryLName << " " << l_boundaryRName << std::endl;
+        std::cout << "  using boundary conditions "
+                  << "  left: " << l_boundaryLName << "  right: " << l_boundaryRName << std::endl;
+        std::cout << "                            "
+                  << "bottom: " << l_boundaryBName << "    top: " << l_boundaryTName << std::endl;
 
         // convert to t_boundary
         getBoundary(l_boundaryLName, &l_boundaryL);
@@ -533,7 +536,7 @@ int main(int i_argc,
       }
       else
       {
-        l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny);
+        l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
         std::cout << "  using CUDA solver" << std::endl;
       }
     }
