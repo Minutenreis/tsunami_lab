@@ -5,8 +5,8 @@
 #SBATCH --partition=gpu_v100
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=11:00:00
-#SBATCH --cpus-per-task=72
+#SBATCH --time=10:00
+#SBATCH --cpus-per-task=48
 
 # Load any necessary modules (if needed)
 # module load mymodule
