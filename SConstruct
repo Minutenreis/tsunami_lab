@@ -90,7 +90,7 @@ else:
   if optReport!='false': 
     env.Append( CXXFLAGS = ['-qopt-report=5'])
     
-env.Append( NVCCFLAGS = [ '-O2'])
+env.Append( NVCCFLAGS = [ '-O2', '-std=c++17'])
   
   
 # set optimization mode
