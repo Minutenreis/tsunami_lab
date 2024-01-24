@@ -226,7 +226,6 @@ void tsunami_lab::patches::WavePropagationCUDA::prepareDataAccess()
     cudaMemcpy(m_h_host, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(m_hu_host, m_hu, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(m_hv_host, m_hv, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(m_b_host, m_b, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
 }
 
 __global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_boundary i_boundaryLeft, tsunami_lab::t_boundary i_boundaryRight, tsunami_lab::t_boundary i_boundaryBottom, tsunami_lab::t_boundary i_boundaryTop)
