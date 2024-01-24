@@ -51,7 +51,8 @@ cxxCompiler = ARGUMENTS.get('comp', "g++")
 # workaround to find the right g++ version on Ara
 if 'centos' == distro.id():
   env.Replace(NVCC="/cluster/nvidia/cuda/11.5/bin/nvcc")
-  env.Append(NVCCFLAGS = [ '-arch=compute_87'])
+  env.Append(NVCCFLAGS = [ '-arch=compute_87',
+                           '-ccbin /cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++'])
   if cxxCompiler == 'g++':
     print('running on Ara, using gcc-11.2.0')
     env.Replace(CXX="/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++")
@@ -90,7 +91,7 @@ else:
   if optReport!='false': 
     env.Append( CXXFLAGS = ['-qopt-report=5'])
     
-env.Append( NVCCFLAGS = [ '-O2', '-std=c++17'])
+env.Append( NVCCFLAGS = [ '-O2'])
   
   
 # set optimization mode
