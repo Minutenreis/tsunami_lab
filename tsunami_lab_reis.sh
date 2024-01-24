@@ -14,7 +14,7 @@ module load tools/python/3.8
 module load compiler/gcc/11.2.0
 module load compiler/intel/2020-Update2
 module load nvidia/cuda/11.7
-python3.8 -m pip install --user scons
+python3.8 -m pip install --user scons==4.0.1
 python3.8 -m pip install --user distro
 
 # Enter your executable commands here
