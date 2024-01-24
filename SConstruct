@@ -122,8 +122,14 @@ env.Append( CXXFLAGS = [ '-isystem', 'submodules/Catch2/single_include' ] )
 env.Append( CXXFLAGS = [ '-isystem', 'submodules/json/single_include'] )
 
 # add CUDA
-env.Append( LIBPATH = ["/usr/local/cuda/lib64"] ) 
-env.Append(LIBS=['cudart'])
+if "centos" == distro.id():
+  env.Append( CXXFLAGS = [ '-isystem', '/cluster/nvidia/cuda/11.5/include' ] )
+  env.Append( LIBPATH = ['/cluster/nvidia/cuda/11.5/lib64'] )
+  env.Append( LIBS=['cudart'])
+else:
+  env.Append( CXXFLAGS = [ '-isystem', '/usr/local/cuda/include' ] )
+  env.Append( LIBPATH = ["/usr/local/cuda/lib64"] ) 
+  env.Append(LIBS=['cudart'])
 
 # get source files
 VariantDir( variant_dir = 'build/src',
