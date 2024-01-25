@@ -129,7 +129,7 @@ if "centos" == distro.id():
 else:
   env.Append( CXXFLAGS = [ '-isystem', '/usr/local/cuda/include' ] )
   env.Append( LIBPATH = ["/usr/local/cuda/lib64"] ) 
-  env.Append(LIBS=['cudart'])
+  env.Append( LIBS=['cudart'])
 
 # get source files
 VariantDir( variant_dir = 'build/src',

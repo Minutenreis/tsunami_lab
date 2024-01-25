@@ -23,6 +23,18 @@ void tsunami_lab::io::NetCdf::ncCheck(int i_status, char const *i_file, int i_li
 void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_ncidp, int i_var, t_idx i_nOut, bool i_hasTime)
 {
     t_idx l_time = i_hasTime ? 0 : 1; // if it has no time, start array at 1st index
+
+    if (m_k == 1)
+    {
+        // if k == 1, no averaging is needed
+        t_idx start_p[3] = {i_nOut, 0, 0};
+        t_idx count_p[3] = {1, 1, m_nx};
+        for (start_p[1] = 0; start_p[1] < m_ny; ++start_p[1])
+        {
+            ncCheck(nc_put_vara_float(l_ncidp, i_var, start_p + l_time, count_p + l_time, i_data + (start_p[1] + 1) * m_stride + 1), __FILE__, __LINE__);
+        }
+        return;
+    }
     t_idx start_p[3] = {i_nOut, 0, 0};
     t_idx count_p[3] = {1, 1, m_nx / m_k};
     t_idx l_sizeX = (m_nx / m_k) * m_k; // m_nx/k*k (integer division) => ignores the overstanding cells at the right border
@@ -39,6 +51,7 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
                 l_row[l_ix / m_k] += i_data[l_ix + m_ghostCellsX + (l_iy + m_ghostCellsY) * m_stride];
             }
         }
+#pragma omp parallel for
         for (t_idx l_ix = 0; l_ix < m_nx / m_k; ++l_ix)
         {
             l_row[l_ix] *= l_kSquaredInv;
@@ -48,29 +61,26 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
     }
 }
 
-void tsunami_lab::io::NetCdf::init(t_real i_dxy,
-                                   t_idx i_nx,
-                                   t_idx i_ny,
-                                   t_idx i_stride,
-                                   t_idx i_ghostCellsX,
-                                   t_idx i_ghostCellsY,
-                                   t_real i_offsetX,
-                                   t_real i_offsetY,
-                                   t_real i_k,
-                                   t_real const *i_b,
-                                   bool i_useCheckpoint)
+tsunami_lab::io::NetCdf::NetCdf(t_real i_dxy,
+                                t_idx i_nx,
+                                t_idx i_ny,
+                                t_idx i_stride,
+                                t_idx i_ghostCellsX,
+                                t_idx i_ghostCellsY,
+                                t_real i_offsetX,
+                                t_real i_offsetY,
+                                t_real i_k,
+                                t_real const *i_b,
+                                bool i_useCheckpoint) : m_dxy(i_dxy),
+                                                        m_nx(i_nx),
+                                                        m_ny(i_ny),
+                                                        m_stride(i_stride),
+                                                        m_ghostCellsX(i_ghostCellsX),
+                                                        m_ghostCellsY(i_ghostCellsY),
+                                                        m_offsetX(i_offsetX),
+                                                        m_offsetY(i_offsetY),
+                                                        m_k(i_k)
 {
-    // saves setup parameters
-    m_dxy = i_dxy;
-    m_nx = i_nx;
-    m_ny = i_ny;
-    m_stride = i_stride;
-    m_ghostCellsX = i_ghostCellsX;
-    m_ghostCellsY = i_ghostCellsY;
-    m_offsetX = i_offsetX;
-    m_offsetY = i_offsetY;
-    m_k = i_k;
-
     // if checkpoint is used, the file already exists with all static data
     if (!i_useCheckpoint)
     {

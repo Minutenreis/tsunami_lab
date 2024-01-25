@@ -164,7 +164,7 @@ int main(int i_argc,
                                             &l_hv);
 
     // always netCdf 2D output
-    l_writer = new tsunami_lab::io::NetCdf();
+    l_useNetCdf = true;
     if (!l_useCuda)
     {
       l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
@@ -439,14 +439,11 @@ int main(int i_argc,
 
         if (l_outputName == "CSV")
         {
-          std::cout << "  using CSV output" << std::endl;
-          l_writer = new tsunami_lab::io::Csv();
           l_useNetCdf = false;
         }
         else if (l_outputName == "NETCDF")
         {
-          std::cout << "  using NetCDF output" << std::endl;
-          l_writer = new tsunami_lab::io::NetCdf();
+          l_useNetCdf = true;
         }
         else
         {
@@ -514,10 +511,13 @@ int main(int i_argc,
                                                     5);
     }
 
-    if (l_writer == nullptr)
+    if (l_useNetCdf)
     {
       std::cout << "  using NetCdf output" << std::endl;
-      l_writer = new tsunami_lab::io::NetCdf();
+    }
+    else
+    {
+      std::cout << "  using CSV output" << std::endl;
     }
 
     // 1d or 2d solver
@@ -640,17 +640,34 @@ int main(int i_argc,
   // init IO
   if (l_useFileIO)
   {
-    l_writer->init(l_dxy,
-                   l_nx,
-                   l_ny,
-                   l_waveProp->getStride(),
-                   l_waveProp->getGhostCellsX(),
-                   l_waveProp->getGhostCellsY(),
-                   l_xOffset,
-                   l_yOffset,
-                   l_k,
-                   l_waveProp->getBathymetry(),
-                   l_useCheckpoint);
+    if (l_useNetCdf)
+    {
+      l_writer = new tsunami_lab::io::NetCdf(l_dxy,
+                                             l_nx,
+                                             l_ny,
+                                             l_waveProp->getStride(),
+                                             l_waveProp->getGhostCellsX(),
+                                             l_waveProp->getGhostCellsY(),
+                                             l_xOffset,
+                                             l_yOffset,
+                                             l_k,
+                                             l_waveProp->getBathymetry(),
+                                             l_useCheckpoint);
+    }
+    else
+    {
+      l_writer = new tsunami_lab::io::Csv(l_dxy,
+                                          l_nx,
+                                          l_ny,
+                                          l_waveProp->getStride(),
+                                          l_waveProp->getGhostCellsX(),
+                                          l_waveProp->getGhostCellsY(),
+                                          l_xOffset,
+                                          l_yOffset,
+                                          l_k,
+                                          l_waveProp->getBathymetry(),
+                                          l_useCheckpoint);
+    }
     l_stations->init(l_dxy,
                      l_nx,
                      l_ny,
@@ -678,13 +695,11 @@ int main(int i_argc,
 
       auto l_writeStart = std::chrono::high_resolution_clock::now();
       l_waveProp->prepareDataAccess();
-      if (l_useFileIO)
-        l_writer->write(
-            l_waveProp->getHeight(),
-            l_waveProp->getMomentumX(),
-            l_waveProp->getMomentumY(),
-            l_simTime,
-            l_nOut);
+      l_writer->write(l_waveProp->getHeight(),
+                      l_waveProp->getMomentumX(),
+                      l_waveProp->getMomentumY(),
+                      l_simTime,
+                      l_nOut);
       l_nOut++;
 
       auto l_WriteEnd = std::chrono::high_resolution_clock::now();
@@ -781,7 +796,10 @@ int main(int i_argc,
   delete l_setup;
   delete l_waveProp;
   delete l_stations;
-  delete l_writer;
+  if (l_useFileIO)
+  {
+    delete l_writer;
+  }
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

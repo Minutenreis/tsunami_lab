@@ -28,33 +28,6 @@ public:
     virtual ~IoWriter(){};
 
     /**
-     * @brief Initialize the writer.
-     *
-     * @param i_dxy cell size.
-     * @param i_nx number of cells in x-direction.
-     * @param i_ny number of cells in y-direction.
-     * @param i_stride stride of the data.
-     * @param i_ghostCellsX number of ghost cells in x-direction.
-     * @param i_ghostCellsY number of ghost cells in y-direction.
-     * @param i_offsetX offset in x-direction.
-     * @param i_offsetY offset in y-direction.
-     * @param i_k cell size to be averaged.
-     * @param i_b bathymetry.
-     * @param i_useCheckpoint flag if checkpoint is used.
-     */
-    virtual void init(t_real i_dxy,
-                      t_idx i_nx,
-                      t_idx i_ny,
-                      t_idx i_stride,
-                      t_idx i_ghostCellsX,
-                      t_idx i_ghostCellsY,
-                      t_real i_offsetX,
-                      t_real i_offsetY,
-                      t_real i_k,
-                      t_real const *i_b,
-                      bool i_useCheckpoint) = 0;
-
-    /**
      * @brief Writes the data to the output.
      *
      * @param i_h water height.

@@ -14,9 +14,8 @@
 
 TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 {
-    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf();
     tsunami_lab::t_real l_b[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    l_writer->init(1, 2, 2, 4, 1, 1, 0, 0, 1, l_b, false);
+    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf(1, 2, 2, 4, 1, 1, 0, 0, 1, l_b, false);
 
     tsunami_lab::t_real l_h[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     tsunami_lab::t_real l_hu[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
@@ -130,9 +129,8 @@ TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 
 TEST_CASE("Test Writing Coarse Output", "[NetCdfWriteCoarse]")
 {
-    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf();
     tsunami_lab::t_real l_b[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    l_writer->init(1, 4, 4, 4, 0, 0, 0, -1, 3, l_b, false);
+    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf(1, 4, 4, 4, 0, 0, 0, -1, 3, l_b, false);
 
     // check if file exists
     REQUIRE(std::filesystem::exists("output.nc"));
