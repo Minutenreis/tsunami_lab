@@ -31,7 +31,7 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
         t_idx count_p[3] = {1, 1, m_nx};
         for (start_p[1] = 0; start_p[1] < m_ny; ++start_p[1])
         {
-            ncCheck(nc_put_vara_float(l_ncidp, i_var, start_p + l_time, count_p + l_time, i_data + (start_p[1] + 1) * m_stride + 1), __FILE__, __LINE__);
+            ncCheck(nc_put_vara_float(l_ncidp, i_var, start_p + l_time, count_p + l_time, i_data + (start_p[1] + m_ghostCellsY) * m_stride + m_ghostCellsX), __FILE__, __LINE__);
         }
         return;
     }
