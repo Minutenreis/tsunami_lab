@@ -2,7 +2,7 @@
 #SBATCH --job-name=tsunami_lab_reis
 #SBATCH --output=tsunami_lab_reis.output
 #SBATCH --error=tsunami_lab_reis.err
-#SBATCH --partition=gpu_v100
+#SBATCH --partition=gpu_v100,gpu_p100,gpu_a100
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=10:00
