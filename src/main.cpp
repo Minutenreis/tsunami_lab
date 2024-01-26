@@ -105,6 +105,7 @@ int main(int i_argc,
   tsunami_lab::t_idx l_nx = 1;
   tsunami_lab::t_idx l_ny = 1;
   tsunami_lab::t_real l_simTime = 0;
+  std::string l_stationsPath;
   int l_maxHours = 24;
   bool l_useCheckpoint = false;
   bool l_useNetCdf = true;
@@ -134,7 +135,6 @@ int main(int i_argc,
     tsunami_lab::t_real *l_h = nullptr;
     tsunami_lab::t_real *l_hu = nullptr;
     tsunami_lab::t_real *l_hv = nullptr;
-    std::string l_stationFilePath = "";
 
     tsunami_lab::io::NetCdf::readCheckpoint(l_newestCheckpoint.data(),
                                             &l_nx,
@@ -150,7 +150,7 @@ int main(int i_argc,
                                             &l_xOffset,
                                             &l_yOffset,
                                             &l_hMax,
-                                            &l_stationFilePath,
+                                            &l_stationsPath,
                                             &l_nFrames,
                                             &l_k,
                                             &l_timeStep,
@@ -173,7 +173,6 @@ int main(int i_argc,
     {
       l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
     }
-    l_stations = new tsunami_lab::io::Stations(l_stationFilePath);
 
     // set up solver
 #pragma omp parallel for
@@ -425,9 +424,8 @@ int main(int i_argc,
       // stations
       case 'r':
       {
-        std::string i_filePath(optarg);
-        std::cout << "  using stations file at " << i_filePath << std::endl;
-        l_stations = new tsunami_lab::io::Stations(i_filePath);
+        l_stationsPath = optarg;
+        std::cout << "  using stations file at " << l_stationsPath << std::endl;
         break;
       }
       // output
@@ -501,15 +499,13 @@ int main(int i_argc,
     if (l_stations == nullptr)
     {
       std::cout << "  using stations file at src/data/stations.json" << std::endl;
-      l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
+      l_stationsPath = "src/data/stations.json";
     }
 
     if (l_setup == nullptr)
     {
-      std::cout << "  using DamBreak1d(10,5,5) setup" << std::endl;
-      l_setup = new tsunami_lab::setups::DamBreak1d(10,
-                                                    5,
-                                                    5);
+      std::cout << "  using ArtificialTsunami2d() setup" << std::endl;
+      l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
     }
 
     if (l_useNetCdf)
@@ -669,16 +665,17 @@ int main(int i_argc,
                                           l_waveProp->getBathymetry(),
                                           l_useCheckpoint);
     }
-    l_stations->init(l_dxy,
-                     l_nx,
-                     l_ny,
-                     l_waveProp->getStride(),
-                     l_waveProp->getGhostCellsX(),
-                     l_waveProp->getGhostCellsY(),
-                     l_xOffset,
-                     l_yOffset,
-                     l_waveProp->getBathymetry(),
-                     l_useCheckpoint);
+    l_stations = new tsunami_lab::io::Stations(l_stationsPath,
+                                               l_dxy,
+                                               l_nx,
+                                               l_ny,
+                                               l_waveProp->getStride(),
+                                               l_waveProp->getGhostCellsX(),
+                                               l_waveProp->getGhostCellsY(),
+                                               l_xOffset,
+                                               l_yOffset,
+                                               l_waveProp->getBathymetry(),
+                                               l_useCheckpoint);
   }
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
@@ -763,7 +760,7 @@ int main(int i_argc,
       }
     }
 
-    if (l_useFileIO && l_simTime > l_nFreqStation * l_stations->getT())
+    if (l_useFileIO && l_stations->hasStations() && l_simTime > l_nFreqStation * l_stations->getT())
     {
       l_waveProp->prepareDataAccess();
       l_stations->write(l_simTime,
@@ -796,11 +793,8 @@ int main(int i_argc,
   std::cout << "freeing memory" << std::endl;
   delete l_setup;
   delete l_waveProp;
+  delete l_writer;
   delete l_stations;
-  if (l_useFileIO)
-  {
-    delete l_writer;
-  }
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

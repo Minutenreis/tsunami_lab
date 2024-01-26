@@ -13,7 +13,7 @@
 TEST_CASE("Test Reading the test.json", "[StationsRead]")
 {
     std::string l_path = "src/data/test.json";
-    tsunami_lab::io::Stations l_stations(l_path);
+    tsunami_lab::io::Stations l_stations(l_path, 1, 3, 3, 3, 0, 0, 0, 0, nullptr, true);
 
     REQUIRE(l_stations.getT() == 2);
     REQUIRE(l_stations.getStations().size() == 2);
@@ -28,13 +28,13 @@ TEST_CASE("Test Reading the test.json", "[StationsRead]")
 TEST_CASE("Test Writing JSons for all Stations", "[StationsWrite]")
 {
     std::string l_path = "src/data/test.json";
-    tsunami_lab::io::Stations l_stations(l_path);
 
     tsunami_lab::t_real l_h[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     tsunami_lab::t_real l_hu[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     tsunami_lab::t_real l_hv[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     tsunami_lab::t_real l_b[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-    l_stations.init(1, 3, 3, 3, 0, 0, 0, 0, l_b, false);
+
+    tsunami_lab::io::Stations l_stations(l_path, 1, 3, 3, 3, 0, 0, 0, 0, l_b, false);
 
     l_stations.write(1, l_h, l_hu, l_hv);
     l_stations.write(2, l_h, l_hu, l_hv);
