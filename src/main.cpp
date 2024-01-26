@@ -176,6 +176,7 @@ int main(int i_argc,
     l_stations = new tsunami_lab::io::Stations(l_stationFilePath);
 
     // set up solver
+#pragma omp parallel for
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
       for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
       {
@@ -566,11 +567,11 @@ int main(int i_argc,
 
   if (!l_useCheckpoint)
   {
-    // set up solver
+// set up solver
+#pragma omp parallel for reduction(max : l_hMax)
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
     {
       tsunami_lab::t_real l_y = l_cy * l_dxy + l_yOffset;
-
       for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
       {
         tsunami_lab::t_real l_x = l_cx * l_dxy + l_xOffset;
