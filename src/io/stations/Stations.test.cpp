@@ -16,13 +16,10 @@ TEST_CASE("Test Reading the test.json", "[StationsRead]")
     tsunami_lab::io::Stations l_stations(l_path, 1, 3, 3, 3, 0, 0, 0, 0, nullptr, true);
 
     REQUIRE(l_stations.getT() == 2);
-    REQUIRE(l_stations.getStations().size() == 2);
+    REQUIRE(l_stations.getStations().size() == 1); // Test_2 is outside of the domain
     REQUIRE(l_stations.getStations()[0].name == "Test_1");
     REQUIRE(l_stations.getStations()[0].x == 0);
     REQUIRE(l_stations.getStations()[0].y == 2);
-    REQUIRE(l_stations.getStations()[1].name == "Test_2");
-    REQUIRE(l_stations.getStations()[1].x == 5);
-    REQUIRE(l_stations.getStations()[1].y == 0);
 }
 
 TEST_CASE("Test Writing JSons for all Stations", "[StationsWrite]")
@@ -41,15 +38,13 @@ TEST_CASE("Test Writing JSons for all Stations", "[StationsWrite]")
     l_stations.write(3, l_h, l_hu, l_hv);
 
     REQUIRE(std::filesystem::exists("stations/station_Test_1.csv"));
-    REQUIRE(std::filesystem::exists("stations/station_Test_2.csv"));
+    REQUIRE(!std::filesystem::exists("stations/station_Test_2.csv"));
 
-    rapidcsv::Document test1Doc, test2Doc;
+    rapidcsv::Document test1Doc;
 
     tsunami_lab::io::Csv::openCSV("stations/station_Test_1.csv", test1Doc, true);
-    tsunami_lab::io::Csv::openCSV("stations/station_Test_2.csv", test2Doc, true);
 
     REQUIRE(test1Doc.GetRowCount() == 3);
-    REQUIRE(test2Doc.GetRowCount() == 0);
     tsunami_lab::t_real l_height, l_momentum_x, l_momentum_y, l_bathymetry, l_time;
     l_time = test1Doc.GetCell<tsunami_lab::t_real>(0, 0);
     l_height = test1Doc.GetCell<tsunami_lab::t_real>(1, 0);

@@ -101,7 +101,6 @@ int main(int i_argc,
   tsunami_lab::t_idx l_k = 1;
   tsunami_lab::t_idx l_timeStep = 0;
   tsunami_lab::t_idx l_nOut = 0;
-  tsunami_lab::t_idx l_nFreqStation = 0;
   tsunami_lab::t_idx l_nx = 1;
   tsunami_lab::t_idx l_ny = 1;
   tsunami_lab::t_real l_simTime = 0;
@@ -155,7 +154,6 @@ int main(int i_argc,
                                             &l_k,
                                             &l_timeStep,
                                             &l_nOut,
-                                            &l_nFreqStation,
                                             &l_simTime,
                                             &l_maxHours,
                                             &l_b,
@@ -496,7 +494,7 @@ int main(int i_argc,
       }
     }
 
-    if (l_stations == nullptr)
+    if (l_stationsPath.empty())
     {
       std::cout << "  using stations file at src/data/stations.json" << std::endl;
       l_stationsPath = "src/data/stations.json";
@@ -505,6 +503,11 @@ int main(int i_argc,
     if (l_setup == nullptr)
     {
       std::cout << "  using ArtificialTsunami2d() setup" << std::endl;
+      l_width = 10000;
+      l_ny = l_nx; // square domain
+      l_xOffset = -5000;
+      l_yOffset = -5000;
+      l_endTime = 3600;
       l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
     }
 
@@ -624,15 +627,6 @@ int main(int i_argc,
   {
     l_nTimeStepsPerFrame = 1;
   }
-  std::cout << "  time step:                      " << l_dt << " s" << std::endl;
-  std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
-  std::cout << "  number of time steps per frame: " << l_nTimeStepsPerFrame << std::endl;
-  std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
-  std::cout << "  maximum runtime:                " << l_maxHours << " h" << std::endl;
-
-  auto l_timeSetupIO = std::chrono::high_resolution_clock::now();
-  // iterate over time
-
   // init IO
   if (l_useFileIO)
   {
@@ -677,6 +671,18 @@ int main(int i_argc,
                                                l_useCheckpoint);
   }
 
+  tsunami_lab::t_idx l_nStepsPerStation = floor((double)l_stations->getT() / (double)l_dt);
+  if (l_nStepsPerStation <= 0)
+  {
+    l_nStepsPerStation = 1;
+  }
+
+  std::cout << "  time step:                      " << l_dt << " s" << std::endl;
+  std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
+  std::cout << "  time steps per frame:           " << l_nTimeStepsPerFrame << std::endl;
+  std::cout << "  time steps per station:         " << l_nStepsPerStation << std::endl;
+  std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
+  std::cout << "  maximum runtime:                " << l_maxHours << " h" << std::endl;
   std::cout << "entering time loop" << std::endl;
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
@@ -685,7 +691,8 @@ int main(int i_argc,
   // writing 1 checkpoint per hour
   int l_nOutCheckpoint = 1;
 
-  while (l_simTime < l_endTime)
+  // iterate over time
+  for (; l_timeStep < l_nTimeSteps; l_timeStep++)
   {
     if (l_useFileIO && l_timeStep % l_nTimeStepsPerFrame == 0)
     {
@@ -736,7 +743,6 @@ int main(int i_argc,
                                                  l_k,
                                                  l_timeStep,
                                                  l_nOut,
-                                                 l_nFreqStation,
                                                  l_simTime,
                                                  l_maxHours,
                                                  l_waveProp->getBathymetry(),
@@ -761,19 +767,17 @@ int main(int i_argc,
       }
     }
 
-    if (l_useFileIO && l_stations->hasStations() && l_simTime > l_nFreqStation * l_stations->getT())
+    if (l_useFileIO && l_stations->hasStations() && l_timeStep % l_nStepsPerStation == 0)
     {
       l_waveProp->prepareDataAccess();
       l_stations->write(l_simTime,
                         l_waveProp->getHeight(),
                         l_waveProp->getMomentumX(),
                         l_waveProp->getMomentumY());
-      ++l_nFreqStation;
     }
 
     l_waveProp->timeStep(l_scaling);
 
-    l_timeStep++;
     l_simTime += l_dt;
   }
 
@@ -782,9 +786,7 @@ int main(int i_argc,
   auto l_duration_total = l_end - l_start;
   printTime(l_duration_total, "total time");
   auto l_duration_setup = l_timeSetup - l_start;
-  auto l_duration_setupIO = l_timeSetup - l_timeSetupIO;
   printTime(l_duration_setup, "setup time");
-  printTime(l_duration_setupIO, "setup IO time");
   auto l_duration_loop = l_end - l_timeSetup;
   auto l_duration_calc = l_duration_loop - l_duration_write - l_duration_checkpoint;
   printTime(l_duration_calc, "calc time ");

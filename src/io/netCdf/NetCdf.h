@@ -167,7 +167,6 @@ public:
      * @param o_k cell size to be averaged
      * @param o_timeStep time step
      * @param o_nOut number of outputs
-     * @param o_nFreqStation number of station outputs
      * @param o_simTime simulation time
      * @param o_maxHours maximum hours of simulation
      * @param o_b bathymetry
@@ -194,7 +193,6 @@ public:
                                tsunami_lab::t_idx *o_k,
                                tsunami_lab::t_idx *o_timeStep,
                                tsunami_lab::t_idx *o_nOut,
-                               tsunami_lab::t_idx *o_nFreqStation,
                                tsunami_lab::t_real *o_simTime,
                                int *o_maxHours,
                                t_real **o_b,
@@ -226,7 +224,6 @@ public:
      * @param i_k cell size to be averaged
      * @param i_timeStep time step
      * @param i_nOut number of outputs
-     * @param i_nFreqStation number of station outputs
      * @param i_simTime simulation time
      * @param i_maxHours maximum hours of simulation
      * @param i_b bathymetry
@@ -255,7 +252,6 @@ public:
                                 tsunami_lab::t_idx i_k,
                                 tsunami_lab::t_idx i_timeStep,
                                 tsunami_lab::t_idx i_nOut,
-                                tsunami_lab::t_idx i_nFreqStation,
                                 tsunami_lab::t_real i_simTime,
                                 int i_maxHours,
                                 const t_real *i_b,

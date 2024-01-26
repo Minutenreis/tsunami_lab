@@ -229,8 +229,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     tsunami_lab::t_idx l_nFrames = 2,
                        l_k = 1,
                        l_timeStep = 5,
-                       l_nOut = 3,
-                       l_nFreqStation = 4;
+                       l_nOut = 3;
 
     tsunami_lab::t_real l_simTime = 0.3;
 
@@ -265,7 +264,6 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                              l_k,
                                              l_timeStep,
                                              l_nOut,
-                                             l_nFreqStation,
                                              l_simTime,
                                              l_maxHours,
                                              l_b,
@@ -312,8 +310,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     tsunami_lab::t_idx l_nFramesR,
         l_kR,
         l_timeStepR,
-        l_nOutR,
-        l_nFreqStationR;
+        l_nOutR;
 
     tsunami_lab::t_real l_simTimeR;
 
@@ -338,7 +335,6 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                             &l_kR,
                                             &l_timeStepR,
                                             &l_nOutR,
-                                            &l_nFreqStationR,
                                             &l_simTimeR,
                                             &l_maxHoursR,
                                             &l_bR,
@@ -364,7 +360,6 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     REQUIRE(l_kR == l_k);
     REQUIRE(l_timeStepR == l_timeStep);
     REQUIRE(l_nOutR == l_nOut);
-    REQUIRE(l_nFreqStationR == l_nFreqStation);
     REQUIRE(l_simTimeR == l_simTime);
     REQUIRE(l_maxHoursR == l_maxHours);
 
