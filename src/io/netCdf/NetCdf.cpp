@@ -233,7 +233,6 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
                                              tsunami_lab::t_idx *o_k,
                                              tsunami_lab::t_idx *o_timeStep,
                                              tsunami_lab::t_idx *o_nOut,
-                                             tsunami_lab::t_real *o_simTime,
                                              int *o_maxHours,
                                              t_real **o_b,
                                              t_real **o_h,
@@ -260,7 +259,7 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     int l_varUseFWaveId, l_varUseCudaId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
     int l_varEndTimeId, l_varWidthId, l_varXOffsetId, l_varYOffsetId, l_varHMaxId;
     int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId;
-    int l_varSimTimeId, l_varMaxHoursId;
+    int l_varMaxHoursId;
     ncCheck(nc_inq_varid(l_ncidp, "useFWave", &l_varUseFWaveId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "useCuda", &l_varUseCudaId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "boundaryL", &l_varBoundaryLId), __FILE__, __LINE__);
@@ -277,7 +276,6 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     ncCheck(nc_inq_varid(l_ncidp, "k", &l_varKId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "timeStep", &l_varTimeStepId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "nOut", &l_varNOutId), __FILE__, __LINE__);
-    ncCheck(nc_inq_varid(l_ncidp, "simTime", &l_varSimTimeId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "maxHours", &l_varMaxHoursId), __FILE__, __LINE__);
 
     // read array id's
@@ -319,7 +317,6 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     *o_timeStep = l_timeStep;
     ncCheck(nc_get_var_int(l_ncidp, l_varNOutId, &l_nOut), __FILE__, __LINE__);
     *o_nOut = l_nOut;
-    ncCheck(nc_get_var_float(l_ncidp, l_varSimTimeId, o_simTime), __FILE__, __LINE__);
     ncCheck(nc_get_var_int(l_ncidp, l_varMaxHoursId, o_maxHours), __FILE__, __LINE__);
 
     // read arrays
@@ -381,7 +378,6 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
                                               tsunami_lab::t_idx i_k,
                                               tsunami_lab::t_idx i_timeStep,
                                               tsunami_lab::t_idx i_nOut,
-                                              tsunami_lab::t_real i_simTime,
                                               int i_maxHours,
                                               const t_real *i_b,
                                               const t_real *i_h,
@@ -414,7 +410,7 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     int l_varUseFWaveId, l_varUseCudaId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
     int l_varEndTimeId, l_varWidthId, l_varXOffsetId, l_varYOffsetId, l_varHMaxId;
     int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId;
-    int l_varSimTimeId, l_varMaxHoursId;
+    int l_varMaxHoursId;
 
     ncCheck(nc_def_var(l_ncidp, "useFWave", NC_INT, 0, nullptr, &l_varUseFWaveId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "useCuda", NC_INT, 0, nullptr, &l_varUseCudaId), __FILE__, __LINE__);
@@ -432,7 +428,6 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     ncCheck(nc_def_var(l_ncidp, "k", NC_INT, 0, nullptr, &l_varKId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "timeStep", NC_INT, 0, nullptr, &l_varTimeStepId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "nOut", NC_INT, 0, nullptr, &l_varNOutId), __FILE__, __LINE__);
-    ncCheck(nc_def_var(l_ncidp, "simTime", NC_FLOAT, 0, nullptr, &l_varSimTimeId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "maxHours", NC_INT, 0, nullptr, &l_varMaxHoursId), __FILE__, __LINE__);
 
     int l_dim[2] = {l_dimYId, l_dimXId};
@@ -473,7 +468,6 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     ncCheck(nc_put_var_int(l_ncidp, l_varTimeStepId, &l_timeStep), __FILE__, __LINE__);
     int l_nOut = i_nOut;
     ncCheck(nc_put_var_int(l_ncidp, l_varNOutId, &l_nOut), __FILE__, __LINE__);
-    ncCheck(nc_put_var_float(l_ncidp, l_varSimTimeId, &i_simTime), __FILE__, __LINE__);
     ncCheck(nc_put_var_int(l_ncidp, l_varMaxHoursId, &i_maxHours), __FILE__, __LINE__);
 
     // write arrays

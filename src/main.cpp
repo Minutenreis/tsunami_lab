@@ -103,7 +103,6 @@ int main(int i_argc,
   tsunami_lab::t_idx l_nOut = 0;
   tsunami_lab::t_idx l_nx = 1;
   tsunami_lab::t_idx l_ny = 1;
-  tsunami_lab::t_real l_simTime = 0;
   std::string l_stationsPath;
   int l_maxHours = 24;
   bool l_useCheckpoint = false;
@@ -154,7 +153,6 @@ int main(int i_argc,
                                             &l_k,
                                             &l_timeStep,
                                             &l_nOut,
-                                            &l_simTime,
                                             &l_maxHours,
                                             &l_b,
                                             &l_h,
@@ -198,6 +196,7 @@ int main(int i_argc,
     if (std::filesystem::exists("stations"))
     {
       rapidcsv::Document l_doc;
+      tsunami_lab::t_real l_simTime = l_timeStep * (0.45 * (l_width / l_nx) / (std::sqrt(9.81 * l_hMax)));
       for (const auto &entry : std::filesystem::directory_iterator("stations"))
       {
         std::string l_filePath{entry.path().u8string()};
@@ -696,6 +695,7 @@ int main(int i_argc,
   {
     if (l_useFileIO && l_timeStep % l_nTimeStepsPerFrame == 0)
     {
+      tsunami_lab::t_real l_simTime = l_dt * l_timeStep;
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;
 
@@ -743,7 +743,6 @@ int main(int i_argc,
                                                  l_k,
                                                  l_timeStep,
                                                  l_nOut,
-                                                 l_simTime,
                                                  l_maxHours,
                                                  l_waveProp->getBathymetry(),
                                                  l_waveProp->getHeight(),
@@ -769,6 +768,7 @@ int main(int i_argc,
 
     if (l_useFileIO && l_stations->hasStations() && l_timeStep % l_nStepsPerStation == 0)
     {
+      tsunami_lab::t_real l_simTime = l_dt * l_timeStep;
       l_waveProp->prepareDataAccess();
       l_stations->write(l_simTime,
                         l_waveProp->getHeight(),
@@ -777,8 +777,6 @@ int main(int i_argc,
     }
 
     l_waveProp->timeStep(l_scaling);
-
-    l_simTime += l_dt;
   }
 
   std::cout << "finished time loop" << std::endl;
