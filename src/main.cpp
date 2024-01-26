@@ -630,8 +630,7 @@ int main(int i_argc,
   std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
   std::cout << "  maximum runtime:                " << l_maxHours << " h" << std::endl;
 
-  std::cout << "entering time loop" << std::endl;
-
+  auto l_timeSetupIO = std::chrono::high_resolution_clock::now();
   // iterate over time
 
   // init IO
@@ -677,6 +676,8 @@ int main(int i_argc,
                                                l_waveProp->getBathymetry(),
                                                l_useCheckpoint);
   }
+
+  std::cout << "entering time loop" << std::endl;
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
   std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
@@ -781,7 +782,9 @@ int main(int i_argc,
   auto l_duration_total = l_end - l_start;
   printTime(l_duration_total, "total time");
   auto l_duration_setup = l_timeSetup - l_start;
+  auto l_duration_setupIO = l_timeSetup - l_timeSetupIO;
   printTime(l_duration_setup, "setup time");
+  printTime(l_duration_setupIO, "setup IO time");
   auto l_duration_loop = l_end - l_timeSetup;
   auto l_duration_calc = l_duration_loop - l_duration_write - l_duration_checkpoint;
   printTime(l_duration_calc, "calc time ");

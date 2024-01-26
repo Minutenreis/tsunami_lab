@@ -64,7 +64,7 @@ private:
     const t_real m_offsetY;
 
     //! bathymetry.
-    const t_real const *m_b;
+    const t_real *m_b;
 
 public:
     /**

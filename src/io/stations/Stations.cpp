@@ -34,7 +34,6 @@ tsunami_lab::io::Stations::Stations(const std::string path,
                                                             m_offsetY(i_offsetY),
                                                             m_b(i_b)
 {
-    m_path = path;
     std::ifstream f(path);
     json data = json::parse(f);
 
