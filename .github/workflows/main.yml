@@ -21,9 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: Jimver/cuda-toolkit@v0.2.14
-        id: cuda-toolkit
-
       - name: Dependencies
         run: |
           sudo apt-get update
@@ -31,6 +28,7 @@ jobs:
           sudo apt-get install valgrind
           sudo apt-get install cppcheck
           sudo apt-get install libnetcdf-c++4-dev
+          sudo apt-get install cuda-compiler-12-3
           git submodule init
           git submodule update
 
