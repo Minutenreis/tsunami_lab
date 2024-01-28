@@ -14,9 +14,8 @@
 
 TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 {
-    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf();
     tsunami_lab::t_real l_b[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    l_writer->init(1, 2, 2, 4, 1, 1, 0, 0, 1, l_b, false);
+    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf(1, 2, 2, 4, 1, 1, 0, 0, 1, l_b, false);
 
     tsunami_lab::t_real l_h[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
     tsunami_lab::t_real l_hu[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
@@ -130,9 +129,8 @@ TEST_CASE("Test Writing NetCDF Files", "[NetCdfWrite]")
 
 TEST_CASE("Test Writing Coarse Output", "[NetCdfWriteCoarse]")
 {
-    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf();
     tsunami_lab::t_real l_b[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};
-    l_writer->init(1, 4, 4, 4, 0, 0, 0, -1, 3, l_b, false);
+    tsunami_lab::io::IoWriter *l_writer = new tsunami_lab::io::NetCdf(1, 4, 4, 4, 0, 0, 0, -1, 3, l_b, false);
 
     // check if file exists
     REQUIRE(std::filesystem::exists("output.nc"));
@@ -209,6 +207,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                        l_ghostCellsY = 0;
 
     bool l_useFWave = true;
+    bool l_useCuda = false;
 
     tsunami_lab::t_boundary l_boundaryL = tsunami_lab::t_boundary::OPEN,
                             l_boundaryR = tsunami_lab::t_boundary::WALL,
@@ -230,10 +229,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     tsunami_lab::t_idx l_nFrames = 2,
                        l_k = 1,
                        l_timeStep = 5,
-                       l_nOut = 3,
-                       l_nFreqStation = 4;
-
-    tsunami_lab::t_real l_simTime = 0.3;
+                       l_nOut = 3;
 
     int l_maxHours = 2;
 
@@ -251,6 +247,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                              l_ghostCellsX,
                                              l_ghostCellsY,
                                              l_useFWave,
+                                             l_useCuda,
                                              l_boundaryL,
                                              l_boundaryR,
                                              l_boundaryB,
@@ -265,8 +262,6 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                              l_k,
                                              l_timeStep,
                                              l_nOut,
-                                             l_nFreqStation,
-                                             l_simTime,
                                              l_maxHours,
                                              l_b,
                                              l_h,
@@ -290,6 +285,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
         l_nyR;
 
     bool l_useFWaveR;
+    bool l_useCudaR;
 
     tsunami_lab::t_boundary l_boundaryLR,
         l_boundaryRR,
@@ -311,10 +307,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     tsunami_lab::t_idx l_nFramesR,
         l_kR,
         l_timeStepR,
-        l_nOutR,
-        l_nFreqStationR;
-
-    tsunami_lab::t_real l_simTimeR;
+        l_nOutR;
 
     int l_maxHoursR;
 
@@ -322,6 +315,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                             &l_nxR,
                                             &l_nyR,
                                             &l_useFWaveR,
+                                            &l_useCudaR,
                                             &l_boundaryLR,
                                             &l_boundaryRR,
                                             &l_boundaryBR,
@@ -336,8 +330,6 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
                                             &l_kR,
                                             &l_timeStepR,
                                             &l_nOutR,
-                                            &l_nFreqStationR,
-                                            &l_simTimeR,
                                             &l_maxHoursR,
                                             &l_bR,
                                             &l_hR,
@@ -347,6 +339,7 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     REQUIRE(l_nxR == l_nx);
     REQUIRE(l_nyR == l_ny);
     REQUIRE(l_useFWaveR == l_useFWave);
+    REQUIRE(l_useCudaR == l_useCuda);
     REQUIRE(l_boundaryLR == l_boundaryL);
     REQUIRE(l_boundaryRR == l_boundaryR);
     REQUIRE(l_boundaryBR == l_boundaryB);
@@ -361,8 +354,6 @@ TEST_CASE("Test Checkpointing", "[NetCdfCheckpoints]")
     REQUIRE(l_kR == l_k);
     REQUIRE(l_timeStepR == l_timeStep);
     REQUIRE(l_nOutR == l_nOut);
-    REQUIRE(l_nFreqStationR == l_nFreqStation);
-    REQUIRE(l_simTimeR == l_simTime);
     REQUIRE(l_maxHoursR == l_maxHours);
 
     for (tsunami_lab::t_idx l_ix = 0; l_ix < l_nx * l_ny; l_ix++)

@@ -32,7 +32,7 @@ Installing and Running
 * add the submodules with :code:`git submodule init` and :code:`git submodule update`
 * install dependencies with :code:`apt-get install libnetcdf-dev`
 * build with :code:`scons`
-* execute the Program with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] [-o outputType] [-f frames] [-t maxtime] [-k size] [-i] n_cells_x` 
+* execute the Program with :code:`./build/tsunami_lab [-s solver] [-u setup] [-b "boundary_left boundary_right"] [-r stationsJson] [-o outputType] [-f frames] [-t maxtime] [-k size] [-i] [-c] n_cells_x` 
 * execute the tests with :code:`./build/tests`
 
 The output of Solver is saved in :code:`/solutions` if you use :code:`csv` as outputType.
@@ -47,7 +47,7 @@ Command Line Parameters
 | :code:`[-u setup]` = choose between :code:`'DamBreak1d h_l h_r'`, :code:`'ShockShock1d h hu'`,
  :code:`'RareRare1d h hu'`, :code:`'Custom1d h_l h_r hu_l hu_r middle'`, :code:`Subcrit1d`,
  :code:`Supercrit1d`, :code:`'Tsunami1d path_to_csv time_simulated'`, :code:`'ArtificialTsunami2d time_simulated'`,
- :code:`'Tsunami2d path_to_displacement path_to_bathymetry time_simulated'`, :code:`DamBreak2d` , default is :code:`'DamBreak1d 10 5'`
+ :code:`'Tsunami2d path_to_displacement path_to_bathymetry time_simulated'`, :code:`DamBreak2d` , default is :code:`DamBreak2d`
 | :code:`[-b 'boundary_left boundary_right boundary_bottom boundary_top']` = 
  choose each boundary between :code:`wall` and :code:`open`, 
  default is :code:`open` for each; any boundary left out is set to :code:`open`

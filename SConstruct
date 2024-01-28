@@ -50,6 +50,10 @@ cxxCompiler = ARGUMENTS.get('comp', "g++")
 
 # workaround to find the right g++ version on Ara
 if 'centos' == distro.id():
+  env.Replace(NVCC="/cluster/nvidia/cuda/11.5/bin/nvcc")
+  env.Append(NVCCFLAGS = [ '-arch=compute_87',
+                           '-ccbin',
+                           '/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++'])
   if cxxCompiler == 'g++':
     print('running on Ara, using gcc-11.2.0')
     env.Replace(CXX="/cluster/spack/opt/spack/linux-centos7-broadwell/gcc-10.2.0/gcc-11.2.0-c27urtyjryzoyyqfms5m3ewi6vrtvt44/bin/g++")
@@ -57,6 +61,7 @@ if 'centos' == distro.id():
     print('running on Ara, using icpc-19.1.2.254')
     env.Replace(CXX="/cluster/intel/parallel_studio_xe_2020.2.108/compilers_and_libraries_2020/linux/bin/intel64/icpc")
 else:
+  env.Append( NVCCFLAGS = ["-arch=native"])
   if cxxCompiler == 'g++':
     pass
   else:
@@ -87,8 +92,7 @@ else:
   if optReport!='false': 
     env.Append( CXXFLAGS = ['-qopt-report=5'])
     
-env.Append( NVCCFLAGS = [ '-O2', 
-                         "-arch=native"])
+env.Append( NVCCFLAGS = [ '-O2'])
   
   
 # set optimization mode
@@ -118,8 +122,14 @@ env.Append( CXXFLAGS = [ '-isystem', 'submodules/Catch2/single_include' ] )
 env.Append( CXXFLAGS = [ '-isystem', 'submodules/json/single_include'] )
 
 # add CUDA
-env.Append( LIBPATH = ["/usr/local/cuda/lib64"] ) 
-env.Append(LIBS=['cudart'])
+if "centos" == distro.id():
+  env.Append( CXXFLAGS = [ '-isystem', '/cluster/nvidia/cuda/11.5/include' ] )
+  env.Append( LIBPATH = ['/cluster/nvidia/cuda/11.5/lib64'] )
+  env.Append( LIBS=['cudart'])
+else:
+  env.Append( CXXFLAGS = [ '-isystem', '/usr/local/cuda/include' ] )
+  env.Append( LIBPATH = ["/usr/local/cuda/lib64"] ) 
+  env.Append( LIBS=['cudart'])
 
 # get source files
 VariantDir( variant_dir = 'build/src',

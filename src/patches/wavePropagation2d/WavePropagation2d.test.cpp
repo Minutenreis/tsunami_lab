@@ -66,8 +66,12 @@ TEST_CASE("Test the 2d wave propagation FWave solver x direction.", "[WaveProp2d
                                      0);
         }
 
+    m_waveProp.initGhostCells();
+
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cx = 0; l_cx < 49; l_cx++)
@@ -160,8 +164,12 @@ TEST_CASE("Test the 2d wave propagation FWave solver y direction.", "[WaveProp2d
                                      0);
         }
 
+    m_waveProp.initGhostCells();
+
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cy = 0; l_cy < 49; l_cy++)
@@ -254,8 +262,12 @@ TEST_CASE("Test the 2d wave propagation Roe solver x direction.", "[WaveProp2dRo
                                      0);
         }
 
+    m_waveProp.initGhostCells();
+
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cx = 0; l_cx < 49; l_cx++)
@@ -348,8 +360,12 @@ TEST_CASE("Test the 2d wave propagation Roe solver y direction.", "[WaveProp2dRo
                                      0);
         }
 
+    m_waveProp.initGhostCells();
+
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cy = 0; l_cy < 49; l_cy++)
@@ -461,8 +477,12 @@ TEST_CASE("Test the 2d wave propagation FWave solver diagonally.", "[WaveProp2dF
                                      0);
         }
 
+    m_waveProp.initGhostCells();
+
     // perform a time step
     m_waveProp.timeStep(0.1);
+
+    m_waveProp.prepareDataAccess();
 
     // steady state
     for (std::size_t l_cx = 0; l_cx < 49; l_cx++)

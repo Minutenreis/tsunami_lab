@@ -101,10 +101,9 @@ int main(int i_argc,
   tsunami_lab::t_idx l_k = 1;
   tsunami_lab::t_idx l_timeStep = 0;
   tsunami_lab::t_idx l_nOut = 0;
-  tsunami_lab::t_idx l_nFreqStation = 0;
   tsunami_lab::t_idx l_nx = 1;
   tsunami_lab::t_idx l_ny = 1;
-  tsunami_lab::t_real l_simTime = 0;
+  std::string l_stationsPath;
   int l_maxHours = 24;
   bool l_useCheckpoint = false;
   bool l_useNetCdf = true;
@@ -134,12 +133,12 @@ int main(int i_argc,
     tsunami_lab::t_real *l_h = nullptr;
     tsunami_lab::t_real *l_hu = nullptr;
     tsunami_lab::t_real *l_hv = nullptr;
-    std::string l_stationFilePath = "";
 
     tsunami_lab::io::NetCdf::readCheckpoint(l_newestCheckpoint.data(),
                                             &l_nx,
                                             &l_ny,
                                             &l_useFwave,
+                                            &l_useCuda,
                                             &l_boundaryL,
                                             &l_boundaryR,
                                             &l_boundaryB,
@@ -149,13 +148,11 @@ int main(int i_argc,
                                             &l_xOffset,
                                             &l_yOffset,
                                             &l_hMax,
-                                            &l_stationFilePath,
+                                            &l_stationsPath,
                                             &l_nFrames,
                                             &l_k,
                                             &l_timeStep,
                                             &l_nOut,
-                                            &l_nFreqStation,
-                                            &l_simTime,
                                             &l_maxHours,
                                             &l_b,
                                             &l_h,
@@ -163,11 +160,18 @@ int main(int i_argc,
                                             &l_hv);
 
     // always netCdf 2D output
-    l_writer = new tsunami_lab::io::NetCdf();
-    l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
-    l_stations = new tsunami_lab::io::Stations(l_stationFilePath);
+    l_useNetCdf = true;
+    if (!l_useCuda)
+    {
+      l_waveProp = new tsunami_lab::patches::WavePropagation2d(l_nx, l_ny, l_useFwave, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    }
+    else
+    {
+      l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
+    }
 
     // set up solver
+#pragma omp parallel for
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
       for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
       {
@@ -188,12 +192,11 @@ int main(int i_argc,
                                   l_b[l_cx + l_cy * l_nx]);
       }
 
-    l_waveProp->initGhostCells();
-
     // delete all newer station outputs
     if (std::filesystem::exists("stations"))
     {
       rapidcsv::Document l_doc;
+      tsunami_lab::t_real l_simTime = l_timeStep * (0.45 * (l_width / l_nx) / (std::sqrt(9.81 * l_hMax)));
       for (const auto &entry : std::filesystem::directory_iterator("stations"))
       {
         std::string l_filePath{entry.path().u8string()};
@@ -403,7 +406,10 @@ int main(int i_argc,
         std::string l_boundaryLName, l_boundaryRName, l_boundaryBName, l_boundaryTName;
         l_stream >> l_boundaryLName >> l_boundaryRName >> l_boundaryBName >> l_boundaryTName;
 
-        std::cout << "  using boundary conditions " << l_boundaryLName << " " << l_boundaryRName << std::endl;
+        std::cout << "  using boundary conditions "
+                  << "  left: " << l_boundaryLName << "  right: " << l_boundaryRName << std::endl;
+        std::cout << "                            "
+                  << "bottom: " << l_boundaryBName << "    top: " << l_boundaryTName << std::endl;
 
         // convert to t_boundary
         getBoundary(l_boundaryLName, &l_boundaryL);
@@ -415,9 +421,8 @@ int main(int i_argc,
       // stations
       case 'r':
       {
-        std::string i_filePath(optarg);
-        std::cout << "  using stations file at " << i_filePath << std::endl;
-        l_stations = new tsunami_lab::io::Stations(i_filePath);
+        l_stationsPath = optarg;
+        std::cout << "  using stations file at " << l_stationsPath << std::endl;
         break;
       }
       // output
@@ -430,14 +435,11 @@ int main(int i_argc,
 
         if (l_outputName == "CSV")
         {
-          std::cout << "  using CSV output" << std::endl;
-          l_writer = new tsunami_lab::io::Csv();
           l_useNetCdf = false;
         }
         else if (l_outputName == "NETCDF")
         {
-          std::cout << "  using NetCDF output" << std::endl;
-          l_writer = new tsunami_lab::io::NetCdf();
+          l_useNetCdf = true;
         }
         else
         {
@@ -491,24 +493,30 @@ int main(int i_argc,
       }
     }
 
-    if (l_stations == nullptr)
+    if (l_stationsPath.empty())
     {
       std::cout << "  using stations file at src/data/stations.json" << std::endl;
-      l_stations = new tsunami_lab::io::Stations("src/data/stations.json");
+      l_stationsPath = "src/data/stations.json";
     }
 
     if (l_setup == nullptr)
     {
-      std::cout << "  using DamBreak1d(10,5,5) setup" << std::endl;
-      l_setup = new tsunami_lab::setups::DamBreak1d(10,
-                                                    5,
-                                                    5);
+      std::cout << "  using DamBreak2d() setup" << std::endl;
+      l_setup = new tsunami_lab::setups::DamBreak2d();
+      l_width = 100;
+      l_ny = l_nx; // square domain
+      l_xOffset = -50;
+      l_yOffset = -50;
+      l_endTime = 20;
     }
 
-    if (l_writer == nullptr)
+    if (l_useNetCdf)
     {
       std::cout << "  using NetCdf output" << std::endl;
-      l_writer = new tsunami_lab::io::NetCdf();
+    }
+    else
+    {
+      std::cout << "  using CSV output" << std::endl;
     }
 
     // 1d or 2d solver
@@ -527,7 +535,7 @@ int main(int i_argc,
       }
       else
       {
-        l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny);
+        l_waveProp = new tsunami_lab::patches::WavePropagationCUDA(l_nx, l_ny, l_boundaryL, l_boundaryR, l_boundaryB, l_boundaryT);
         std::cout << "  using CUDA solver" << std::endl;
       }
     }
@@ -557,11 +565,11 @@ int main(int i_argc,
 
   if (!l_useCheckpoint)
   {
-    // set up solver
+// set up solver
+#pragma omp parallel for reduction(max : l_hMax)
     for (tsunami_lab::t_idx l_cy = 0; l_cy < l_ny; l_cy++)
     {
       tsunami_lab::t_real l_y = l_cy * l_dxy + l_yOffset;
-
       for (tsunami_lab::t_idx l_cx = 0; l_cx < l_nx; l_cx++)
       {
         tsunami_lab::t_real l_x = l_cx * l_dxy + l_xOffset;
@@ -618,41 +626,63 @@ int main(int i_argc,
   {
     l_nTimeStepsPerFrame = 1;
   }
-  std::cout << "  time step:                      " << l_dt << " s" << std::endl;
-  std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
-  std::cout << "  number of time steps per frame: " << l_nTimeStepsPerFrame << std::endl;
-  std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
-  std::cout << "  maximum runtime:                " << l_maxHours << " h" << std::endl;
-
-  std::cout << "entering time loop" << std::endl;
-
-  // iterate over time
-
   // init IO
   if (l_useFileIO)
   {
-    l_writer->init(l_dxy,
-                   l_nx,
-                   l_ny,
-                   l_waveProp->getStride(),
-                   l_waveProp->getGhostCellsX(),
-                   l_waveProp->getGhostCellsY(),
-                   l_xOffset,
-                   l_yOffset,
-                   l_k,
-                   l_waveProp->getBathymetry(),
-                   l_useCheckpoint);
-    l_stations->init(l_dxy,
-                     l_nx,
-                     l_ny,
-                     l_waveProp->getStride(),
-                     l_waveProp->getGhostCellsX(),
-                     l_waveProp->getGhostCellsY(),
-                     l_xOffset,
-                     l_yOffset,
-                     l_waveProp->getBathymetry(),
-                     l_useCheckpoint);
+    if (l_useNetCdf)
+    {
+      l_writer = new tsunami_lab::io::NetCdf(l_dxy,
+                                             l_nx,
+                                             l_ny,
+                                             l_waveProp->getStride(),
+                                             l_waveProp->getGhostCellsX(),
+                                             l_waveProp->getGhostCellsY(),
+                                             l_xOffset,
+                                             l_yOffset,
+                                             l_k,
+                                             l_waveProp->getBathymetry(),
+                                             l_useCheckpoint);
+    }
+    else
+    {
+      l_writer = new tsunami_lab::io::Csv(l_dxy,
+                                          l_nx,
+                                          l_ny,
+                                          l_waveProp->getStride(),
+                                          l_waveProp->getGhostCellsX(),
+                                          l_waveProp->getGhostCellsY(),
+                                          l_xOffset,
+                                          l_yOffset,
+                                          l_k,
+                                          l_waveProp->getBathymetry(),
+                                          l_useCheckpoint);
+    }
+    l_stations = new tsunami_lab::io::Stations(l_stationsPath,
+                                               l_dxy,
+                                               l_nx,
+                                               l_ny,
+                                               l_waveProp->getStride(),
+                                               l_waveProp->getGhostCellsX(),
+                                               l_waveProp->getGhostCellsY(),
+                                               l_xOffset,
+                                               l_yOffset,
+                                               l_waveProp->getBathymetry(),
+                                               l_useCheckpoint);
   }
+
+  tsunami_lab::t_idx l_nStepsPerStation = floor((double)l_stations->getT() / (double)l_dt);
+  if (l_nStepsPerStation <= 0)
+  {
+    l_nStepsPerStation = 1;
+  }
+
+  std::cout << "  time step:                      " << l_dt << " s" << std::endl;
+  std::cout << "  number of time steps:           " << l_nTimeSteps << std::endl;
+  std::cout << "  time steps per frame:           " << l_nTimeStepsPerFrame << std::endl;
+  std::cout << "  time steps per station:         " << l_nStepsPerStation << std::endl;
+  std::cout << "  time per frame (approx.):       " << l_nTimeStepsPerFrame * l_dt << " s" << std::endl;
+  std::cout << "  maximum runtime:                " << l_maxHours << " h" << std::endl;
+  std::cout << "entering time loop" << std::endl;
 
   auto l_timeSetup = std::chrono::high_resolution_clock::now();
   std::chrono::nanoseconds l_duration_write = std::chrono::nanoseconds::zero();
@@ -660,22 +690,22 @@ int main(int i_argc,
   // writing 1 checkpoint per hour
   int l_nOutCheckpoint = 1;
 
-  while (l_simTime < l_endTime)
+  // iterate over time
+  for (; l_timeStep < l_nTimeSteps; l_timeStep++)
   {
     if (l_useFileIO && l_timeStep % l_nTimeStepsPerFrame == 0)
     {
+      tsunami_lab::t_real l_simTime = l_dt * l_timeStep;
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;
 
       auto l_writeStart = std::chrono::high_resolution_clock::now();
       l_waveProp->prepareDataAccess();
-      if (l_useFileIO)
-        l_writer->write(
-            l_waveProp->getHeight(),
-            l_waveProp->getMomentumX(),
-            l_waveProp->getMomentumY(),
-            l_simTime,
-            l_nOut);
+      l_writer->write(l_waveProp->getHeight(),
+                      l_waveProp->getMomentumX(),
+                      l_waveProp->getMomentumY(),
+                      l_simTime,
+                      l_nOut);
       l_nOut++;
 
       auto l_WriteEnd = std::chrono::high_resolution_clock::now();
@@ -698,6 +728,7 @@ int main(int i_argc,
                                                  l_waveProp->getGhostCellsX(),
                                                  l_waveProp->getGhostCellsY(),
                                                  l_useFwave,
+                                                 l_useCuda,
                                                  l_boundaryL,
                                                  l_boundaryR,
                                                  l_boundaryB,
@@ -712,8 +743,6 @@ int main(int i_argc,
                                                  l_k,
                                                  l_timeStep,
                                                  l_nOut,
-                                                 l_nFreqStation,
-                                                 l_simTime,
                                                  l_maxHours,
                                                  l_waveProp->getBathymetry(),
                                                  l_waveProp->getHeight(),
@@ -737,20 +766,17 @@ int main(int i_argc,
       }
     }
 
-    if (l_useFileIO && l_simTime > l_nFreqStation * l_stations->getT())
+    if (l_useFileIO && l_stations->hasStations() && l_timeStep % l_nStepsPerStation == 0)
     {
+      tsunami_lab::t_real l_simTime = l_dt * l_timeStep;
       l_waveProp->prepareDataAccess();
       l_stations->write(l_simTime,
                         l_waveProp->getHeight(),
                         l_waveProp->getMomentumX(),
                         l_waveProp->getMomentumY());
-      ++l_nFreqStation;
     }
 
     l_waveProp->timeStep(l_scaling);
-
-    l_timeStep++;
-    l_simTime += l_dt;
   }
 
   std::cout << "finished time loop" << std::endl;
@@ -770,8 +796,8 @@ int main(int i_argc,
   std::cout << "freeing memory" << std::endl;
   delete l_setup;
   delete l_waveProp;
-  delete l_stations;
   delete l_writer;
+  delete l_stations;
 
   std::cout << "finished, exiting" << std::endl;
   return EXIT_SUCCESS;

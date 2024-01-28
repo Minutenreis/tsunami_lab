@@ -3,6 +3,7 @@
 /docs/UserDoc/_build/**
 /docs/UserDoc/_build_doxygen/**
 /.sconf_temp/**
+**.pyc
 
 # configs & caches
 /.vscode/**

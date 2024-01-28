@@ -23,6 +23,18 @@ void tsunami_lab::io::NetCdf::ncCheck(int i_status, char const *i_file, int i_li
 void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_ncidp, int i_var, t_idx i_nOut, bool i_hasTime)
 {
     t_idx l_time = i_hasTime ? 0 : 1; // if it has no time, start array at 1st index
+
+    if (m_k == 1)
+    {
+        // if k == 1, no averaging is needed
+        t_idx start_p[3] = {i_nOut, 0, 0};
+        t_idx count_p[3] = {1, 1, m_nx};
+        for (start_p[1] = 0; start_p[1] < m_ny; ++start_p[1])
+        {
+            ncCheck(nc_put_vara_float(l_ncidp, i_var, start_p + l_time, count_p + l_time, i_data + (start_p[1] + m_ghostCellsY) * m_stride + m_ghostCellsX), __FILE__, __LINE__);
+        }
+        return;
+    }
     t_idx start_p[3] = {i_nOut, 0, 0};
     t_idx count_p[3] = {1, 1, m_nx / m_k};
     t_idx l_sizeX = (m_nx / m_k) * m_k; // m_nx/k*k (integer division) => ignores the overstanding cells at the right border
@@ -39,6 +51,7 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
                 l_row[l_ix / m_k] += i_data[l_ix + m_ghostCellsX + (l_iy + m_ghostCellsY) * m_stride];
             }
         }
+#pragma omp parallel for
         for (t_idx l_ix = 0; l_ix < m_nx / m_k; ++l_ix)
         {
             l_row[l_ix] *= l_kSquaredInv;
@@ -48,29 +61,26 @@ void tsunami_lab::io::NetCdf::putVaraWithGhostcells(t_real const *i_data, int l_
     }
 }
 
-void tsunami_lab::io::NetCdf::init(t_real i_dxy,
-                                   t_idx i_nx,
-                                   t_idx i_ny,
-                                   t_idx i_stride,
-                                   t_idx i_ghostCellsX,
-                                   t_idx i_ghostCellsY,
-                                   t_real i_offsetX,
-                                   t_real i_offsetY,
-                                   t_real i_k,
-                                   t_real const *i_b,
-                                   bool i_useCheckpoint)
+tsunami_lab::io::NetCdf::NetCdf(t_real i_dxy,
+                                t_idx i_nx,
+                                t_idx i_ny,
+                                t_idx i_stride,
+                                t_idx i_ghostCellsX,
+                                t_idx i_ghostCellsY,
+                                t_real i_offsetX,
+                                t_real i_offsetY,
+                                t_real i_k,
+                                t_real const *i_b,
+                                bool i_useCheckpoint) : m_dxy(i_dxy),
+                                                        m_nx(i_nx),
+                                                        m_ny(i_ny),
+                                                        m_stride(i_stride),
+                                                        m_ghostCellsX(i_ghostCellsX),
+                                                        m_ghostCellsY(i_ghostCellsY),
+                                                        m_offsetX(i_offsetX),
+                                                        m_offsetY(i_offsetY),
+                                                        m_k(i_k)
 {
-    // saves setup parameters
-    m_dxy = i_dxy;
-    m_nx = i_nx;
-    m_ny = i_ny;
-    m_stride = i_stride;
-    m_ghostCellsX = i_ghostCellsX;
-    m_ghostCellsY = i_ghostCellsY;
-    m_offsetX = i_offsetX;
-    m_offsetY = i_offsetY;
-    m_k = i_k;
-
     // if checkpoint is used, the file already exists with all static data
     if (!i_useCheckpoint)
     {
@@ -208,6 +218,7 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
                                              t_idx *o_nx,
                                              t_idx *o_ny,
                                              bool *o_useFWave,
+                                             bool *o_useCuda,
                                              tsunami_lab::t_boundary *o_boundaryL,
                                              tsunami_lab::t_boundary *o_boundaryR,
                                              tsunami_lab::t_boundary *o_boundaryB,
@@ -222,8 +233,6 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
                                              tsunami_lab::t_idx *o_k,
                                              tsunami_lab::t_idx *o_timeStep,
                                              tsunami_lab::t_idx *o_nOut,
-                                             tsunami_lab::t_idx *o_nFreqStation,
-                                             tsunami_lab::t_real *o_simTime,
                                              int *o_maxHours,
                                              t_real **o_b,
                                              t_real **o_h,
@@ -247,11 +256,12 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     ncCheck(nc_inq_dimlen(l_ncidp, l_dimTextId, &l_textLength), __FILE__, __LINE__);
 
     // read dimensionless variables
-    int l_varUseFWaveId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
+    int l_varUseFWaveId, l_varUseCudaId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
     int l_varEndTimeId, l_varWidthId, l_varXOffsetId, l_varYOffsetId, l_varHMaxId;
-    int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId, l_varNFreqStationId;
-    int l_varSimTimeId, l_varMaxHoursId;
+    int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId;
+    int l_varMaxHoursId;
     ncCheck(nc_inq_varid(l_ncidp, "useFWave", &l_varUseFWaveId), __FILE__, __LINE__);
+    ncCheck(nc_inq_varid(l_ncidp, "useCuda", &l_varUseCudaId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "boundaryL", &l_varBoundaryLId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "boundaryR", &l_varBoundaryRId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "boundaryB", &l_varBoundaryBId), __FILE__, __LINE__);
@@ -266,8 +276,6 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     ncCheck(nc_inq_varid(l_ncidp, "k", &l_varKId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "timeStep", &l_varTimeStepId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "nOut", &l_varNOutId), __FILE__, __LINE__);
-    ncCheck(nc_inq_varid(l_ncidp, "nFreqStation", &l_varNFreqStationId), __FILE__, __LINE__);
-    ncCheck(nc_inq_varid(l_ncidp, "simTime", &l_varSimTimeId), __FILE__, __LINE__);
     ncCheck(nc_inq_varid(l_ncidp, "maxHours", &l_varMaxHoursId), __FILE__, __LINE__);
 
     // read array id's
@@ -278,9 +286,11 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     ncCheck(nc_inq_varid(l_ncidp, "momentum_y", &l_varHvId), __FILE__, __LINE__);
 
     // read dimensionless variables
-    int l_useFWaveInt, l_boundaryLInt, l_boundaryRInt, l_boundaryBInt, l_boundaryTInt;
+    int l_useFWaveInt, l_useCudaInt, l_boundaryLInt, l_boundaryRInt, l_boundaryBInt, l_boundaryTInt;
     ncCheck(nc_get_var_int(l_ncidp, l_varUseFWaveId, &l_useFWaveInt), __FILE__, __LINE__);
     *o_useFWave = l_useFWaveInt != 0;
+    ncCheck(nc_get_var_int(l_ncidp, l_varUseCudaId, &l_useCudaInt), __FILE__, __LINE__);
+    *o_useCuda = l_useCudaInt != 0;
     ncCheck(nc_get_var_int(l_ncidp, l_varBoundaryLId, &l_boundaryLInt), __FILE__, __LINE__);
     *o_boundaryL = intToTBoundary(l_boundaryLInt);
     ncCheck(nc_get_var_int(l_ncidp, l_varBoundaryRId, &l_boundaryRInt), __FILE__, __LINE__);
@@ -298,7 +308,7 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     ncCheck(nc_get_var_text(l_ncidp, l_varStationFilePathId, l_stationFilePath), __FILE__, __LINE__);
     *o_stationFilePath = std::string(l_stationFilePath);
     delete[] l_stationFilePath;
-    int l_nFrames, l_k, l_timeStep, l_nOut, l_nFreqStation;
+    int l_nFrames, l_k, l_timeStep, l_nOut;
     ncCheck(nc_get_var_int(l_ncidp, l_varNFramesId, &l_nFrames), __FILE__, __LINE__);
     *o_nFrames = l_nFrames;
     ncCheck(nc_get_var_int(l_ncidp, l_varKId, &l_k), __FILE__, __LINE__);
@@ -307,9 +317,6 @@ void tsunami_lab::io::NetCdf::readCheckpoint(char *i_filePath,
     *o_timeStep = l_timeStep;
     ncCheck(nc_get_var_int(l_ncidp, l_varNOutId, &l_nOut), __FILE__, __LINE__);
     *o_nOut = l_nOut;
-    ncCheck(nc_get_var_int(l_ncidp, l_varNFreqStationId, &l_nFreqStation), __FILE__, __LINE__);
-    *o_nFreqStation = l_nFreqStation;
-    ncCheck(nc_get_var_float(l_ncidp, l_varSimTimeId, o_simTime), __FILE__, __LINE__);
     ncCheck(nc_get_var_int(l_ncidp, l_varMaxHoursId, o_maxHours), __FILE__, __LINE__);
 
     // read arrays
@@ -356,6 +363,7 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
                                               t_idx i_ghostCellsX,
                                               t_idx i_ghostCellsY,
                                               bool i_useFWave,
+                                              bool i_useCuda,
                                               tsunami_lab::t_boundary i_boundaryL,
                                               tsunami_lab::t_boundary i_boundaryR,
                                               tsunami_lab::t_boundary i_boundaryB,
@@ -370,8 +378,6 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
                                               tsunami_lab::t_idx i_k,
                                               tsunami_lab::t_idx i_timeStep,
                                               tsunami_lab::t_idx i_nOut,
-                                              tsunami_lab::t_idx i_nFreqStation,
-                                              tsunami_lab::t_real i_simTime,
                                               int i_maxHours,
                                               const t_real *i_b,
                                               const t_real *i_h,
@@ -401,12 +407,13 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     ncCheck(nc_def_dim(l_ncidp, "text", i_stationFilePath.length() + 1, &l_dimTextId), __FILE__, __LINE__);
 
     // define dimensionless variables
-    int l_varUseFWaveId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
+    int l_varUseFWaveId, l_varUseCudaId, l_varBoundaryLId, l_varBoundaryRId, l_varBoundaryBId, l_varBoundaryTId;
     int l_varEndTimeId, l_varWidthId, l_varXOffsetId, l_varYOffsetId, l_varHMaxId;
-    int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId, l_varNFreqStationId;
-    int l_varSimTimeId, l_varMaxHoursId;
+    int l_varStationFilePathId, l_varNFramesId, l_varKId, l_varTimeStepId, l_varNOutId;
+    int l_varMaxHoursId;
 
     ncCheck(nc_def_var(l_ncidp, "useFWave", NC_INT, 0, nullptr, &l_varUseFWaveId), __FILE__, __LINE__);
+    ncCheck(nc_def_var(l_ncidp, "useCuda", NC_INT, 0, nullptr, &l_varUseCudaId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "boundaryL", NC_INT, 0, nullptr, &l_varBoundaryLId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "boundaryR", NC_INT, 0, nullptr, &l_varBoundaryRId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "boundaryB", NC_INT, 0, nullptr, &l_varBoundaryBId), __FILE__, __LINE__);
@@ -421,8 +428,6 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     ncCheck(nc_def_var(l_ncidp, "k", NC_INT, 0, nullptr, &l_varKId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "timeStep", NC_INT, 0, nullptr, &l_varTimeStepId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "nOut", NC_INT, 0, nullptr, &l_varNOutId), __FILE__, __LINE__);
-    ncCheck(nc_def_var(l_ncidp, "nFreqStation", NC_INT, 0, nullptr, &l_varNFreqStationId), __FILE__, __LINE__);
-    ncCheck(nc_def_var(l_ncidp, "simTime", NC_FLOAT, 0, nullptr, &l_varSimTimeId), __FILE__, __LINE__);
     ncCheck(nc_def_var(l_ncidp, "maxHours", NC_INT, 0, nullptr, &l_varMaxHoursId), __FILE__, __LINE__);
 
     int l_dim[2] = {l_dimYId, l_dimXId};
@@ -439,6 +444,8 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     // write dimensionless variables
     int l_useFWaveInt = i_useFWave ? 1 : 0;
     ncCheck(nc_put_var_int(l_ncidp, l_varUseFWaveId, &l_useFWaveInt), __FILE__, __LINE__);
+    int l_useCudaInt = i_useCuda ? 1 : 0;
+    ncCheck(nc_put_var_int(l_ncidp, l_varUseCudaId, &l_useCudaInt), __FILE__, __LINE__);
     int l_boundaryLInt = tBoundaryToInt(i_boundaryL);
     ncCheck(nc_put_var_int(l_ncidp, l_varBoundaryLId, &l_boundaryLInt), __FILE__, __LINE__);
     int l_boundaryRInt = tBoundaryToInt(i_boundaryR);
@@ -461,9 +468,6 @@ void tsunami_lab::io::NetCdf::writeCheckpoint(t_idx i_nx,
     ncCheck(nc_put_var_int(l_ncidp, l_varTimeStepId, &l_timeStep), __FILE__, __LINE__);
     int l_nOut = i_nOut;
     ncCheck(nc_put_var_int(l_ncidp, l_varNOutId, &l_nOut), __FILE__, __LINE__);
-    int l_nFreqStation = i_nFreqStation;
-    ncCheck(nc_put_var_int(l_ncidp, l_varNFreqStationId, &l_nFreqStation), __FILE__, __LINE__);
-    ncCheck(nc_put_var_float(l_ncidp, l_varSimTimeId, &i_simTime), __FILE__, __LINE__);
     ncCheck(nc_put_var_int(l_ncidp, l_varMaxHoursId, &i_maxHours), __FILE__, __LINE__);
 
     // write arrays

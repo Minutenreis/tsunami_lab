@@ -33,43 +33,66 @@ private:
     //! station data vector
     std::vector<t_station> m_stations;
 
+    //! has stations
+    bool m_hasStations = false;
+
     //! stations file path
-    std::string m_path;
+    const std::string m_path;
 
     //! cell width in x- and y-direction.
-    t_real m_dxy;
+    const t_real m_dxy;
 
     //! number of cells in x-direction.
-    t_idx m_nx;
+    const t_idx m_nx;
 
     //! number of cells in y-direction.
-    t_idx m_ny;
+    const t_idx m_ny;
 
     //! stride of the data arrays.
-    t_idx m_stride;
+    const t_idx m_stride;
 
     //! number of ghost cells in x-direction.
-    t_idx m_ghostCellsX;
+    const t_idx m_ghostCellsX;
 
     //! number of ghost cells in y-direction.
-    t_idx m_ghostCellsY;
+    const t_idx m_ghostCellsY;
 
     //! offset in x-direction.
-    t_real m_offsetX;
+    const t_real m_offsetX;
 
     //! offset in y-direction.
-    t_real m_offsetY;
+    const t_real m_offsetY;
 
     //! bathymetry.
-    t_real const *m_b;
+    const t_real *m_b;
 
 public:
     /**
      * Constructs the stations controller.
      *
      * @param path path to the stations file
+     * @param i_dxy cell width in x- and y-direction.
+     * @param i_nx number of cells in x-direction.
+     * @param i_ny number of cells in y-direction.
+     * @param i_stride stride of the data arrays in y-direction (x is assumed to be stride-1).
+     * @param i_ghostCellsX number of ghost cells in x-direction.
+     * @param i_ghostCellsY number of ghost cells in y-direction.
+     * @param i_offsetX offset in x-direction.
+     * @param i_offsetY offset in y-direction.
+     * @param i_b bathymetry of the cells; optional: use nullptr if not required.
+     * @param i_useCheckpoint flag if checkpoint is used.
      */
-    Stations(const std::string path);
+    Stations(const std::string path,
+             t_real i_dxy,
+             t_idx i_nx,
+             t_idx i_ny,
+             t_idx i_stride,
+             t_idx i_ghostCellsX,
+             t_idx i_ghostCellsY,
+             t_real i_offsetX,
+             t_real i_offsetY,
+             t_real const *i_b,
+             bool i_useCheckpoint);
 
     /**
      * Returns the output period.
@@ -84,6 +107,11 @@ public:
      * @return station data vector
      */
     std::vector<t_station> getStations() const;
+
+    /**
+     * @brief Returns the number of stations.
+     */
+    bool hasStations() const;
 
     /**
      * @brief Returns the path to the stations file.
@@ -106,27 +134,9 @@ public:
     /**
      * @brief Initializes output files
      *
-     * @param i_dxy cell width in x- and y-direction.
-     * @param i_nx number of cells in x-direction.
-     * @param i_ny number of cells in y-direction.
-     * @param i_stride stride of the data arrays in y-direction (x is assumed to be stride-1).
-     * @param i_ghostCellsX number of ghost cells in x-direction.
-     * @param i_ghostCellsY number of ghost cells in y-direction.
-     * @param i_offsetX offset in x-direction.
-     * @param i_offsetY offset in y-direction.
-     * @param i_b bathymetry of the cells; optional: use nullptr if not required.
-     * @param i_useCheckpoint flag if checkpoint is used.
+
      */
-    void init(t_real i_dxy,
-              t_idx i_nx,
-              t_idx i_ny,
-              t_idx i_stride,
-              t_idx i_ghostCellsX,
-              t_idx i_ghostCellsY,
-              t_real i_offsetX,
-              t_real i_offsetY,
-              t_real const *i_b,
-              bool i_useCheckpoint);
+    void init();
 };
 
 #endif

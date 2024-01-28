@@ -17,9 +17,9 @@ static tsunami_lab::t_real constexpr m_g = 9.80665;
 //! square root of gravity
 static tsunami_lab::t_real constexpr m_gSqrt = 3.131557121;
 
-__global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
-__global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
-__global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny);
+__global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_boundary i_boundaryLeft, tsunami_lab::t_boundary i_boundaryRight);
+__global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_boundary i_boundaryBottom, tsunami_lab::t_boundary i_boundaryTop);
+__global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_boundary i_boundaryLeft, tsunami_lab::t_boundary i_boundaryRight, tsunami_lab::t_boundary i_boundaryBottom, tsunami_lab::t_boundary i_boundaryTop);
 __global__ void netUpdatesX(tsunami_lab::t_real *o_h, tsunami_lab::t_real *o_hu, tsunami_lab::t_real *i_hTemp,tsunami_lab::t_real * i_huvTemp, tsunami_lab::t_real *i_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_real i_scaling);
 __global__ void netUpdatesY(tsunami_lab::t_real *o_h, tsunami_lab::t_real *o_hv, tsunami_lab::t_real *i_hTemp,tsunami_lab::t_real * i_huvTemp, tsunami_lab::t_real *i_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_real i_scaling);
 __device__ void netUpdatesCUDA(tsunami_lab::t_real i_hL,tsunami_lab::t_real i_hR,tsunami_lab::t_real i_huL,tsunami_lab::t_real i_huR,tsunami_lab::t_real i_bL,tsunami_lab::t_real i_bR,tsunami_lab::t_real o_netUpdateL[2],tsunami_lab::t_real o_netUpdateR[2]);
@@ -31,8 +31,16 @@ tsunami_lab::t_idx tsunami_lab::patches::WavePropagationCUDA::getCoord(t_idx i_x
 }
 
 tsunami_lab::patches::WavePropagationCUDA::WavePropagationCUDA(t_idx i_nCellsx,
-                                                               t_idx i_nCellsy) : m_nCellsx(i_nCellsx),
-                                                                                  m_nCellsy(i_nCellsy)
+                                                               t_idx i_nCellsy,
+                                                               t_boundary i_boundaryLeft,
+                                                               t_boundary i_boundaryRight,
+                                                               t_boundary i_boundaryBottom,
+                                                               t_boundary i_boundaryTop) : m_nCellsx(i_nCellsx),
+                                                                                           m_nCellsy(i_nCellsy),
+                                                                                           m_boundaryLeft(i_boundaryLeft),
+                                                                                           m_boundaryRight(i_boundaryRight),
+                                                                                           m_boundaryBottom(i_boundaryBottom),
+                                                                                           m_boundaryTop(i_boundaryTop)
 {
     // allocate memory including a single ghost cell on each side (zero initialised)
     t_idx l_size = (m_nCellsx + 2) * (m_nCellsy + 2) * sizeof(float);
@@ -74,13 +82,13 @@ void tsunami_lab::patches::WavePropagationCUDA::timeStep(t_real i_scaling)
     dim3 l_blockSize(16, 16);
     dim3 l_numBlock((m_nCellsx+2-1)/l_blockSize.x+1, (m_nCellsy+2-1)/l_blockSize.y+1);
 
-    setGhostCellsX<<<l_numBlock,l_blockSize>>>(m_h, m_hu, m_nCellsx, m_nCellsy);
+    setGhostCellsX<<<l_numBlock,l_blockSize>>>(m_h, m_hu, m_nCellsx, m_nCellsy, m_boundaryLeft, m_boundaryRight);
 
     cudaMemcpy(m_hTemp, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
     cudaMemcpy(m_huvTemp, m_hu, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
     netUpdatesX<<<l_numBlock,l_blockSize>>>(m_h, m_hu, m_hTemp, m_huvTemp, m_b, m_nCellsx, m_nCellsy, i_scaling);
 
-    setGhostCellsY<<<l_numBlock,l_blockSize>>>(m_h, m_hv, m_nCellsx, m_nCellsy);
+    setGhostCellsY<<<l_numBlock,l_blockSize>>>(m_h, m_hv, m_nCellsx, m_nCellsy, m_boundaryBottom, m_boundaryTop);
 
     cudaMemcpy(m_hTemp, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
     cudaMemcpy(m_huvTemp, m_hv, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToDevice);
@@ -155,7 +163,7 @@ __global__ void netUpdatesX(tsunami_lab::t_real *o_h, tsunami_lab::t_real *o_hu,
     atomicAdd(&o_hu[l_ceR], -i_scaling * l_netUpdates[1][1]);
 }
 
-__global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny)
+__global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_boundary i_boundaryLeft, tsunami_lab::t_boundary i_boundaryRight)
 {
     tsunami_lab::t_idx l_x = blockIdx.x * blockDim.x + threadIdx.x;
     tsunami_lab::t_idx l_y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -164,19 +172,19 @@ __global__ void setGhostCellsX(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
         return;
     }
 
-    if (l_x == 0)
+    if (l_x == 0 && i_boundaryLeft == tsunami_lab::t_boundary::OPEN)
     {
         io_h[(i_nx+2) * l_y] = io_h[1 + (i_nx+2) * l_y];
         io_hu[(i_nx+2) * l_y] = io_hu[1 + (i_nx+2) * l_y];
     }
-    else if (l_x == i_nx + 1)
+    else if (l_x == i_nx + 1 && i_boundaryRight == tsunami_lab::t_boundary::OPEN)
     {
         io_h[l_x + (i_nx+2) * l_y] = io_h[l_x - 1 + (i_nx+2) * l_y];
         io_hu[l_x + (i_nx+2) * l_y] = io_hu[l_x - 1 + (i_nx+2) * l_y];
     }
 }
 
-__global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny)
+__global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_boundary i_boundaryBottom, tsunami_lab::t_boundary i_boundaryTop)
 {
     tsunami_lab::t_idx l_x = blockIdx.x * blockDim.x + threadIdx.x;
     tsunami_lab::t_idx l_y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -186,12 +194,12 @@ __global__ void setGhostCellsY(tsunami_lab::t_real *io_h, tsunami_lab::t_real *i
         return;
     }
 
-    if (l_y == 0)
+    if (l_y == 0 && i_boundaryBottom == tsunami_lab::t_boundary::OPEN)
     {
         io_h[l_x] = io_h[l_x + (i_nx+2)];
         io_hv[l_x] = io_hv[l_x + (i_nx+2)];
     }
-    else if (l_y == i_ny + 1)
+    else if (l_y == i_ny + 1 && i_boundaryTop == tsunami_lab::t_boundary::OPEN)
     {
         io_h[l_x + (i_nx+2) * l_y] = io_h[l_x + (i_nx+2) * (l_y - 1)];
         io_hv[l_x + (i_nx+2) * l_y] = io_hv[l_x + (i_nx+2) * (l_y - 1)];
@@ -209,7 +217,7 @@ void tsunami_lab::patches::WavePropagationCUDA::initGhostCells()
     // set ghost cells
     dim3 l_blockSize(16,16);
     dim3 l_numBlock((m_nCellsx+2-1)/l_blockSize.x+1, (m_nCellsy+2-1)/l_blockSize.y+1);
-    initGhostCellsCuda<<<l_numBlock,l_blockSize>>>(m_b, m_nCellsx, m_nCellsy);
+    initGhostCellsCuda<<<l_numBlock,l_blockSize>>>(m_b, m_h, m_hu, m_hv, m_nCellsx, m_nCellsy, m_boundaryLeft, m_boundaryRight, m_boundaryBottom, m_boundaryTop);
 }
 
 void tsunami_lab::patches::WavePropagationCUDA::prepareDataAccess()
@@ -218,13 +226,13 @@ void tsunami_lab::patches::WavePropagationCUDA::prepareDataAccess()
     cudaMemcpy(m_h_host, m_h, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(m_hu_host, m_hu, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
     cudaMemcpy(m_hv_host, m_hv, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(m_b_host, m_b, (m_nCellsx+2) * (m_nCellsy+2) * sizeof(float), cudaMemcpyDeviceToHost);
 }
 
-__global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny)
+__global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_real *io_h, tsunami_lab::t_real *io_hu, tsunami_lab::t_real *io_hv, tsunami_lab::t_idx i_nx, tsunami_lab::t_idx i_ny, tsunami_lab::t_boundary i_boundaryLeft, tsunami_lab::t_boundary i_boundaryRight, tsunami_lab::t_boundary i_boundaryBottom, tsunami_lab::t_boundary i_boundaryTop)
 {
     tsunami_lab::t_idx l_x = blockIdx.x * blockDim.x + threadIdx.x;
     tsunami_lab::t_idx l_y = blockIdx.y * blockDim.y + threadIdx.y;
+    // only affect cells in grid
     if (l_x > i_nx + 1 || l_y > i_ny + 1)
     {
         return;
@@ -232,19 +240,59 @@ __global__ void initGhostCellsCuda(tsunami_lab::t_real *io_b, tsunami_lab::t_idx
 
     if (l_x == 0)
     {
-        io_b[(i_nx+2) * l_y] = io_b[1 + (i_nx+2) * l_y];
+        if(i_boundaryLeft == tsunami_lab::t_boundary::OPEN)
+        {
+            io_b[(i_nx+2) * l_y] = io_b[1 + (i_nx+2) * l_y];
+        }
+        else if(i_boundaryLeft == tsunami_lab::t_boundary::WALL)
+        {
+            io_b[(i_nx+2) * l_y] = 20;
+            io_h[(i_nx+2) * l_y] = 0;
+            io_hu[(i_nx+2) * l_y] = 0;
+            io_hv[(i_nx+2) * l_y] = 0;
+        }
     }
     else if (l_x == i_nx + 1)
     {
-        io_b[l_x + (i_nx+2) * l_y] = io_b[i_nx + (i_nx+2) * l_y];
+        if(i_boundaryRight == tsunami_lab::t_boundary::OPEN)
+        {
+            io_b[l_x + (i_nx+2) * l_y] = io_b[i_nx + (i_nx+2) * l_y];
+        }
+        else if(i_boundaryRight == tsunami_lab::t_boundary::WALL)
+        {
+            io_b[l_x + (i_nx+2) * l_y] = 20;
+            io_h[l_x + (i_nx+2) * l_y] = 0;
+            io_hu[l_x + (i_nx+2) * l_y] = 0;
+            io_hv[l_x + (i_nx+2) * l_y] = 0;
+        }
     }
     else if (l_y == 0)
     {
-        io_b[l_x] = io_b[l_x + (i_nx+2)];
+        if(i_boundaryBottom == tsunami_lab::t_boundary::OPEN)
+        {
+            io_b[l_x] = io_b[l_x + (i_nx+2)];
+        }
+        else if(i_boundaryBottom == tsunami_lab::t_boundary::WALL)
+        {
+            io_b[l_x] = 20;
+            io_h[l_x] = 0;
+            io_hu[l_x] = 0;
+            io_hv[l_x] = 0;
+        }
     }
     else if (l_y == i_ny + 1)
     {
-        io_b[l_x + (i_nx+2) * l_y] = io_b[l_x + (i_nx+2) * (l_y - 1)];
+        if(i_boundaryTop == tsunami_lab::t_boundary::OPEN)
+        {
+            io_b[l_x + (i_nx+2) * l_y] = io_b[l_x + (i_nx+2) * (l_y - 1)];
+        }
+        else if(i_boundaryTop == tsunami_lab::t_boundary::WALL)
+        {
+            io_b[l_x + (i_nx+2) * l_y] = 20;
+            io_h[l_x + (i_nx+2) * l_y] = 0;
+            io_hu[l_x + (i_nx+2) * l_y] = 0;
+            io_hv[l_x + (i_nx+2) * l_y] = 0;
+        }
     }
 }
 

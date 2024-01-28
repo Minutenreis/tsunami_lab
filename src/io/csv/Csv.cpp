@@ -10,28 +10,26 @@
 #include "Csv.h"
 #include <filesystem>
 
-void tsunami_lab::io::Csv::init(t_real i_dxy,
-                                t_idx i_nx,
-                                t_idx i_ny,
-                                t_idx i_stride,
-                                t_idx i_ghostCellsX,
-                                t_idx i_ghostCellsY,
-                                t_real i_offsetX,
-                                t_real i_offsetY,
-                                t_real,
-                                t_real const *i_b,
-                                bool i_useCheckpoint)
+tsunami_lab::io::Csv::Csv(t_real i_dxy,
+                          t_idx i_nx,
+                          t_idx i_ny,
+                          t_idx i_stride,
+                          t_idx i_ghostCellsX,
+                          t_idx i_ghostCellsY,
+                          t_real i_offsetX,
+                          t_real i_offsetY,
+                          t_real,
+                          t_real const *i_b,
+                          bool i_useCheckpoint) : m_dxy(i_dxy),
+                                                  m_nx(i_nx),
+                                                  m_ny(i_ny),
+                                                  m_stride(i_stride),
+                                                  m_ghostCellsX(i_ghostCellsX),
+                                                  m_ghostCellsY(i_ghostCellsY),
+                                                  m_offsetX(i_offsetX),
+                                                  m_offsetY(i_offsetY),
+                                                  m_b(i_b)
 {
-  // save setup parameters
-  m_dxy = i_dxy;
-  m_nx = i_nx;
-  m_ny = i_ny;
-  m_stride = i_stride;
-  m_ghostCellsX = i_ghostCellsX;
-  m_ghostCellsY = i_ghostCellsY;
-  m_offsetX = i_offsetX;
-  m_offsetY = i_offsetY;
-  m_b = i_b;
 
   if (!i_useCheckpoint)
   {

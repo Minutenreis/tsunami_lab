@@ -13,55 +13,41 @@
 
 using json = nlohmann::json;
 
-tsunami_lab::io::Stations::Stations(const std::string path)
+tsunami_lab::io::Stations::Stations(const std::string path,
+                                    t_real i_dxy,
+                                    t_idx i_nx,
+                                    t_idx i_ny,
+                                    t_idx i_stride,
+                                    t_idx i_ghostCellsX,
+                                    t_idx i_ghostCellsY,
+                                    t_real i_offsetX,
+                                    t_real i_offsetY,
+                                    t_real const *i_b,
+                                    bool i_useCheckpoint) : m_path(path),
+                                                            m_dxy(i_dxy),
+                                                            m_nx(i_nx),
+                                                            m_ny(i_ny),
+                                                            m_stride(i_stride),
+                                                            m_ghostCellsX(i_ghostCellsX),
+                                                            m_ghostCellsY(i_ghostCellsY),
+                                                            m_offsetX(i_offsetX),
+                                                            m_offsetY(i_offsetY),
+                                                            m_b(i_b)
 {
-    m_path = path;
     std::ifstream f(path);
     json data = json::parse(f);
 
     m_T = data["period"];
 
     m_stations = data["stations"];
-}
-
-tsunami_lab::t_real tsunami_lab::io::Stations::getT() const
-{
-    return m_T;
-}
-
-std::vector<tsunami_lab::t_station> tsunami_lab::io::Stations::getStations() const
-{
-    return m_stations;
-}
-
-std::string tsunami_lab::io::Stations::getPath() const
-{
-    return m_path;
-}
-
-void tsunami_lab::io::Stations::init(t_real i_dxy,
-                                     t_idx i_nx,
-                                     t_idx i_ny,
-                                     t_idx i_stride,
-                                     t_idx i_ghostCellsX,
-                                     t_idx i_ghostCellsY,
-                                     t_real i_offsetX,
-                                     t_real i_offsetY,
-                                     t_real const *i_b,
-                                     bool i_useCheckpoint)
-{
-    m_dxy = i_dxy;
-    m_nx = i_nx;
-    m_ny = i_ny;
-    m_stride = i_stride;
-    m_ghostCellsX = i_ghostCellsX;
-    m_ghostCellsY = i_ghostCellsY;
-    m_offsetX = i_offsetX;
-    m_offsetY = i_offsetY;
-    m_b = i_b;
+    // remove stations outside of the domain
+    m_stations.erase(std::remove_if(m_stations.begin(), m_stations.end(), [&](t_station i_station)
+                                    { return i_station.x - m_offsetX < 0 || i_station.x - m_offsetX >= m_nx * m_dxy || i_station.y - m_offsetY < 0 || i_station.y - m_offsetY >= m_ny * m_dxy; }),
+                     m_stations.end());
+    m_hasStations = m_stations.size() > 0;
 
     // if checkpoint is used, the stations are already initialized
-    if (!i_useCheckpoint)
+    if (!i_useCheckpoint && m_hasStations)
     {
         // delete old stations
         if (std::filesystem::exists("stations"))
@@ -79,6 +65,26 @@ void tsunami_lab::io::Stations::init(t_real i_dxy,
     }
 }
 
+tsunami_lab::t_real tsunami_lab::io::Stations::getT() const
+{
+    return m_T;
+}
+
+std::vector<tsunami_lab::t_station> tsunami_lab::io::Stations::getStations() const
+{
+    return m_stations;
+}
+
+bool tsunami_lab::io::Stations::hasStations() const
+{
+    return m_hasStations;
+}
+
+std::string tsunami_lab::io::Stations::getPath() const
+{
+    return m_path;
+}
+
 void tsunami_lab::io::Stations::write(t_real i_simTime,
                                       t_real const *i_h,
                                       t_real const *i_hu,
@@ -86,9 +92,6 @@ void tsunami_lab::io::Stations::write(t_real i_simTime,
 {
     for (t_station l_station : m_stations)
     {
-        if (l_station.x - m_offsetX < 0 || l_station.x - m_offsetX >= m_nx * m_dxy || l_station.y - m_offsetY < 0 || l_station.y - m_offsetY >= m_ny * m_dxy)
-            continue; // station is outside of the domain
-
         t_idx l_ix = (l_station.x - m_offsetX) / m_dxy + m_ghostCellsX;
         t_idx l_iy = (l_station.y - m_offsetY) / m_dxy + m_ghostCellsY;
 

@@ -24,31 +24,31 @@ class tsunami_lab::io::NetCdf : public IoWriter
 {
 private:
     //! cell width in x- and y-direction.
-    t_real m_dxy;
+    const t_real m_dxy;
 
     //! number of cells in x-direction.
-    t_idx m_nx;
+    const t_idx m_nx;
 
     //! number of cells in y-direction.
-    t_idx m_ny;
+    const t_idx m_ny;
 
     //! stride of the data arrays.
-    t_idx m_stride;
+    const t_idx m_stride;
 
     //! number of ghost cells in x-direction.
-    t_idx m_ghostCellsX;
+    const t_idx m_ghostCellsX;
 
     //! number of ghost cells in y-direction.
-    t_idx m_ghostCellsY;
+    const t_idx m_ghostCellsY;
 
     //! offset in x-direction.
-    t_real m_offsetX;
+    const t_real m_offsetX;
 
     //! offset in y-direction.
-    t_real m_offsetY;
+    const t_real m_offsetY;
 
     //! cell size to be averaged.
-    t_idx m_k;
+    const t_idx m_k;
 
     /**
      * @brief Prune Ghost Cells of Data
@@ -90,17 +90,17 @@ public:
      * @param i_b bathymetry.
      * @param i_useCheckpoint flag if checkpoint is used.
      */
-    void init(t_real i_dxy,
-              t_idx i_nx,
-              t_idx i_ny,
-              t_idx i_stride,
-              t_idx i_ghostCellsX,
-              t_idx i_ghostCellsY,
-              t_real i_offsetX,
-              t_real i_offsetY,
-              t_real i_k,
-              t_real const *i_b,
-              bool i_useCheckpoint);
+    NetCdf(t_real i_dxy,
+           t_idx i_nx,
+           t_idx i_ny,
+           t_idx i_stride,
+           t_idx i_ghostCellsX,
+           t_idx i_ghostCellsY,
+           t_real i_offsetX,
+           t_real i_offsetY,
+           t_real i_k,
+           t_real const *i_b,
+           bool i_useCheckpoint);
 
     /**
      * @brief Writes the data to the output.
@@ -152,6 +152,7 @@ public:
      * @param o_nx number of cells in x-direction
      * @param o_ny number of cells in y-direction
      * @param o_useFWave flag if f-wave is used
+     * @param o_useCuda flag if cuda is used
      * @param o_boundaryL left boundary
      * @param o_boundaryR right boundary
      * @param o_boundaryB bottom boundary
@@ -166,8 +167,6 @@ public:
      * @param o_k cell size to be averaged
      * @param o_timeStep time step
      * @param o_nOut number of outputs
-     * @param o_nFreqStation number of station outputs
-     * @param o_simTime simulation time
      * @param o_maxHours maximum hours of simulation
      * @param o_b bathymetry
      * @param o_h water height
@@ -178,6 +177,7 @@ public:
                                t_idx *o_nx,
                                t_idx *o_ny,
                                bool *o_useFWave,
+                               bool *o_useCuda,
                                tsunami_lab::t_boundary *o_boundaryL,
                                tsunami_lab::t_boundary *o_boundaryR,
                                tsunami_lab::t_boundary *o_boundaryB,
@@ -192,8 +192,6 @@ public:
                                tsunami_lab::t_idx *o_k,
                                tsunami_lab::t_idx *o_timeStep,
                                tsunami_lab::t_idx *o_nOut,
-                               tsunami_lab::t_idx *o_nFreqStation,
-                               tsunami_lab::t_real *o_simTime,
                                int *o_maxHours,
                                t_real **o_b,
                                t_real **o_h,
@@ -209,6 +207,7 @@ public:
      * @param i_ghostCellsX number of ghost cells in x-direction
      * @param i_ghostCellsY number of ghost cells in y-direction
      * @param i_useFWave flag if f-wave is used
+     * @param i_useCuda flag if cuda is used
      * @param i_boundaryL left boundary
      * @param i_boundaryR right boundary
      * @param i_boundaryB bottom boundary
@@ -223,8 +222,6 @@ public:
      * @param i_k cell size to be averaged
      * @param i_timeStep time step
      * @param i_nOut number of outputs
-     * @param i_nFreqStation number of station outputs
-     * @param i_simTime simulation time
      * @param i_maxHours maximum hours of simulation
      * @param i_b bathymetry
      * @param i_h water height
@@ -237,6 +234,7 @@ public:
                                 t_idx i_ghostCellsX,
                                 t_idx i_ghostCellsY,
                                 bool i_useFWave,
+                                bool i_useCuda,
                                 tsunami_lab::t_boundary i_boundaryL,
                                 tsunami_lab::t_boundary i_boundaryR,
                                 tsunami_lab::t_boundary i_boundaryB,
@@ -251,8 +249,6 @@ public:
                                 tsunami_lab::t_idx i_k,
                                 tsunami_lab::t_idx i_timeStep,
                                 tsunami_lab::t_idx i_nOut,
-                                tsunami_lab::t_idx i_nFreqStation,
-                                tsunami_lab::t_real i_simTime,
                                 int i_maxHours,
                                 const t_real *i_b,
                                 const t_real *i_h,
