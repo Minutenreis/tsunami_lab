@@ -44,20 +44,20 @@ jobs:
       - name: Sanitize
         run: |
           scons mode=debug+san
-          ./build/tests
+          ./build/tests "~[CUDA]"
           ./build/tsunami_lab -u "DamBreak1d 10 2" -s "FWave" -b "OPEN WALL" 25
           scons mode=release+san
-          ./build/tests
-          ./build/tsunami_lab 500
+          ./build/tests "~[CUDA]"
+          ./build/tsunami_lab 200
 
       - name: Valgrind
         run: |
           scons mode=debug
-          valgrind ./build/tests
-          valgrind ./build/tsunami_lab -u "DamBreak1d 10 2" -s "FWave" -b "OPEN WALL" 25
+          valgrind ./build/tests "~[CUDA]"
+          valgrind ./build/tsunami_lab -b "OPEN WALL" 25
 
       - name: Release
         run: |
           scons
-          ./build/tests
-          ./build/tsunami_lab 500
+          ./build/tests "~[CUDA]"
+          ./build/tsunami_lab 200

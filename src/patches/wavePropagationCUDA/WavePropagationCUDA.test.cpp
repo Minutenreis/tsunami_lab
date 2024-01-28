@@ -10,7 +10,7 @@
 #include "WavePropagationCUDA.h"
 #include "../../constants.h"
 
-TEST_CASE("Test the CUDA wave propagation solver x direction.", "[WavePropCUDAX]")
+TEST_CASE("Test the CUDA wave propagation solver x direction.", "[CUDA]")
 {
     /*
      * Test case:
@@ -107,7 +107,7 @@ TEST_CASE("Test the CUDA wave propagation solver x direction.", "[WavePropCUDAX]
         }
 }
 
-TEST_CASE("Test the CUDA wave propagation solver y direction.", "[WavePropCUDAY]")
+TEST_CASE("Test the CUDA wave propagation solver y direction.", "[CUDA]")
 {
     /*
      * Test case:
@@ -204,7 +204,7 @@ TEST_CASE("Test the CUDA wave propagation solver y direction.", "[WavePropCUDAY]
         }
 }
 
-TEST_CASE("Test the 2d wave propagation solver diagonally.", "[WavePropCUDADiag]")
+TEST_CASE("Test the 2d wave propagation solver diagonally.", "[CUDA]")
 {
     /*
      * Test case:

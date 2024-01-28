@@ -47,7 +47,7 @@ Command Line Parameters
 | :code:`[-u setup]` = choose between :code:`'DamBreak1d h_l h_r'`, :code:`'ShockShock1d h hu'`,
  :code:`'RareRare1d h hu'`, :code:`'Custom1d h_l h_r hu_l hu_r middle'`, :code:`Subcrit1d`,
  :code:`Supercrit1d`, :code:`'Tsunami1d path_to_csv time_simulated'`, :code:`'ArtificialTsunami2d time_simulated'`,
- :code:`'Tsunami2d path_to_displacement path_to_bathymetry time_simulated'`, :code:`DamBreak2d` , default is :code:`'DamBreak1d 10 5'`
+ :code:`'Tsunami2d path_to_displacement path_to_bathymetry time_simulated'`, :code:`DamBreak2d` , default is :code:`DamBreak2d`
 | :code:`[-b 'boundary_left boundary_right boundary_bottom boundary_top']` = 
  choose each boundary between :code:`wall` and :code:`open`, 
  default is :code:`open` for each; any boundary left out is set to :code:`open`

@@ -501,13 +501,13 @@ int main(int i_argc,
 
     if (l_setup == nullptr)
     {
-      std::cout << "  using ArtificialTsunami2d() setup" << std::endl;
-      l_width = 10000;
+      std::cout << "  using DamBreak2d() setup" << std::endl;
+      l_setup = new tsunami_lab::setups::DamBreak2d();
+      l_width = 100;
       l_ny = l_nx; // square domain
-      l_xOffset = -5000;
-      l_yOffset = -5000;
-      l_endTime = 3600;
-      l_setup = new tsunami_lab::setups::ArtificialTsunami2d();
+      l_xOffset = -50;
+      l_yOffset = -50;
+      l_endTime = 20;
     }
 
     if (l_useNetCdf)
