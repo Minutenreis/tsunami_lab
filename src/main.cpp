@@ -670,10 +670,10 @@ int main(int i_argc,
                                                l_useCheckpoint);
   }
 
-  tsunami_lab::t_idx l_nStepsPerStation = floor((double)l_stations->getT() / (double)l_dt);
-  if (l_nStepsPerStation <= 0)
+  tsunami_lab::t_idx l_nStepsPerStation = 1;
+  if (l_useFileIO && l_stations->hasStations() && floor((double)l_stations->getT() / (double)l_dt) > 1)
   {
-    l_nStepsPerStation = 1;
+    l_nStepsPerStation = floor((double)l_stations->getT() / (double)l_dt);
   }
 
   std::cout << "  time step:                      " << l_dt << " s" << std::endl;
@@ -790,7 +790,7 @@ int main(int i_argc,
   printTime(l_duration_calc, "calc time ");
   printTime(l_duration_write, "write time");
   printTime(l_duration_checkpoint, "checkpoint time");
-  std::cout << "calc time per cell and iteration: " << (double)std::chrono::duration_cast<std::chrono::nanoseconds>(l_duration_calc).count() / (double)(l_timeStep * l_nx * l_ny) << "ns" << std::endl;
+  std::cout << "calc time per cell and iteration: " << (double)std::chrono::duration_cast<std::chrono::nanoseconds>(l_duration_calc).count() / (double)(l_nTimeSteps * l_nx * l_ny) << "ns" << std::endl;
 
   // free memory
   std::cout << "freeing memory" << std::endl;
