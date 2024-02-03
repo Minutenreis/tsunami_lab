@@ -214,30 +214,57 @@ We couldn't identify whether the culprit was something in our use of the NetCdf 
 MS-4 Testing
 ------------
 
-..
-    todo: write performance and stuttering
-
 We did not further optimize our CUDA code in this step despite setting out to seeing as the write time was dominating our total time now.
 This made changes to our CUDA code not seem very impactful.
-We did run the code through Nvidias NSight profiles (the newer version of NVProf):
+We did run the code through NVIDIAs NSight Compute profiles (the newer version of NVProf):
 
-We also ran the coda with differing resolutions on Ara (specifically the NVIDIA P100 nodes):
+.. figure:: _static/10_Nsight_setGhostCells_1.png
+    :width: 700
+
+.. figure:: _static/10_Nsight_setGhostCells_2.png
+    :width: 700
+
+    Set Ghost Cells Kernel Profile
+
+We already alluded to this in `MS-2 Initial Kernel Development` section, but here we have the proof that our throughput and occupancy are quite low.
+This is due to the fact that we spawn a thread for each cell, despite only needing to calculate the ghost cells (so the vast majority of threads are doing nothing).
+We did not change this as despite its low throughput it was overall only a very minor part of the total time.
+As a reference the `netUpdates` kernels take 14 times as long as the `setGhostCells` kernels.
+The maximum calculation time speedup then would be around 7%, which is not bad but we deemed it not worth the time investment since the calculation time overall is (depending on number of frames) only about 8% of the total time as well.
+Which would make the maximum total time speedup of the `setGhostCells` kernels about 0.6%.
+
+.. figure:: _static/10_Nsight_netUpdates_1.png
+    :width: 700
+
+.. figure:: _static/10_Nsight_netUpdates_2.png
+    :width: 700
+
+    Net Updates Kernel Profile
+
+This looks pretty good, we seem to have a good occupancy and a good memory throughput.
+We see that we are bottlenecked by the memory throughput, but we can't really do anything about that.
+Overall we are happy with these results.
+
+We also ran the coda with differing resolutions on Ara:
 
 *All tests were run with 100 frames and 18000 seconds simulated time with the CUDA kernels*
 
-+----------------+----------------+----------------+----------------+----------------+----------------+
-| Resolution     | Total Time     | Setup Time     | Calculation    | Write Time     | Checkpoint Time|
-+================+================+================+================+================+================+
-| 4000m          |                |                |                |                |                |
-+----------------+----------------+----------------+----------------+----------------+----------------+
-| 2000m          |                |                |                |                |                |
-+----------------+----------------+----------------+----------------+----------------+----------------+
-| 1000m          |                |                |                |                |                |
-+----------------+----------------+----------------+----------------+----------------+----------------+
-| 500m           |                |                |                |                |                |
-+----------------+----------------+----------------+----------------+----------------+----------------+
++----------------+---------------------------------+------------------------+------------------------+---------------------------------+
+| Resolution     | Total Time                      | Setup Time             | Calculation Time       | Write Time                      |
++================+=================================+========================+========================+=================================+
+| 4000m          |                                 |                        |                        |                                 |
++----------------+---------------------------------+------------------------+------------------------+---------------------------------+
+| 2000m          |                                 |                        |                        |                                 |
++----------------+---------------------------------+------------------------+------------------------+---------------------------------+
+| 1000m          |                                 |                        |                        |                                 |
++----------------+---------------------------------+------------------------+------------------------+---------------------------------+
+| 500m           |                                 |                        |                        |                                 |
++----------------+---------------------------------+------------------------+------------------------+---------------------------------+
 
 *Performance on Ara with 2 NVIDIA Tesla P100 GPU's, 2 Intel Xeon E5-2660v4 CPUs and 128GB DDR4 RAM*
+
+..
+    todo: add comments to ara's performance
 
 And since we saw that our limiting factor was the write time we tested our code with differing amounts of frames:
 
@@ -288,3 +315,22 @@ You may look below for a visual "eye test" of the CUDA code, but this is of cour
     :width: 700
 
 *Tohoku Simulation with 1000m Cellsize, 100 Frames and 18000 seconds simulated time on CUDA*
+
+Goals
+-----
+
+We had 2 goals for this individual phase:
+
+1. Increase performance by at least 2 times compared to the parallelized CPU code
+2. Don't compromise the accuracy of the simulation while doing so
+
+Regarding the calculation time we definitely achieved our first goal.
+We went from over 3 minutes to about 12 seconds, which is a speedup of about 15 times.
+
+Regarding the total time though it depends a lot on the amount of frames.
+With low frames (<= 50) we still reached our goal with a speedup of about 9 times.
+If we increase the amount of frames to 100 though we reduce our speedup to a meager 1.25 times.
+
+Regarding the accuracy of our simulation we can't really say much.
+We did not see any obvious problems while visualizing the simulation (see above for example), but we noticed we had neither validated the CPU nor the GPU variation for accuracy.
+We also lacked the knowledge to properly run the validation tests so we can only say that "it looks good", which is not a proper validation.
