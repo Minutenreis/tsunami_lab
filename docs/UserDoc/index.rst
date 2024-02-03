@@ -19,6 +19,7 @@
    9_Parallelization
    10_CUDA
    10_1_CUDA
+   10_2_CUDA
    doxygen
 
 User Documentation
