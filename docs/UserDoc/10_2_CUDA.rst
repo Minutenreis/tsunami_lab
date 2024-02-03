@@ -175,7 +175,7 @@ For the latter we now mandate a prior call to a `prepareDataAccess` function whi
 
 *Data Access Preparation Function*
 
-MS-3 implementation
+MS-3 Implementation
 -------------------
 
 With much work already done in week 2, we didn't really touch the `WavePropagationCUDA` class in week 3 outside of a few tweaks, none with major impact.
@@ -252,19 +252,23 @@ We also ran the coda with differing resolutions on Ara:
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
 | Resolution     | Total Time                      | Setup Time             | Calculation Time       | Write Time                      |
 +================+=================================+========================+========================+=================================+
-| 4000m          |                                 |                        |                        |                                 |
+| 4000m          | 23s 566ms 770us 810ns           | 20s 879ms 547us 439ns  | 4ms 169us 871ns        | 2s 683ms 53us 500ns             |
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
-| 2000m          |                                 |                        |                        |                                 |
+| 2000m          | 9s 22ms 518us 27ns              | 2s 992ms 497us 211ns   | 5ms 200us 927ns        | 6s 24ms 819us 889ns             |
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
-| 1000m          |                                 |                        |                        |                                 |
+| 1000m          | 43min 47s 134ms 788us 719ns     | 3s 253ms 829us 489ns   | 8ms 578us 417ns        | 43min 43s 872ms 380us 813ns     |
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
-| 500m           |                                 |                        |                        |                                 |
+| 500m           | 2h 59min 52s 494ms 302us 997ns  | 5s 473ms 510us 557ns   | 13ms 87us 343ns        | 2h 5G9min 43s 623ms 213us 679ns  |
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
 
 *Performance on Ara with 2 NVIDIA Tesla P100 GPU's, 2 Intel Xeon E5-2660v4 CPUs and 128GB DDR4 RAM*
 
-..
-    todo: add comments to ara's performance
+On Ara we see that Ara is significantly slower than our own home computers for our simulation (43 minutes on Ara vs 3 minutes on our PC's).
+While Ara seems to boost great calculation times (though we are a bit sceptical of those results), the write time is a lot slower than on our home computers.
+Since the write time dominated the overall time already on our own computers, it should be no surprise that Ara is overall significantly slower in total then.
+We assume that the write time is so slow because of the shared file system `BeeGFS <https://www.beegfs.io/>`_ on Ara and the relatively old CPU's and slower RAM.
+
+We also observe one of the "stutters" we mentioned in `MS-3 Implementation` section at the setup, where Ara takes over 20 seconds instead of the usual ~3 seconds at 4000m Cellsize.
 
 And since we saw that our limiting factor was the write time we tested our code with differing amounts of frames:
 
