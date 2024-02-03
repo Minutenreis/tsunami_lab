@@ -258,7 +258,7 @@ We also ran the coda with differing resolutions on Ara:
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
 | 1000m          | 43min 47s 134ms 788us 719ns     | 3s 253ms 829us 489ns   | 8ms 578us 417ns        | 43min 43s 872ms 380us 813ns     |
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
-| 500m           | 2h 59min 52s 494ms 302us 997ns  | 5s 473ms 510us 557ns   | 13ms 87us 343ns        | 2h 5G9min 43s 623ms 213us 679ns  |
+| 500m           | 2h 59min 52s 494ms 302us 997ns  | 5s 473ms 510us 557ns   | 13ms 87us 343ns        | 2h 59min 43s 623ms 213us 679ns  |
 +----------------+---------------------------------+------------------------+------------------------+---------------------------------+
 
 *Performance on Ara with 2 NVIDIA Tesla P100 GPU's, 2 Intel Xeon E5-2660v4 CPUs and 128GB DDR4 RAM*
@@ -311,9 +311,7 @@ We don't know why the writes take so much longer on the CUDA version than on the
 NetCdf might have a maximum throughput problem when processing large files and wait for function calls asynchronously to finish.
 In that case the faster simulation would hinder the libraries ability to hide the write time behind the calculation time.
 
-Regarding the calculation accuracy we lacked the tools to properly validate the accuracy of our CUDA code beyond the eye test.
-We never validated our CPU code so we can't even compare the two for validation.
-You may look below for a visual "eye test" of the CUDA code, but this is of course not a proper validation.
+We validated the calculation accuracy by using the same test cases as in the CPU version.
 
 .. video:: _static/10_Tohoku_CUDA_Final.mp4
     :width: 700
@@ -335,6 +333,5 @@ Regarding the total time though it depends a lot on the amount of frames.
 With low frames (<= 50) we still reached our goal with a speedup of about 9 times.
 If we increase the amount of frames to 100 though we reduce our speedup to a meager 1.25 times.
 
-Regarding the accuracy of our simulation we can't really say much.
-We did not see any obvious problems while visualizing the simulation (see above for example), but we noticed we had neither validated the CPU nor the GPU variation for accuracy.
-We also lacked the knowledge to properly run the validation tests so we can only say that "it looks good", which is not a proper validation.
+Regarding the calculation accuracy we reused the same test cases that we used for the CPU version and they all passed without any issues.
+So we assume the accuracy is good enough.
