@@ -4,6 +4,7 @@
 /docs/UserDoc/_build_doxygen/**
 /.sconf_temp/**
 **.pyc
+**.ncu-rep
 
 # configs & caches
 /.vscode/**
