@@ -699,8 +699,8 @@ int main(int i_argc,
       std::cout << "  simulation time / #time steps: "
                 << l_simTime << " / " << l_timeStep << std::endl;
 
-      auto l_writeStart = std::chrono::high_resolution_clock::now();
       l_waveProp->prepareDataAccess();
+      auto l_writeStart = std::chrono::high_resolution_clock::now();
       l_writer->write(l_waveProp->getHeight(),
                       l_waveProp->getMomentumX(),
                       l_waveProp->getMomentumY(),
